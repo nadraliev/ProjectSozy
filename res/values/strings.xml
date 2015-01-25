@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">EvySync</string>
+    <string name="addrhead">Server Address:</string>
+    <string name="userhead">Login:</string>
+    <string name="passwdhead">Password:</string>
+    <string name="uploadbutton">Upload</string>
+    <string name="settingsbutton">Settings</string>
+    <string name="savebutton">Save</string>
+</resources>
