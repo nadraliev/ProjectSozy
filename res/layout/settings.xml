@@ -24,7 +24,4 @@
     <Button android:layout_width="match_parent" android:layout_height="wrap_content"
             android:id="@+id/savebutton"
             android:text="@string/savebutton"/>
-    <Button android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:id="@+id/uploadbutton"
-            android:text="@string/uploadbutton"/>
 </LinearLayout>

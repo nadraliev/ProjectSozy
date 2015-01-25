@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Button;
 import org.apache.commons.net.ftp.FTPClient;
 
 import java.io.BufferedInputStream;
@@ -40,11 +41,23 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
 
+        final Button UploadButton = (Button)findViewById(R.id.uploadbutton);            //кнопка выгрузки
 
+        UploadButton.setOnClickListener(new View.OnClickListener() {                    //Создаем обработчик нажатия для кнопки выгрузки
+            @Override
+            public void onClick(View v) {
+                try {
+                    UploadToServer(Settings.FTP.getAddress(), Settings.FTP.getUser(), Settings.FTP.getPassword(), "/public", "tryic.txt", "/storage/emulated/0/tryic.txt");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 
     public void settingsOnClick(View view) {
         Intent Settings = new Intent(MainActivity.this, Settings.class);
         startActivity(Settings);
     }
+
 }
