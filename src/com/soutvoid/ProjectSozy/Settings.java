@@ -6,9 +6,7 @@ import android.text.Editable;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import org.apache.commons.net.ftp.FTP;
-
-import java.io.*;
+import java.sql.*;
 
 /**
  * Created by andrew on 26.12.14.
@@ -16,7 +14,6 @@ import java.io.*;
 
 public class Settings extends Activity {
 
-    final String PathToHome = "/storage/emulated/0/";
     protected static LoginData FTP = new LoginData();
 
     @Override

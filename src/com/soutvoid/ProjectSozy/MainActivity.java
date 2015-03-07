@@ -2,9 +2,13 @@ package com.soutvoid.ProjectSozy;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.text.Editable;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
 import org.apache.commons.net.ftp.FTPClient;
 
 import java.io.BufferedInputStream;
@@ -13,10 +17,19 @@ import java.io.IOException;
 
 public class MainActivity extends Activity {
 
+    static TextView TestAsync;
+
     public static void UploadToServer(final String address, final String user, final String passwd, final String dironserver, final String nameonserver, final String localpathtofile) throws IOException {
-        Thread Upload = new Thread(new Runnable() {                                     //Создаем новый поток для выгрузки
+        class Task extends AsyncTask<Void, Void, Void> {
+
             @Override
-            public void run() {
+            protected void onPreExecute() {
+                super.onPreExecute();
+                TestAsync.setText("Begin");
+            }
+
+            @Override
+            protected Void doInBackground(Void... params) {
                 FTPClient ftpClient = new FTPClient();
                 try {
                     ftpClient.connect(address);
@@ -31,9 +44,17 @@ public class MainActivity extends Activity {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
+                return null;
             }
-        });
-        Upload.start();
+
+            @Override
+            protected void onPostExecute(Void result) {
+                super.onPreExecute();
+                TestAsync.setText("End");
+            }
+        }
+        Task MyTask = new Task();
+        MyTask.execute();
     }
 
     @Override
@@ -41,13 +62,15 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
 
-        final Button UploadButton = (Button)findViewById(R.id.uploadbutton);            //кнопка выгрузки
+        final Button UploadButton = (Button)findViewById(R.id.uploadbutton);                //кнопка выгрузки
+        TestAsync = (TextView)findViewById(R.id.test_async);
+        final Editable FileInput = ((EditText)findViewById(R.id.file_input)).getText();
 
         UploadButton.setOnClickListener(new View.OnClickListener() {                    //Создаем обработчик нажатия для кнопки выгрузки
             @Override
             public void onClick(View v) {
                 try {
-                    UploadToServer(Settings.FTP.getAddress(), Settings.FTP.getUser(), Settings.FTP.getPassword(), "/public", "tryic.txt", "/storage/emulated/0/tryic.txt");
+                    UploadToServer(Settings.FTP.getAddress(), Settings.FTP.getUser(), Settings.FTP.getPassword(), "/public", FileInput.toString(), R.string.pathtohome + FileInput.toString());
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

@@ -7,7 +7,7 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-sdk android:minSdkVersion="19"/>
-    <application android:label="@string/app_name" android:icon="@drawable/largeic">
+    <application android:label="@string/app_name" android:icon="@drawable/ic_launcher">
         <activity android:name="com.soutvoid.ProjectSozy.MainActivity"
                   android:label="@string/app_name">
             <intent-filter>

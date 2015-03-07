@@ -11,22 +11,22 @@ public class LoginData {
     private String Password;
 
 
-    protected String getUser() {
+    public String getUser() {
         return User;
     }
-    protected String getAddress() {
+    public String getAddress() {
         return Address;
     }
-    protected String getPassword() {
+    public String getPassword() {
         return Password;
     }
-    protected void setUser(String input) {
+    public void setUser(String input) {
         User = input;
     }
-    protected void setAddress(String input) {
+    public void setAddress(String input) {
         Address = input;
     }
-    protected void setPassword(String input) {
+    public void setPassword(String input) {
         Password = input;
     }
 }
