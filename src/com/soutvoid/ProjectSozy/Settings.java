@@ -6,7 +6,7 @@ import android.text.Editable;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import java.sql.*;
+
 
 /**
  * Created by andrew on 26.12.14.
@@ -32,6 +32,7 @@ public class Settings extends Activity {
                 FTP.setUser(UserEdit.toString());
                 FTP.setAddress(AddressEdit.toString());
                 FTP.setPassword(PasswdEdit.toString());
+                onBackPressed();
             }
         });
     }
