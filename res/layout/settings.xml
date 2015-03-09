@@ -2,29 +2,27 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:orientation="vertical"
               android:layout_width="match_parent"
-              android:layout_height="match_parent">
+              android:layout_height="match_parent" android:background="@color/white">
     <TextView
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:text="@string/addrhead"
             android:id="@+id/addrhead"
-            />
+            android:textColor="@color/black"/>
     <EditText android:layout_width="match_parent" android:layout_height="wrap_content"
-              android:id="@+id/addredit"/>
+              android:id="@+id/addredit" android:textColor="@color/black"
+              style="@android:style/Widget.DeviceDefault.Light.EditText" android:inputType="text"/>
     <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
               android:id="@+id/userhead"
-              android:text="@string/userhead"/>
+              android:text="@string/userhead" android:textColor="@color/black"/>
     <EditText android:layout_width="match_parent" android:layout_height="wrap_content"
-              android:id="@+id/useredit"/>
+              android:id="@+id/useredit" android:textColor="@color/black" android:inputType="text"/>
     <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
               android:id="@+id/passwdhead"
-              android:text="@string/passwdhead"/>
+              android:text="@string/passwdhead" android:textColor="@color/black"/>
     <EditText android:layout_width="match_parent" android:layout_height="wrap_content"
-              android:id="@+id/passwdedit"/>
+              android:id="@+id/passwdedit" android:textColor="@color/black" android:inputType="textPassword"/>
     <Button android:layout_width="match_parent" android:layout_height="wrap_content"
             android:id="@+id/savebutton"
-            android:text="@string/savebutton"/>
-    <Button android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:id="@+id/uploadbutton"
-            android:text="@string/uploadbutton"/>
+            android:text="@string/savebutton" android:textColor="@color/black" style="@android:style/DeviceDefault.ButtonBar"/>
 </LinearLayout>
