@@ -144,7 +144,8 @@ public class MainActivity extends Activity {
         setContentView(R.layout.main);
 
         final Button UploadButton = (Button)findViewById(R.id.uploadbutton);                //кнопка выгрузки
-        final Editable FileInput = ((EditText)findViewById(R.id.file_input)).getText();
+        final Editable LocalPath = ((EditText)findViewById(R.id.localpath)).getText();
+        final Editable RemotePath = ((EditText)findViewById(R.id.remotepath)).getText();
         test = (TextView)findViewById(R.id.test);
 
         //handler для выгрузки файлов
@@ -159,7 +160,7 @@ public class MainActivity extends Activity {
         UploadButton.setOnClickListener(new View.OnClickListener() {                    //Создаем обработчик нажатия для кнопки выгрузки
             @Override
             public void onClick(View v) {
-                Uploading(Settings.FTP.getAddress(), Settings.FTP.getUser(), Settings.FTP.getPassword(), "/storage/emulated/0/" + FileInput.toString(), "/public");
+                Uploading(Settings.FTP.getAddress(), Settings.FTP.getUser(), Settings.FTP.getPassword(), "/storage/emulated/0/" + LocalPath.toString(), "/" + RemotePath.toString());
             }
         });
     }

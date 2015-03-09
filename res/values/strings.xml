@@ -8,4 +8,6 @@
     <string name="settingsbutton">Settings</string>
     <string name="savebutton">Save</string>
     <string name="pathtohome">/storage/emulated/0/</string>
+    <string name="localpathhead">Local path</string>
+    <string name="remotepathhead">Remote path</string>
 </resources>
