@@ -3,75 +3,72 @@ package com.soutvoid.ProjectSozy;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Message;
 import android.text.Editable;
 import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ProgressBar;
-import android.widget.TextView;
+import android.widget.*;
 import org.apache.commons.net.ftp.FTPClient;
-import org.apache.commons.net.ftp.FTPFile;
+import org.apache.commons.net.ftp.FTPConnectionClosedException;
 
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.net.ConnectException;
+import java.net.UnknownHostException;
 
 public class MainActivity extends Activity {
 
     ProgressDialog progressBar;
     Integer filesCount;
-    Handler handler;
+    Handler increase;
+    Handler close;
     TextView test;
+
 
     public boolean hasDirectory(File target) {
         boolean flag = false;
-        for (int counter = 0; counter < target.listFiles().length; counter++) {
-            if (target.listFiles()[counter].isDirectory()) flag = true;
+        if (target.isDirectory()) {
+            for (int counter = 0; counter < target.listFiles().length; counter++) {
+                if (target.listFiles()[counter].isDirectory()) flag = true;
+            }
         }
         return flag;
     }
 
-    public void mkDirFTP(final String address, final String user, final String passwd, final String dirName, final String destination) {
-        Thread t = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                FTPClient ftpClient = new FTPClient();
-                try {
-                    ftpClient.connect(address);
-                    ftpClient.login(user, passwd);
-                    ftpClient.changeWorkingDirectory(destination);
-                    boolean isContains = false;
-                    for (int counter = 0; counter < ftpClient.listFiles().length; counter++) {
-                        if (dirName.equals(ftpClient.listFiles()[counter].toString())) isContains = true;
-                    }
-                    if (!isContains) {
-                        ftpClient.makeDirectory(dirName);
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
+    public void mkDirFTP(final String address, final String user, final String passwd, final String dirName, final String destination, final FTPClient ftpClient) {
+        try {
+            ftpClient.changeWorkingDirectory(destination);
+            boolean isContains = false;
+            if (ftpClient.listFiles().length != 0)
+                for (int counter = 0; counter < ftpClient.listFiles().length; counter++) {
+                    if (dirName.equals(ftpClient.listFiles()[counter].getName())) isContains = true;
                 }
+            if (!isContains) {
+                ftpClient.makeDirectory(dirName);
             }
-        });
-        t.start();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void filesCount(File dir) {
         for (int counter = 0; counter < dir.listFiles().length; counter++) {
             if (dir.listFiles()[counter].isDirectory()) filesCount(new File(dir.toString() + "/" + dir.listFiles()[counter].getName()));
-            else filesCount += 1;
+            else {
+                filesCount += 1;
+            }
         }
     }
 
     public void Uploading(final String address, final String user, final String passwd, final String target, final String destination) {
         filesCount = 0;
+        if (new File(target).isDirectory())
         filesCount(new File(target));
+        else filesCount = 1;
+
 
         //Инициализируем прогрессбар
         progressBar = new ProgressDialog(this);
@@ -79,59 +76,85 @@ public class MainActivity extends Activity {
         progressBar.setMax(filesCount);
         progressBar.setIndeterminate(true);
         progressBar.show();
-        UploadToFTPServer(address,user, passwd, target, destination);
-        progressBar.dismiss();
+
+        //Инициализируем строки исключений
+        final String UnknownHostException = getString(R.string.unknownhostexception);
+        final String ConnectionException = getString(R.string.connectexception);
+        final String ConnectionClosedException = getString(R.string.connectionclosedexception);
+
+        //Инициализируем тосты для исключений
+        final Toast UnknownHostExceptionToast = Toast.makeText(getApplicationContext(), UnknownHostException + address, Toast.LENGTH_LONG);
+        final Toast ConnectionExceptionToast = Toast.makeText(getApplicationContext(), ConnectionException, Toast.LENGTH_LONG);
+        final Toast ConnectionClosedExceptionToast = Toast.makeText(getApplicationContext(), ConnectionClosedException, Toast.LENGTH_LONG);
+
+        Thread upload = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                final FTPClient ftpClient = new FTPClient();
+                try {
+                    ftpClient.connect(address);
+                    ftpClient.login(user, passwd);
+                    UploadToFTPServer(address, user, passwd, target, destination, ftpClient);
+                    ftpClient.logout();
+                    ftpClient.disconnect();
+                } catch (UnknownHostException e) {
+                    e.printStackTrace();
+                    UnknownHostExceptionToast.show();
+                    close.sendEmptyMessage(0);   //послать 0 для закрытия прогрессбара
+                } catch (ConnectException e) {
+                    e.printStackTrace();                                    //TODO улучшиь распознавание исключений
+                    ConnectionExceptionToast.show();
+                    close.sendEmptyMessage(0);
+                } catch (FTPConnectionClosedException e) {
+                    e.printStackTrace();
+                    ConnectionClosedExceptionToast.show();
+                    close.sendEmptyMessage(0);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        upload.start();
     }
 
-    public void UploadToFTPServer(final String address, final String user, final String passwd, final String target, final String destination) {
+    public void UploadToFTPServer(final String address, final String user, final String passwd, final String target, final String destination, final FTPClient ftpClient) {
         final File targetFile = new File(target);
 
         //Создаем папку
-        mkDirFTP(address, user, passwd, (new File(target)).getName(), destination);
-
+        if (targetFile.isDirectory())
+        mkDirFTP(address, user, passwd, targetFile.getName(), destination, ftpClient);
 
 
         //Загружаем файлы
         if (hasDirectory(targetFile)) {
-            for (int counter = 0; counter < targetFile.listFiles().length; counter++) {
-                if (targetFile.listFiles()[counter].isDirectory()) {
-                    UploadToFTPServer(address, user, passwd, targetFile.listFiles()[counter].toString(), destination + "/" + targetFile.getName());
+                for (int counter = 0; counter < targetFile.listFiles().length; counter++) {
+                    if (targetFile.listFiles()[counter].isDirectory()) {
+                        UploadToFTPServer(address, user, passwd, targetFile.listFiles()[counter].toString(), destination + "/" + targetFile.getName(), ftpClient);
+                    }
                 }
             }
-        } else {
 
-            progressBar.setIndeterminate(false);
-            Thread upload = new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    FTPClient ftpClient = new FTPClient();
-                    try {
-                        ftpClient.connect(address);
-                        ftpClient.login(user, passwd);
-                        ftpClient.changeWorkingDirectory(destination + "/" + targetFile.getName());
-                        BufferedInputStream buffout = null;
-                        if (targetFile.isFile()) {
-                            buffout = new BufferedInputStream(new FileInputStream(targetFile));
-                            ftpClient.storeFile(targetFile.getName(), buffout);
-                            buffout.close();
-                            ftpClient.logout();
-                            ftpClient.disconnect();
-                        } else {
-                            for (int counter = 0; counter < targetFile.listFiles().length; counter++) {
-                                buffout = new BufferedInputStream(new FileInputStream(targetFile.listFiles()[counter]));
-                                ftpClient.storeFile(targetFile.listFiles()[counter].getName().toString(), buffout);
-                                buffout.close();
-                                handler.sendEmptyMessage(1);
-                            }
-                            ftpClient.logout();
-                            ftpClient.disconnect();
-                        }
-                    } catch (IOException e) {
-                    e.printStackTrace();
+        progressBar.setIndeterminate(false);
+        try {
+            if (targetFile.isDirectory())
+                ftpClient.changeWorkingDirectory(destination + "/" + targetFile.getName());
+            else ftpClient.changeWorkingDirectory(destination);
+            BufferedInputStream buffout = null;
+            if (targetFile.isDirectory()) {
+                for (int counter = 0; counter < targetFile.listFiles().length; counter++) {
+                    if (!targetFile.listFiles()[counter].isDirectory())
+                    buffout = new BufferedInputStream(new FileInputStream(targetFile.listFiles()[counter].toString()));
+                    ftpClient.storeFile(targetFile.listFiles()[counter].getName(), buffout);
+                    increase.sendEmptyMessage(1);
                 }
-                }
-            });
-            upload.start();
+            } else {
+                buffout = new BufferedInputStream(new FileInputStream(targetFile.toString()));
+                ftpClient.storeFile(targetFile.getName(), buffout);
+                buffout.close();
+                increase.sendEmptyMessage(1);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -142,20 +165,49 @@ public class MainActivity extends Activity {
         setContentView(R.layout.main);
 
         final Button UploadButton = (Button)findViewById(R.id.uploadbutton);                //кнопка выгрузки
-        final Editable FileInput = ((EditText)findViewById(R.id.file_input)).getText();
+        final Editable LocalPath = ((EditText)findViewById(R.id.localpath)).getText();
+        final Editable RemotePath = ((EditText)findViewById(R.id.remotepath)).getText();
         test = (TextView)findViewById(R.id.test);
 
-        //handler для выгрузки файлов
-        handler = new Handler() {
+        //increase для выгрузки файлов
+        increase = new Handler() {
             public void handleMessage(android.os.Message msg) {
                 progressBar.incrementProgressBy(msg.what);
+                if (progressBar.getProgress() == progressBar.getMax()) progressBar.dismiss();
             }
         };
+
+        close = new Handler() {
+            public void handleMessage(android.os.Message msg) {
+                if (msg.what == 0) progressBar.dismiss();
+            }
+        };
+
 
         UploadButton.setOnClickListener(new View.OnClickListener() {                    //Создаем обработчик нажатия для кнопки выгрузки
             @Override
             public void onClick(View v) {
-                Uploading(Settings.FTP.getAddress(), Settings.FTP.getUser(), Settings.FTP.getPassword(), "/storage/emulated/0/" + FileInput.toString(), "/public");
+
+                //во избежание запуска нескольких выгрузок выключаем кнопку до конца загрузки
+                UploadButton.setEnabled(false);
+
+                if (!LocalPath.toString().equals("") && !RemotePath.toString().equals("")) {
+                    Uploading(Settings.FTP.getAddress(), Settings.FTP.getUser(), Settings.FTP.getPassword(), "/storage/emulated/0/" + LocalPath.toString(), "/" + RemotePath.toString());
+                }
+                else {
+                    if (LocalPath.toString().equals("")) {
+                        String InputLocalPath = getString(R.string.inputlocalpath);
+                        Toast InputLocalPathToast = Toast.makeText(getApplicationContext(), InputLocalPath, Toast.LENGTH_SHORT);
+                        InputLocalPathToast.show();
+                    }
+                    if (RemotePath.toString().equals("")) {
+                        String InputRemotePath = getString(R.string.inputremotepath);
+                        Toast InputReotePathToast = Toast.makeText(getApplicationContext(), InputRemotePath, Toast.LENGTH_SHORT);
+                        InputReotePathToast.show();
+                    }
+                }
+
+                UploadButton.setEnabled(true);
             }
         });
     }

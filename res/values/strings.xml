@@ -8,4 +8,12 @@
     <string name="settingsbutton">Settings</string>
     <string name="savebutton">Save</string>
     <string name="pathtohome">/storage/emulated/0/</string>
+    <string name="localpathhead">Local path</string>
+    <string name="remotepathhead">Remote path</string>
+    <string name="unknownhostexception">Unknown/Unreachable host: </string>
+    <string name="connectexception">Input address in settings</string>
+    <string name="saved">Saved</string>
+    <string name="inputlocalpath">Input Local Path</string>
+    <string name="inputremotepath">Input Remote Path</string>
+    <string name="connectionclosedexception">Check Login And Password</string>
 </resources>

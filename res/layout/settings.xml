@@ -24,5 +24,7 @@
               android:id="@+id/passwdedit" android:textColor="@color/black" android:inputType="textPassword"/>
     <Button android:layout_width="match_parent" android:layout_height="wrap_content"
             android:id="@+id/savebutton"
-            android:text="@string/savebutton" android:textColor="@color/black" style="@android:style/DeviceDefault.ButtonBar"/>
+            android:text="@string/savebutton" android:textColor="@color/black"
+            android:textSize="18sp" android:background="@color/white"
+            style="@android:style/Widget.DeviceDefault.Button.Borderless"/>
 </LinearLayout>

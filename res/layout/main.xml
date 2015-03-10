@@ -3,22 +3,45 @@
               android:orientation="vertical"
               android:layout_width="fill_parent"
               android:layout_height="fill_parent"
-              android:background="@color/white">
+              android:background="@color/white" android:baselineAligned="false">
+    <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:text="@string/localpathhead"
+            android:background="@color/white"
+            android:textColor="@color/black"/>
     <EditText android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:id="@+id/file_input" style="@android:style/Widget.DeviceDefault.Light.EditText"
+            android:id="@+id/localpath" style="@android:style/Widget.DeviceDefault.Light.EditText"
             android:inputType="text" android:textColor="@color/black"/>
-    <Button android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:id="@+id/uploadbutton"
-            android:text="@string/uploadbutton"
-            android:background="@color/white" android:textColor="@color/black" android:enabled="true"/>
-    <Button android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:id="@+id/settingsbutton"
-            android:text="@string/settingsbutton"
-            android:onClick="settingsOnClick" android:background="@color/white" android:textColor="@color/black"
-            android:enabled="true"/>
+    <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:text="@string/remotepathhead"
+            android:background="@color/white"
+            android:textColor="@color/black"/>
+    <EditText android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:id="@+id/remotepath"
+            android:textColor="@color/black" android:inputType="text"/>
     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
             android:id="@+id/test"
             android:background="@color/white"
             android:textColor="@color/black"/>
+    <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:background="@color/white">
+        <Button android:layout_width="182dp" android:layout_height="wrap_content"
+                android:id="@+id/uploadbutton"
+                android:text="@string/uploadbutton" android:layout_gravity="center_horizontal"
+                android:textColor="@color/black"
+                android:background="@color/white"
+                style="@android:style/Widget.DeviceDefault.Button.Borderless"/>
+        <ImageView
+                android:layout_width="7dp"
+                android:layout_height="50dp"
+                android:id="@+id/imageView" android:background="@drawable/ic_separator"
+                android:layout_gravity="center_horizontal"/>
+        <Button android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:id="@+id/settingsbutton"
+                android:text="@string/settingsbutton"
+                android:onClick="settingsOnClick" android:layout_gravity="center_horizontal"
+                style="@android:style/Widget.DeviceDefault.Button.Borderless" android:textColor="@color/black"/>
+    </LinearLayout>
 </LinearLayout>
 
