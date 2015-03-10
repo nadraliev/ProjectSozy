@@ -10,6 +10,7 @@ import android.text.Editable;
 import android.view.View;
 import android.widget.*;
 import org.apache.commons.net.ftp.FTPClient;
+import org.apache.commons.net.ftp.FTPConnectionClosedException;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -68,6 +69,7 @@ public class MainActivity extends Activity {
         filesCount(new File(target));
         else filesCount = 1;
 
+
         //Инициализируем прогрессбар
         progressBar = new ProgressDialog(this);
         progressBar.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
@@ -78,10 +80,12 @@ public class MainActivity extends Activity {
         //Инициализируем строки исключений
         final String UnknownHostException = getString(R.string.unknownhostexception);
         final String ConnectionException = getString(R.string.connectexception);
+        final String ConnectionClosedException = getString(R.string.connectionclosedexception);
 
         //Инициализируем тосты для исключений
         final Toast UnknownHostExceptionToast = Toast.makeText(getApplicationContext(), UnknownHostException + address, Toast.LENGTH_LONG);
         final Toast ConnectionExceptionToast = Toast.makeText(getApplicationContext(), ConnectionException, Toast.LENGTH_LONG);
+        final Toast ConnectionClosedExceptionToast = Toast.makeText(getApplicationContext(), ConnectionClosedException, Toast.LENGTH_LONG);
 
         Thread upload = new Thread(new Runnable() {
             @Override
@@ -97,10 +101,13 @@ public class MainActivity extends Activity {
                     e.printStackTrace();
                     UnknownHostExceptionToast.show();
                     close.sendEmptyMessage(0);   //послать 0 для закрытия прогрессбара
-
                 } catch (ConnectException e) {
-                    e.printStackTrace();
+                    e.printStackTrace();                                    //TODO улучшиь распознавание исключений
                     ConnectionExceptionToast.show();
+                    close.sendEmptyMessage(0);
+                } catch (FTPConnectionClosedException e) {
+                    e.printStackTrace();
+                    ConnectionClosedExceptionToast.show();
                     close.sendEmptyMessage(0);
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -180,7 +187,27 @@ public class MainActivity extends Activity {
         UploadButton.setOnClickListener(new View.OnClickListener() {                    //Создаем обработчик нажатия для кнопки выгрузки
             @Override
             public void onClick(View v) {
-                Uploading(Settings.FTP.getAddress(), Settings.FTP.getUser(), Settings.FTP.getPassword(), "/storage/emulated/0/" + LocalPath.toString(), "/" + RemotePath.toString());
+
+                //во избежание запуска нескольких выгрузок выключаем кнопку до конца загрузки
+                UploadButton.setEnabled(false);
+
+                if (!LocalPath.toString().equals("") && !RemotePath.toString().equals("")) {
+                    Uploading(Settings.FTP.getAddress(), Settings.FTP.getUser(), Settings.FTP.getPassword(), "/storage/emulated/0/" + LocalPath.toString(), "/" + RemotePath.toString());
+                }
+                else {
+                    if (LocalPath.toString().equals("")) {
+                        String InputLocalPath = getString(R.string.inputlocalpath);
+                        Toast InputLocalPathToast = Toast.makeText(getApplicationContext(), InputLocalPath, Toast.LENGTH_SHORT);
+                        InputLocalPathToast.show();
+                    }
+                    if (RemotePath.toString().equals("")) {
+                        String InputRemotePath = getString(R.string.inputremotepath);
+                        Toast InputReotePathToast = Toast.makeText(getApplicationContext(), InputRemotePath, Toast.LENGTH_SHORT);
+                        InputReotePathToast.show();
+                    }
+                }
+
+                UploadButton.setEnabled(true);
             }
         });
     }

@@ -6,6 +6,7 @@ import android.text.Editable;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 
 /**
@@ -32,6 +33,11 @@ public class Settings extends Activity {
                 FTP.setUser(UserEdit.toString());
                 FTP.setAddress(AddressEdit.toString());
                 FTP.setPassword(PasswdEdit.toString());
+
+                String Saved = getString(R.string.saved);
+                Toast SavedToast = Toast.makeText(getApplicationContext(), Saved, Toast.LENGTH_SHORT);
+                SavedToast.show();
+
                 onBackPressed();
             }
         });
