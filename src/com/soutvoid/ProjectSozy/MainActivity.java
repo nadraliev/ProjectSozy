@@ -3,32 +3,29 @@ package com.soutvoid.ProjectSozy;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Message;
 import android.text.Editable;
 import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ProgressBar;
-import android.widget.TextView;
+import android.widget.*;
 import org.apache.commons.net.ftp.FTPClient;
-import org.apache.commons.net.ftp.FTPFile;
 
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.net.ConnectException;
+import java.net.UnknownHostException;
 
 public class MainActivity extends Activity {
 
     ProgressDialog progressBar;
     Integer filesCount;
-    Handler handler;
+    Handler increase;
+    Handler close;
     TextView test;
+
 
     public boolean hasDirectory(File target) {
         boolean flag = false;
@@ -46,7 +43,7 @@ public class MainActivity extends Activity {
             boolean isContains = false;
             if (ftpClient.listFiles().length != 0)
                 for (int counter = 0; counter < ftpClient.listFiles().length; counter++) {
-                    if (dirName.equals(ftpClient.listFiles()[counter].getName().toString())) isContains = true;
+                    if (dirName.equals(ftpClient.listFiles()[counter].getName())) isContains = true;
                 }
             if (!isContains) {
                 ftpClient.makeDirectory(dirName);
@@ -77,6 +74,15 @@ public class MainActivity extends Activity {
         progressBar.setMax(filesCount);
         progressBar.setIndeterminate(true);
         progressBar.show();
+
+        //Инициализируем строки исключений
+        final String UnknownHostException = getString(R.string.unknownhostexception);
+        final String ConnectionException = getString(R.string.connectexception);
+
+        //Инициализируем тосты для исключений
+        final Toast UnknownHostExceptionToast = Toast.makeText(getApplicationContext(), UnknownHostException + address, Toast.LENGTH_LONG);
+        final Toast ConnectionExceptionToast = Toast.makeText(getApplicationContext(), ConnectionException, Toast.LENGTH_LONG);
+
         Thread upload = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -87,7 +93,16 @@ public class MainActivity extends Activity {
                     UploadToFTPServer(address, user, passwd, target, destination, ftpClient);
                     ftpClient.logout();
                     ftpClient.disconnect();
-                } catch (Exception e) {
+                } catch (UnknownHostException e) {
+                    e.printStackTrace();
+                    UnknownHostExceptionToast.show();
+                    close.sendEmptyMessage(0);   //послать 0 для закрытия прогрессбара
+
+                } catch (ConnectException e) {
+                    e.printStackTrace();
+                    ConnectionExceptionToast.show();
+                    close.sendEmptyMessage(0);
+                } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
@@ -122,15 +137,14 @@ public class MainActivity extends Activity {
                 for (int counter = 0; counter < targetFile.listFiles().length; counter++) {
                     if (!targetFile.listFiles()[counter].isDirectory())
                     buffout = new BufferedInputStream(new FileInputStream(targetFile.listFiles()[counter].toString()));
-                    ftpClient.storeFile(targetFile.listFiles()[counter].getName().toString(), buffout);
-                    buffout.close();
-                    handler.sendEmptyMessage(1);
+                    ftpClient.storeFile(targetFile.listFiles()[counter].getName(), buffout);
+                    increase.sendEmptyMessage(1);
                 }
             } else {
                 buffout = new BufferedInputStream(new FileInputStream(targetFile.toString()));
                 ftpClient.storeFile(targetFile.getName(), buffout);
                 buffout.close();
-                handler.sendEmptyMessage(1);
+                increase.sendEmptyMessage(1);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -148,11 +162,17 @@ public class MainActivity extends Activity {
         final Editable RemotePath = ((EditText)findViewById(R.id.remotepath)).getText();
         test = (TextView)findViewById(R.id.test);
 
-        //handler для выгрузки файлов
-        handler = new Handler() {
+        //increase для выгрузки файлов
+        increase = new Handler() {
             public void handleMessage(android.os.Message msg) {
                 progressBar.incrementProgressBy(msg.what);
                 if (progressBar.getProgress() == progressBar.getMax()) progressBar.dismiss();
+            }
+        };
+
+        close = new Handler() {
+            public void handleMessage(android.os.Message msg) {
+                if (msg.what == 0) progressBar.dismiss();
             }
         };
 
