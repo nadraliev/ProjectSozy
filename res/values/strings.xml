@@ -16,4 +16,10 @@
     <string name="inputlocalpath">Input Local Path</string>
     <string name="inputremotepath">Input Remote Path</string>
     <string name="connectionclosedexception">Check Login And Password</string>
+    <string name="confirmation">Confirmation</string>
+    <string name="wantopen">Do you want to open</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="filemanager">File Manager</string>
+    <string name="rootpermission">Permission denied</string>
 </resources>

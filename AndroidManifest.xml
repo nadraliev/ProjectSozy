@@ -17,5 +17,7 @@
         </activity>
         <activity android:name="com.soutvoid.ProjectSozy.Settings"
                   android:label="@string/settingsbutton" />
+        <activity android:name=".PathsSelection"
+                  android:label="@string/filemanager"/>
     </application>
 </manifest>

@@ -43,5 +43,10 @@
                 android:onClick="settingsOnClick" android:layout_gravity="center_horizontal"
                 style="@android:style/Widget.DeviceDefault.Button.Borderless" android:textColor="@color/black"/>
     </LinearLayout>
+    <Button android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:id="@+id/pathsselectionact"
+            android:onClick="pathsselectionOnCLick"
+            android:text="@string/filemanager"
+            android:textColor="@color/black" android:background="@color/white"/>
 </LinearLayout>
 

@@ -217,4 +217,8 @@ public class MainActivity extends Activity {
         startActivity(Settings);
     }
 
+    public void pathsselectionOnCLick(View view) {
+        Intent PathSelection = new Intent(MainActivity.this, PathsSelection.class);
+        startActivity(PathSelection);
+    }
 }
