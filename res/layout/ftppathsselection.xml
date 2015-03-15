@@ -16,19 +16,19 @@
         <Button android:layout_width="50dp" android:layout_height="50dp"
                 android:background="@drawable/ic_ok"
                 android:onClick="ok"
-                android:layout_weight="0" android:id="@+id/okbutton"/>
+                android:layout_weight="0" android:id="@+id/ftpokbutton"/>
     </LinearLayout>
 
     <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:id="@+id/absolutepathtitle"
-            android:textColor="@color/black"
-            android:textSize="20dp"
-            android:textStyle="bold"
+              android:id="@+id/ftpabsolutepathtitle"
+              android:textColor="@color/black"
+              android:textSize="20dp"
+              android:textStyle="bold"
             />
     <ImageView android:layout_width="match_parent" android:layout_height="2dp"
-            android:background="@color/black"/>
+               android:background="@color/black"/>
     <ListView android:layout_width="match_parent" android:layout_height="match_parent"
-            android:drawSelectorOnTop="false"
-            android:id="@android:id/list">
+              android:drawSelectorOnTop="false"
+              android:id="@android:id/list">
     </ListView>
 </LinearLayout>

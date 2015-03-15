@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent" android:background="@color/white"
+        android:id="@+id/mainlayoutprofiles">
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                  android:orientation="horizontal"
+                  android:layout_width="match_parent"
+                  android:layout_height="50dp" android:background="@color/purple">
+        <Button android:layout_width="wrap_content" android:layout_height="match_parent"
+                android:background="@drawable/ic_return"
+                android:onClick="profileactionbarback"/>
+        <TextView android:layout_width="wrap_content" android:layout_height="match_parent"
+                  android:text="@string/profiles" android:textSize="22dp" android:layout_gravity="center_vertical"
+                  android:gravity="center_vertical" android:textColor="@color/white"/>
+    </LinearLayout>
+
+    <RelativeLayout
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent">
+        <ListView android:layout_width="match_parent" android:layout_height="match_parent"
+                android:id="@+id/profileslist" android:background="@color/white"
+                style="@android:style/Widget.DeviceDefault.Light.ListView">
+        </ListView>
+        <Button
+                android:layout_width="46dp"
+                android:layout_height="46dp"
+                android:id="@+id/addprofilebutton"
+                android:background="@drawable/ic_add" android:layout_alignParentEnd="true"
+                android:layout_alignBottom="@+id/profileslist" android:layout_marginBottom="20dp"
+                android:layout_marginRight="20dp"
+                android:onClick="addprofilebutton"/>
+    </RelativeLayout>
+</LinearLayout>

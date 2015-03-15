@@ -4,6 +4,15 @@
               android:layout_width="fill_parent"
               android:layout_height="fill_parent"
               android:background="@color/white" android:baselineAligned="false">
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                  android:orientation="horizontal"
+                  android:layout_width="match_parent"
+                  android:layout_height="50dp" android:background="@color/purple">
+        <TextView android:layout_width="wrap_content" android:layout_height="match_parent"
+                  android:text="@string/app_name" android:textSize="22dp" android:layout_gravity="center_vertical"
+                  android:gravity="center_vertical" android:textColor="@color/white"
+                android:paddingLeft="5dp"/>
+    </LinearLayout>
     <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
             android:text="@string/localpathhead"
             android:background="@color/white"
@@ -48,5 +57,11 @@
             android:onClick="pathsselectionOnCLick"
             android:text="@string/filemanager"
             android:textColor="@color/black" android:background="@color/white"/>
+    <Button android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:id="@+id/profilesbutton"
+            android:onClick="profiles"
+            android:text="@string/profiles"
+            android:textColor="@color/black"
+            android:background="@color/white"/>
 </LinearLayout>
 

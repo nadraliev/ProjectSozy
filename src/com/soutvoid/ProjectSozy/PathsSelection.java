@@ -8,11 +8,8 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.preference.DialogPreference;
 import android.view.View;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
-import android.widget.TextView;
+import android.widget.*;
 import android.content.DialogInterface;
-import android.widget.Toast;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -27,6 +24,8 @@ public class PathsSelection extends ListActivity {
     private List<String> directoryEntries = new ArrayList<String>();
     private List<String> directoryEntriesShow = new ArrayList<String>();
     private File currentDirectory = new File("/");
+    private File currentFile = new File("");
+    private Button ok;
 
 
     //заполняем лист содержимым папки
@@ -67,6 +66,9 @@ public class PathsSelection extends ListActivity {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     //дествия по нажатию да
+                    currentFile = aDirectory;
+                    ok(ok);
+
                 }
             };
 
@@ -109,6 +111,23 @@ public class PathsSelection extends ListActivity {
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
         setContentView(R.layout.pathsselection);
+        getActionBar().hide();
+
+        ok = (Button)findViewById(R.id.okbutton);
+
         browseTo(new File("/sdcard"));
+    }
+
+    public void actionbarback(View view) {
+        onBackPressed();
+    }
+
+    public void ok(View view) {
+        Intent i = new Intent();
+        if (currentFile.getName() == "")
+        i.putExtra("path", currentDirectory.getAbsolutePath());
+        else i.putExtra("path", currentFile.getAbsolutePath());
+        setResult(RESULT_OK, i);
+        finish();
     }
 }

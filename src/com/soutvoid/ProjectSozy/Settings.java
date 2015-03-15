@@ -21,6 +21,7 @@ public class Settings extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.settings);
+        getActionBar().hide();
 
         final Editable AddressEdit = ((EditText)findViewById(R.id.addredit)).getText(); //поле ввода адреса
         final Editable UserEdit = ((EditText)findViewById(R.id.useredit)).getText();    //поле ввода логина
@@ -41,5 +42,9 @@ public class Settings extends Activity {
                 onBackPressed();
             }
         });
+    }
+
+    public void actionbarback(View view) {
+        onBackPressed();
     }
 }

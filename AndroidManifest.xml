@@ -19,5 +19,11 @@
                   android:label="@string/settingsbutton" />
         <activity android:name=".PathsSelection"
                   android:label="@string/filemanager"/>
+        <activity android:name=".Profiles"
+                  android:label="Profiles"/>
+        <activity android:name=".AddProfile"
+                  android:label="@string/addprofile"/>
+        <activity android:name=".FTPPathsSelection"
+                  android:label="@string/filemanager"/>
     </application>
 </manifest>

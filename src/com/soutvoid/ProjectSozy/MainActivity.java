@@ -163,6 +163,7 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {                                   //Вызывается при создании активности
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
+        getActionBar().hide();
 
         final Button UploadButton = (Button)findViewById(R.id.uploadbutton);                //кнопка выгрузки
         final Editable LocalPath = ((EditText)findViewById(R.id.localpath)).getText();
@@ -220,5 +221,10 @@ public class MainActivity extends Activity {
     public void pathsselectionOnCLick(View view) {
         Intent PathSelection = new Intent(MainActivity.this, PathsSelection.class);
         startActivity(PathSelection);
+    }
+
+    public void profiles(View view) {
+        Intent profies = new Intent(MainActivity.this, Profiles.class);
+        startActivity(profies);
     }
 }
