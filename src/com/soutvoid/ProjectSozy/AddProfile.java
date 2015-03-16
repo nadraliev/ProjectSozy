@@ -40,7 +40,7 @@ public class AddProfile extends Activity {
     }
 
     public void chooseremotepath(View view) {
-        Intent i = new Intent(this, FTPPathsSelection.class);     //TODO сделать активити выбора папки на сервере
+        Intent i = new Intent(this, FTPPathsSelection.class);
         startActivityForResult(i, 2);
     }
 
@@ -51,13 +51,15 @@ public class AddProfile extends Activity {
             }
             LocalPath = data.getStringExtra("path");
             localpathtext.setText((CharSequence) new File(LocalPath).getName());
-        } else {
+        }
+        if (requestCode == 2) {
             if (data == null) {
                 return;
             }
-            RemotePath = data.getStringExtra("path");
+            RemotePath = data.getStringExtra("remotepath");
             remotepath.setText((CharSequence) new File(RemotePath).getName());
         }
-    }
+        }
+
 
 }
