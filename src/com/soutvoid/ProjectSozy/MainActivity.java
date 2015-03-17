@@ -8,6 +8,8 @@ import android.os.Handler;
 import android.os.Message;
 import android.text.Editable;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.*;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPConnectionClosedException;
@@ -165,10 +167,31 @@ public class MainActivity extends Activity {
         setContentView(R.layout.main);
         getActionBar().hide();
 
+
         final Button UploadButton = (Button)findViewById(R.id.uploadbutton);                //кнопка выгрузки
         final Editable LocalPath = ((EditText)findViewById(R.id.localpath)).getText();
         final Editable RemotePath = ((EditText)findViewById(R.id.remotepath)).getText();
         test = (TextView)findViewById(R.id.test);
+        Animation anim = AnimationUtils.loadAnimation(this, R.anim.launching);
+        final ImageView launch = (ImageView)findViewById(R.id.launch);
+        launch.startAnimation(anim);
+        Animation.AnimationListener alpha = new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                launch.setVisibility(View.INVISIBLE);
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+
+            }
+        };
+        alpha.onAnimationEnd(anim);
 
         //increase для выгрузки файлов
         increase = new Handler() {
@@ -227,4 +250,5 @@ public class MainActivity extends Activity {
         Intent profies = new Intent(MainActivity.this, Profiles.class);
         startActivity(profies);
     }
+
 }

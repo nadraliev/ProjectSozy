@@ -23,9 +23,9 @@ public class Settings extends Activity {
         setContentView(R.layout.settings);
         getActionBar().hide();
 
-        final Editable AddressEdit = ((EditText)findViewById(R.id.addredit)).getText(); //поле ввода адреса
-        final Editable UserEdit = ((EditText)findViewById(R.id.useredit)).getText();    //поле ввода логина
-        final Editable PasswdEdit = ((EditText)findViewById(R.id.passwdedit)).getText();//поле ввода пароля
+        final Editable AddressEdit = ((EditText)findViewById(R.id.addreditold)).getText(); //поле ввода адреса
+        final Editable UserEdit = ((EditText)findViewById(R.id.usereditold)).getText();    //поле ввода логина
+        final Editable PasswdEdit = ((EditText)findViewById(R.id.passwdeditold)).getText();//поле ввода пароля
         final Button SaveButton = (Button)findViewById(R.id.savebutton);                //кнопка сохранения в файл
 
         SaveButton.setOnClickListener(new View.OnClickListener() {

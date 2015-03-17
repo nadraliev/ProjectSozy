@@ -25,5 +25,7 @@
                   android:label="@string/addprofile"/>
         <activity android:name=".FTPPathsSelection"
                   android:label="@string/filemanager"/>
+        <activity android:name=".Launch"
+                  android:label="Launch"/>
     </application>
 </manifest>

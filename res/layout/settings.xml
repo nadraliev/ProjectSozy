@@ -19,21 +19,21 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:text="@string/addrhead"
-            android:id="@+id/addrhead"
+            android:id="@+id/addrheadold"
             android:textColor="@color/black"/>
     <EditText android:layout_width="match_parent" android:layout_height="wrap_content"
-              android:id="@+id/addredit" android:textColor="@color/black"
+              android:id="@+id/addreditold" android:textColor="@color/black"
               style="@android:style/Widget.DeviceDefault.Light.EditText" android:inputType="text"/>
     <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
-              android:id="@+id/userhead"
+              android:id="@+id/userheadold"
               android:text="@string/userhead" android:textColor="@color/black"/>
     <EditText android:layout_width="match_parent" android:layout_height="wrap_content"
-              android:id="@+id/useredit" android:textColor="@color/black" android:inputType="text"/>
+              android:id="@+id/usereditold" android:textColor="@color/black" android:inputType="text"/>
     <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
-              android:id="@+id/passwdhead"
+              android:id="@+id/passwdheadold"
               android:text="@string/passwdhead" android:textColor="@color/black"/>
     <EditText android:layout_width="match_parent" android:layout_height="wrap_content"
-              android:id="@+id/passwdedit" android:textColor="@color/black" android:inputType="textPassword"/>
+              android:id="@+id/passwdeditold" android:textColor="@color/black" android:inputType="textPassword"/>
     <Button android:layout_width="match_parent" android:layout_height="wrap_content"
             android:id="@+id/savebutton"
             android:text="@string/savebutton" android:textColor="@color/black"

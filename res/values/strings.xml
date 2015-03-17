@@ -11,7 +11,7 @@
     <string name="localpathhead">Local path</string>
     <string name="remotepathhead">Remote path</string>
     <string name="unknownhostexception">Unknown/Unreachable host: </string>
-    <string name="connectexception">Input address in settings</string>
+    <string name="connectexception">Connection failed</string>
     <string name="saved">Saved</string>
     <string name="inputlocalpath">Input Local Path</string>
     <string name="inputremotepath">Input Remote Path</string>

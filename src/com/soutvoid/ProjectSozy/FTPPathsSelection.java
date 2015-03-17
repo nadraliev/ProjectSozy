@@ -41,7 +41,7 @@ public class FTPPathsSelection extends ListActivity {
 
     @Override
     protected void onListItemClick(ListView l, View v, int position, long id) {
-        int selectedRowID = position;
+        final int selectedRowID = position;
         final String selectedItem = directoryEntries.get(selectedRowID);
 
 
@@ -76,16 +76,16 @@ public class FTPPathsSelection extends ListActivity {
                         e.printStackTrace();
                     }
                 }
-                if (!selectedItem.equals(".") && !selectedItem.equals("..")) {
-                    if (currentDirectory.equals("/"))
-                        currentDirectory = currentDirectory.concat(selectedItem);
-                    else currentDirectory = currentDirectory.concat("/" + selectedItem);
-                    try {
-                        ftpClient.changeWorkingDirectory(currentDirectory);
-                        fill();
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                try {
+                    if (!selectedItem.equals(".") && !selectedItem.equals("..") && ftpClient.listFiles()[selectedRowID].isDirectory()) {
+                        if (currentDirectory.equals("/"))
+                            currentDirectory = currentDirectory.concat(selectedItem);
+                        else currentDirectory = currentDirectory.concat("/" + selectedItem);
+                            ftpClient.changeWorkingDirectory(currentDirectory);
+                            fill();
                     }
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
 
                 try {
@@ -148,7 +148,7 @@ public class FTPPathsSelection extends ListActivity {
 
     public void ok(View view) {
         Intent i = new Intent();
-        i.putExtra("remotepath", currentDirectory);
+        i.putExtra("remotepathtext", currentDirectory);
         setResult(RESULT_OK, i);
         finish();
     }
