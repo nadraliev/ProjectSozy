@@ -5,6 +5,7 @@
     <string name="userhead">Login:</string>
     <string name="passwdhead">Password:</string>
     <string name="uploadbutton">Upload</string>
+    <string name="download">Download</string>
     <string name="settingsbutton">Settings</string>
     <string name="savebutton">Save</string>
     <string name="pathtohome">/storage/emulated/0/</string>

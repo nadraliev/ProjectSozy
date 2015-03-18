@@ -15,21 +15,20 @@ import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPConnectionClosedException;
 import org.apache.commons.net.ftp.FTPFile;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.ConnectException;
 import java.net.UnknownHostException;
 
 public class MainActivity extends Activity {
 
     ProgressDialog progressBar;
+    ProgressDialog FTPProgressBar;
     Integer filesCount;
     Integer FTPFilesCount;
     Handler increase;
     Handler close;
     TextView test;
+    Handler download;
 
     //выгрузка все, что с ней связано
     public boolean hasDirectory(File target) {
@@ -143,18 +142,18 @@ public class MainActivity extends Activity {
             if (targetFile.isDirectory())
                 ftpClient.changeWorkingDirectory(destination + "/" + targetFile.getName());
             else ftpClient.changeWorkingDirectory(destination);
-            BufferedInputStream buffout = null;
+            BufferedInputStream buffin = null;
             if (targetFile.isDirectory()) {
                 for (int counter = 0; counter < targetFile.listFiles().length; counter++) {
                     if (!targetFile.listFiles()[counter].isDirectory())
-                    buffout = new BufferedInputStream(new FileInputStream(targetFile.listFiles()[counter].toString()));
-                    ftpClient.storeFile(targetFile.listFiles()[counter].getName(), buffout);
+                    buffin = new BufferedInputStream(new FileInputStream(targetFile.listFiles()[counter].toString()));
+                    ftpClient.storeFile(targetFile.listFiles()[counter].getName(), buffin);
                     increase.sendEmptyMessage(1);
                 }
             } else {
-                buffout = new BufferedInputStream(new FileInputStream(targetFile.toString()));
-                ftpClient.storeFile(targetFile.getName(), buffout);
-                buffout.close();
+                buffin = new BufferedInputStream(new FileInputStream(targetFile.toString()));
+                ftpClient.storeFile(targetFile.getName(), buffin);
+                buffin.close();
                 increase.sendEmptyMessage(1);
             }
         } catch (IOException e) {
@@ -180,7 +179,7 @@ public class MainActivity extends Activity {
 
     public void mkDir(final String dirName, final String destination) {
         boolean isContains = false;
-        File[] files = new File(destination).listFiles();
+        File[] files = (new File(destination)).listFiles();
         if (files.length != 0) {
             for (File file : files) {
                 if (dirName.equals(file.getName())) isContains = true;
@@ -204,8 +203,93 @@ public class MainActivity extends Activity {
         }
     }
 
-    public void downloadFromFTPServer(final String address, final String user, final String password, final String target, final String destination, final FTPClient ftpClient) {
-        //TODO закончить функцию загрузки
+    public boolean FTPIsDirectory(final String target, FTPClient ftpClient) {
+        boolean flag = false;
+        try {
+            FTPFile[] files = ftpClient.listFiles();
+            for (FTPFile file : files) {
+                if (file.toString().equals(target)) {
+                    if (file.isDirectory()) flag = true;
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return flag;
+    }
+
+    public void downloadFromFTPServer(final String address, final String user, final String password, final String target, final String destination, final FTPClient ftpClient) throws IOException {
+        if (ftpClient.changeWorkingDirectory(target))
+        mkDir(new File(target).getName(), destination);
+        else
+        ftpClient.changeWorkingDirectory(target.substring(0, target.length() - 1 - new File(target).getName().length()));
+
+        if (FTPHasDirectory(ftpClient)) {
+            FTPFile[] files = ftpClient.listFiles();
+            for (FTPFile file : files) {
+                if (FTPIsDirectory(file.toString(), ftpClient)) {
+                    downloadFromFTPServer(address, user, password, file.toString(), destination + "/" + new File(target).getName().toString(), ftpClient);
+                }
+            }
+        }
+
+        FTPProgressBar.setIndeterminate(false);
+        try {
+            BufferedOutputStream buffout = null;
+            if (FTPIsDirectory(target, ftpClient)) {
+                FTPFile[] files = ftpClient.listFiles();
+                for (FTPFile file : files) {
+                    if (!file.isDirectory()) {
+                        buffout = new BufferedOutputStream(new FileOutputStream(destination + "/" + file.getName()));
+                        ftpClient.retrieveFile(file.toString(), buffout);
+                        download.sendEmptyMessage(0);
+                    }
+                }
+            } else {
+                buffout = new BufferedOutputStream(new FileOutputStream(destination + "/" + new File(target).getName().toString()));
+                ftpClient.retrieveFile(target, buffout);
+                download.sendEmptyMessage(0);
+            }
+            buffout.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void downloading(final String address, final String user, final String password, final String target, final String destination) {
+        FTPFilesCount = 0;
+        final FTPClient ftpClient = new FTPClient();
+
+        FTPProgressBar = new ProgressDialog(this);
+        FTPProgressBar.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+
+        Thread download = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    ftpClient.connect(address);
+                    ftpClient.login(user, password);
+                    if (ftpClient.changeWorkingDirectory(target))
+                        ftpClient.changeWorkingDirectory(target);
+                    else
+                        ftpClient.changeWorkingDirectory(target.substring(0, target.length() - 1 - new File(target).getName().length()));
+                    if (!new File(target).isDirectory())
+                        FTPFilesCount = 1;
+                    else {
+                        FTPFilesCount(ftpClient);
+                    }
+
+                    downloadFromFTPServer(address, user, password, target, destination, ftpClient);
+
+                    ftpClient.logout();
+                    ftpClient.disconnect();
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        download.start();
     }
 
 
@@ -247,6 +331,18 @@ public class MainActivity extends Activity {
             public void handleMessage(android.os.Message msg) {
                 progressBar.incrementProgressBy(msg.what);
                 if (progressBar.getProgress() == progressBar.getMax()) progressBar.dismiss();
+            }
+        };
+
+        download = new Handler() {
+            public void handleMessage(android.os.Message msg) {
+                if (msg.what == 0) FTPProgressBar.incrementProgressBy(1);
+                else {
+                    FTPProgressBar.setMax(msg.what);
+                    FTPProgressBar.setIndeterminate(true);
+                    FTPProgressBar.show();
+                }
+                if (FTPProgressBar.getProgress() == FTPProgressBar.getMax()) FTPProgressBar.dismiss();
             }
         };
 
@@ -298,6 +394,12 @@ public class MainActivity extends Activity {
     public void profiles(View view) {
         Intent profies = new Intent(MainActivity.this, Profiles.class);
         startActivity(profies);
+    }
+
+    public void download(View view) {
+        String localpath = ((EditText)findViewById(R.id.localpathold)).getText().toString();
+        String remotepath = ((EditText)findViewById(R.id.remotepathold)).getText().toString();
+        downloading(Settings.FTP.getAddress(), Settings.FTP.getUser(), Settings.FTP.getPassword(), remotepath, "/storage/emulated/0/" + localpath);
     }
 
 }
