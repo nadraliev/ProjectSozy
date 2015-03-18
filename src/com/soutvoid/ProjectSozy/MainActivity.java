@@ -13,6 +13,7 @@ import android.view.animation.AnimationUtils;
 import android.widget.*;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPConnectionClosedException;
+import org.apache.commons.net.ftp.FTPFile;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -25,11 +26,12 @@ public class MainActivity extends Activity {
 
     ProgressDialog progressBar;
     Integer filesCount;
+    Integer FTPFilesCount;
     Handler increase;
     Handler close;
     TextView test;
 
-
+    //выгрузка все, что с ней связано
     public boolean hasDirectory(File target) {
         boolean flag = false;
         if (target.isDirectory()) {
@@ -161,6 +163,53 @@ public class MainActivity extends Activity {
     }
 
 
+
+    //загрузка и все, что с ней связано
+    public boolean FTPHasDirectory(FTPClient ftpClient) {
+        boolean flag = false;
+        try {
+            FTPFile[] files = ftpClient.listFiles();
+            for (FTPFile file : files) {
+                if (file.isDirectory()) flag = true;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return flag;
+    }
+
+    public void mkDir(final String dirName, final String destination) {
+        boolean isContains = false;
+        File[] files = new File(destination).listFiles();
+        if (files.length != 0) {
+            for (File file : files) {
+                if (dirName.equals(file.getName())) isContains = true;
+            }
+        }
+        if (!isContains) {
+            new File(destination).mkdirs();
+        }
+    }
+
+    public void FTPFilesCount(FTPClient ftpClient) {  //после подсчета меняет рабочую директорию!!
+        try {
+            for (int counter = 0; counter < ftpClient.listFiles().length; counter++) {
+                if (ftpClient.listFiles()[counter].isDirectory()) {
+                    ftpClient.changeWorkingDirectory(ftpClient.listFiles()[counter].toString());
+                    FTPFilesCount(ftpClient);
+                } else FTPFilesCount++;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void downloadFromFTPServer(final String address, final String user, final String password, final String target, final String destination, final FTPClient ftpClient) {
+        //TODO закончить функцию загрузки
+    }
+
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {                                   //Вызывается при создании активности
         super.onCreate(savedInstanceState);
@@ -169,8 +218,8 @@ public class MainActivity extends Activity {
 
 
         final Button UploadButton = (Button)findViewById(R.id.uploadbutton);                //кнопка выгрузки
-        final Editable LocalPath = ((EditText)findViewById(R.id.localpath)).getText();
-        final Editable RemotePath = ((EditText)findViewById(R.id.remotepath)).getText();
+        final Editable LocalPath = ((EditText)findViewById(R.id.localpathold)).getText();
+        final Editable RemotePath = ((EditText)findViewById(R.id.remotepathold)).getText();
         test = (TextView)findViewById(R.id.test);
         Animation anim = AnimationUtils.loadAnimation(this, R.anim.launching);
         final ImageView launch = (ImageView)findViewById(R.id.launch);
@@ -226,8 +275,8 @@ public class MainActivity extends Activity {
                     }
                     if (RemotePath.toString().equals("")) {
                         String InputRemotePath = getString(R.string.inputremotepath);
-                        Toast InputReotePathToast = Toast.makeText(getApplicationContext(), InputRemotePath, Toast.LENGTH_SHORT);
-                        InputReotePathToast.show();
+                        Toast InputRemotePathToast = Toast.makeText(getApplicationContext(), InputRemotePath, Toast.LENGTH_SHORT);
+                        InputRemotePathToast.show();
                     }
                 }
 

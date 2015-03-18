@@ -13,6 +13,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
+import android.database.sqlite.*;
 
 /**
  * Created by andrew on 15.03.15.
@@ -40,22 +41,6 @@ public class AddProfile extends Activity {
         Editable useredit = ((EditText)findViewById(R.id.useredit)).getText();
         Editable passwordedit = ((EditText)findViewById(R.id.passwdedit)).getText();
 
-        //инициализируем базу данных
-        String driverName = "org.sqlite.JDBC";
-        try {
-            Class.forName(driverName).newInstance();
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        }
-        try {
-            Connection conn = DriverManager.getConnection("jdbc:sqlite:res/profiles.db");
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
 
     }
 

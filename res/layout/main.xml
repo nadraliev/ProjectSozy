@@ -21,14 +21,14 @@
                 android:background="@color/white"
                 android:textColor="@color/black"/>
         <EditText android:layout_width="match_parent" android:layout_height="wrap_content"
-                android:id="@+id/localpath" style="@android:style/Widget.DeviceDefault.Light.EditText"
+                android:id="@+id/localpathold" style="@android:style/Widget.DeviceDefault.Light.EditText"
                 android:inputType="text" android:textColor="@color/black"/>
         <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
                 android:text="@string/remotepathhead"
                 android:background="@color/white"
                 android:textColor="@color/black"/>
         <EditText android:layout_width="match_parent" android:layout_height="wrap_content"
-                android:id="@+id/remotepath"
+                android:id="@+id/remotepathold"
                 android:textColor="@color/black" android:inputType="text"/>
         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                 android:id="@+id/test"

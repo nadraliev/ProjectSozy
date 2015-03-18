@@ -2,7 +2,6 @@
   <library name="libs1">
     <CLASSES>
       <root url="jar://$PROJECT_DIR$/libs/commons-net-3.3.jar!/" />
-      <root url="jar://$PROJECT_DIR$/libs/sqlite-jdbc-3.8.7.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />
