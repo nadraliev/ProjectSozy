@@ -113,6 +113,8 @@ public class FTPPathsSelection extends ListActivity {
         final Toast ConnectExceptionToast = Toast.makeText(getApplicationContext(), getString(R.string.connectexception), Toast.LENGTH_SHORT);
         abspath = (TextView)findViewById(R.id.ftpabsolutepathtitle);
 
+        ftpClient.setAutodetectUTF8(true);
+
         printList = new Handler() {
             public void handleMessage(android.os.Message msg) {
                 setListAdapter(directoryList);

@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.*;
+import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPConnectionClosedException;
 import org.apache.commons.net.ftp.FTPFile;
@@ -18,17 +19,20 @@ import org.apache.commons.net.ftp.FTPFile;
 import java.io.*;
 import java.net.ConnectException;
 import java.net.UnknownHostException;
+import java.util.Set;
 
 public class MainActivity extends Activity {
 
     ProgressDialog progressBar;
     ProgressDialog FTPProgressBar;
     Integer filesCount;
-    Integer FTPFilesCount;
+    Integer FTPFilesCount = 0;
     Handler increase;
     Handler close;
     TextView test;
-    Handler download;
+    Handler downloadHandler;
+    FTPClient ftpClient = new FTPClient();
+    Boolean FTPIsDir;
 
     //выгрузка все, что с ней связано
     public boolean hasDirectory(File target) {
@@ -164,133 +168,42 @@ public class MainActivity extends Activity {
 
 
     //загрузка и все, что с ней связано
-    public boolean FTPHasDirectory(FTPClient ftpClient) {
-        boolean flag = false;
-        try {
-            FTPFile[] files = ftpClient.listFiles();
-            for (FTPFile file : files) {
-                if (file.isDirectory()) flag = true;
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return flag;
-    }
-
-    public void mkDir(final String dirName, final String destination) {
-        boolean isContains = false;
-        File[] files = (new File(destination)).listFiles();
-        if (files.length != 0) {
-            for (File file : files) {
-                if (dirName.equals(file.getName())) isContains = true;
-            }
-        }
-        if (!isContains) {
-            new File(destination).mkdirs();
-        }
-    }
-
-    public void FTPFilesCount(FTPClient ftpClient) {  //после подсчета меняет рабочую директорию!!
-        try {
-            for (int counter = 0; counter < ftpClient.listFiles().length; counter++) {
-                if (ftpClient.listFiles()[counter].isDirectory()) {
-                    ftpClient.changeWorkingDirectory(ftpClient.listFiles()[counter].toString());
-                    FTPFilesCount(ftpClient);
-                } else FTPFilesCount++;
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public boolean FTPIsDirectory(final String target, FTPClient ftpClient) {
-        boolean flag = false;
-        try {
-            FTPFile[] files = ftpClient.listFiles();
-            for (FTPFile file : files) {
-                if (file.toString().equals(target)) {
-                    if (file.isDirectory()) flag = true;
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return flag;
-    }
-
-    public void downloadFromFTPServer(final String address, final String user, final String password, final String target, final String destination, final FTPClient ftpClient) throws IOException {
-        if (ftpClient.changeWorkingDirectory(target))
-        mkDir(new File(target).getName(), destination);
-        else
-        ftpClient.changeWorkingDirectory(target.substring(0, target.length() - 1 - new File(target).getName().length()));
-
-        if (FTPHasDirectory(ftpClient)) {
-            FTPFile[] files = ftpClient.listFiles();
-            for (FTPFile file : files) {
-                if (FTPIsDirectory(file.toString(), ftpClient)) {
-                    downloadFromFTPServer(address, user, password, file.toString(), destination + "/" + new File(target).getName().toString(), ftpClient);
+    //вторая попытка
+    public void FTPFilesCount(FTPFile[] files) throws IOException {
+        String currentDir = ftpClient.printWorkingDirectory();
+        for (FTPFile file : files) {
+            if (!file.getName().equals(".") && !file.getName().equals("..")) {
+                if (file.isDirectory()) {
+                    ftpClient.changeWorkingDirectory(ftpClient.printWorkingDirectory() + "/" + file.getName());
+                    FTPFilesCount(ftpClient.listFiles());
+                    ftpClient.changeWorkingDirectory(currentDir);
+                } else {
+                    FTPFilesCount++;
                 }
             }
         }
+    }
 
-        FTPProgressBar.setIndeterminate(false);
-        try {
-            BufferedOutputStream buffout = null;
-            if (FTPIsDirectory(target, ftpClient)) {
-                FTPFile[] files = ftpClient.listFiles();
-                for (FTPFile file : files) {
-                    if (!file.isDirectory()) {
-                        buffout = new BufferedOutputStream(new FileOutputStream(destination + "/" + file.getName()));
-                        ftpClient.retrieveFile(file.toString(), buffout);
-                        download.sendEmptyMessage(0);
-                    }
+    public void download(FTPFile[] files, final String destination) throws IOException {
+        String currentDir = ftpClient.printWorkingDirectory();
+        for (FTPFile file : files) {
+            if (!file.getName().equals(".") && !file.getName().equals("..")) {
+                if (file.isDirectory()) {
+                    new File(destination + "/" + file.getName()).mkdir();
+                    ftpClient.changeWorkingDirectory(ftpClient.printWorkingDirectory() + "/" + file.getName());
+                    download(ftpClient.listFiles(), destination + "/" + file.getName());
+                    ftpClient.changeWorkingDirectory(currentDir);
+                } else {
+                    downloadHandler.sendEmptyMessage(-1);
+                    BufferedOutputStream buffout = new BufferedOutputStream(new FileOutputStream(destination + "/" + file.getName()));
+                    ftpClient.retrieveFile(ftpClient.printWorkingDirectory() + "/" + file.getName(), buffout);
+                    buffout.close();
+                    downloadHandler.sendEmptyMessage(-3);
                 }
-            } else {
-                buffout = new BufferedOutputStream(new FileOutputStream(destination + "/" + new File(target).getName().toString()));
-                ftpClient.retrieveFile(target, buffout);
-                download.sendEmptyMessage(0);
             }
-            buffout.close();
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 
-    public void downloading(final String address, final String user, final String password, final String target, final String destination) {
-        FTPFilesCount = 0;
-        final FTPClient ftpClient = new FTPClient();
-
-        FTPProgressBar = new ProgressDialog(this);
-        FTPProgressBar.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-
-        Thread download = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    ftpClient.connect(address);
-                    ftpClient.login(user, password);
-                    if (ftpClient.changeWorkingDirectory(target))
-                        ftpClient.changeWorkingDirectory(target);
-                    else
-                        ftpClient.changeWorkingDirectory(target.substring(0, target.length() - 1 - new File(target).getName().length()));
-                    if (!new File(target).isDirectory())
-                        FTPFilesCount = 1;
-                    else {
-                        FTPFilesCount(ftpClient);
-                    }
-
-                    downloadFromFTPServer(address, user, password, target, destination, ftpClient);
-
-                    ftpClient.logout();
-                    ftpClient.disconnect();
-
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-        download.start();
-    }
 
 
 
@@ -326,23 +239,40 @@ public class MainActivity extends Activity {
         };
         alpha.onAnimationEnd(anim);
 
+        ftpClient.setAutodetectUTF8(true);
+
+
+
         //increase для выгрузки файлов
         increase = new Handler() {
             public void handleMessage(android.os.Message msg) {
                 progressBar.incrementProgressBy(msg.what);
-                if (progressBar.getProgress() == progressBar.getMax()) progressBar.dismiss();
+                if (progressBar.getProgress() == progressBar.getMax()) {
+                    progressBar.dismiss();
+                    Toast doneToast = Toast.makeText(getApplicationContext(), getString(R.string.done), Toast.LENGTH_SHORT);
+                    doneToast.show();
+                }
             }
         };
 
-        download = new Handler() {
+        downloadHandler = new Handler() {
             public void handleMessage(android.os.Message msg) {
-                if (msg.what == 0) FTPProgressBar.incrementProgressBy(1);
-                else {
-                    FTPProgressBar.setMax(msg.what);
+                if (msg.what == -3) FTPProgressBar.incrementProgressBy(1);
+                else if (msg.what == -1) FTPProgressBar.setIndeterminate(false);
+                else if (msg.what == -2) {
                     FTPProgressBar.setIndeterminate(true);
                     FTPProgressBar.show();
                 }
-                if (FTPProgressBar.getProgress() == FTPProgressBar.getMax()) FTPProgressBar.dismiss();
+                else {
+                    FTPProgressBar.setMax(msg.what);
+
+                }
+                if (FTPProgressBar.getProgress() == FTPProgressBar.getMax()) {
+                    FTPProgressBar.dismiss();
+                    Toast doneToast = Toast.makeText(getApplicationContext(), getString(R.string.done), Toast.LENGTH_SHORT);
+                    doneToast.show();
+                }
+
             }
         };
 
@@ -397,9 +327,41 @@ public class MainActivity extends Activity {
     }
 
     public void download(View view) {
-        String localpath = ((EditText)findViewById(R.id.localpathold)).getText().toString();
-        String remotepath = ((EditText)findViewById(R.id.remotepathold)).getText().toString();
-        downloading(Settings.FTP.getAddress(), Settings.FTP.getUser(), Settings.FTP.getPassword(), remotepath, "/storage/emulated/0/" + localpath);
+        final String localpath = ((EditText)findViewById(R.id.localpathold)).getText().toString();
+        final String remotepath = ((EditText)findViewById(R.id.remotepathold)).getText().toString();
+        FTPProgressBar = new ProgressDialog(this);
+        FTPProgressBar.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+        FTPProgressBar.setMax(0);
+        FTPProgressBar.setIndeterminate(true);
+        FTPProgressBar.show();
+        final Thread download = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    ftpClient.connect(Settings.FTP.getAddress());
+                    ftpClient.login(Settings.FTP.getUser(), Settings.FTP.getPassword());
+                    if (ftpClient.changeWorkingDirectory(remotepath)) {
+                        FTPFilesCount(ftpClient.listFiles());
+                        downloadHandler.sendEmptyMessage(FTPFilesCount);
+                        FTPFilesCount = 0;
+                        download(ftpClient.listFiles(), "/storage/emulated/0/" + localpath);
+                    } else {
+                        downloadHandler.sendEmptyMessage(1);
+                        downloadHandler.sendEmptyMessage(-1);
+                        ftpClient.changeWorkingDirectory(remotepath.substring(0, remotepath.lastIndexOf("/")));
+                        BufferedOutputStream buffout = new BufferedOutputStream(new FileOutputStream("/storage/emulated/0/" + localpath + remotepath.substring(remotepath.lastIndexOf("/"))));
+                        ftpClient.retrieveFile(remotepath, buffout);
+                        buffout.close();
+                        downloadHandler.sendEmptyMessage(-3);
+                    }
+                    ftpClient.logout();
+                    ftpClient.disconnect();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        download.start();
     }
 
 }
