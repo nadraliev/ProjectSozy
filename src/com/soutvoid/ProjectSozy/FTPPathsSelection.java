@@ -1,6 +1,8 @@
 package com.soutvoid.ProjectSozy;
 
+import android.app.AlertDialog;
 import android.app.ListActivity;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -25,6 +27,7 @@ public class FTPPathsSelection extends ListActivity {
     ArrayAdapter<String> directoryList;
     Handler printList;
     TextView abspath;
+    boolean isFile = false;
 
     public void fill() throws IOException {
         directoryEntries.clear();
@@ -77,12 +80,18 @@ public class FTPPathsSelection extends ListActivity {
                     }
                 }
                 try {
-                    if (!selectedItem.equals(".") && !selectedItem.equals("..") && ftpClient.listFiles()[selectedRowID].isDirectory()) {
-                        if (currentDirectory.equals("/"))
-                            currentDirectory = currentDirectory.concat(selectedItem);
-                        else currentDirectory = currentDirectory.concat("/" + selectedItem);
+                    if (ftpClient.listFiles()[selectedRowID].isDirectory()) {
+                        if (!selectedItem.equals(".") && !selectedItem.equals("..")) {
+                            if (currentDirectory.equals("/"))
+                                currentDirectory = currentDirectory.concat(selectedItem);
+                            else currentDirectory = currentDirectory.concat("/" + selectedItem);
                             ftpClient.changeWorkingDirectory(currentDirectory);
                             fill();
+                        }
+                    } else {
+                        currentDirectory = currentDirectory.concat("/" + selectedItem);
+                        isFile = true;
+                        ok(ok);
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -109,6 +118,7 @@ public class FTPPathsSelection extends ListActivity {
         setContentView(R.layout.ftppathsselection);
         getActionBar().hide();
 
+        isFile = false;
         ok = (Button)findViewById(R.id.okbutton);
         final Toast ConnectExceptionToast = Toast.makeText(getApplicationContext(), getString(R.string.connectexception), Toast.LENGTH_SHORT);
         abspath = (TextView)findViewById(R.id.ftpabsolutepathtitle);
@@ -150,6 +160,7 @@ public class FTPPathsSelection extends ListActivity {
 
     public void ok(View view) {
         Intent i = new Intent();
+        i.putExtra("isFile", isFile);
         i.putExtra("remotepathtext", currentDirectory);
         setResult(RESULT_OK, i);
         finish();

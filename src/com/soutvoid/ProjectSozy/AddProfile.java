@@ -5,15 +5,14 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.File;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
-import android.database.sqlite.*;
 
 /**
  * Created by andrew on 15.03.15.
@@ -24,9 +23,15 @@ public class AddProfile extends Activity {
     String RemotePath = "";
     TextView localpathtext;
     TextView remotepathtext;
+    Editable addressedit;
+    Editable useredit;
+    Editable passwordedit;
+    Editable nameedit;
     String address;
     String user;
     String password;
+    boolean isUploading = true;
+    boolean isFTPFile;
 
 
     @Override
@@ -35,12 +40,13 @@ public class AddProfile extends Activity {
         setContentView(R.layout.addprofile);
         getActionBar().hide();
 
+        isFTPFile = false;
         localpathtext = (TextView)findViewById(R.id.localpath);
         remotepathtext = (TextView)findViewById(R.id.remotepath);
-        Editable addressedit = ((EditText)findViewById(R.id.addredit)).getText();
-        Editable useredit = ((EditText)findViewById(R.id.useredit)).getText();
-        Editable passwordedit = ((EditText)findViewById(R.id.passwdedit)).getText();
-
+        addressedit = ((EditText)findViewById(R.id.addredit)).getText();
+        useredit = ((EditText)findViewById(R.id.useredit)).getText();
+        passwordedit = ((EditText)findViewById(R.id.passwdedit)).getText();
+        nameedit = ((EditText)findViewById(R.id.nameedit)).getText();
 
     }
 
@@ -71,9 +77,69 @@ public class AddProfile extends Activity {
                 return;
             }
             RemotePath = data.getStringExtra("remotepathtext");
+            isFTPFile = data.getBooleanExtra("isFile", isFTPFile);
             remotepathtext.setText((CharSequence) new File(RemotePath).getName());
         }
         }
+
+    public void changeDirection(View view) {
+        final ImageView arrow = (ImageView)findViewById(R.id.arrow);
+        if (isUploading) {
+            Animation rotateToRight = AnimationUtils.loadAnimation(this, R.anim.rotatetoright);
+            arrow.startAnimation(rotateToRight);
+            Animation.AnimationListener rotateLsiten = new Animation.AnimationListener() {
+                @Override
+                public void onAnimationStart(Animation animation) {
+
+                }
+
+                @Override
+                public void onAnimationEnd(Animation animation) {
+                    arrow.setBackgroundResource(R.drawable.ic_lefttarrow);
+                }
+
+                @Override
+                public void onAnimationRepeat(Animation animation) {
+
+                }
+            };
+            rotateLsiten.onAnimationEnd(rotateToRight);
+            isUploading = false;
+        } else {
+            Animation rotateToLeft = AnimationUtils.loadAnimation(this, R.anim.rotatetoleft);
+            arrow.startAnimation(rotateToLeft);
+            Animation.AnimationListener rotateListen = new Animation.AnimationListener() {
+                @Override
+                public void onAnimationStart(Animation animation) {
+
+                }
+
+                @Override
+                public void onAnimationEnd(Animation animation) {
+                    arrow.setBackgroundResource(R.drawable.ic_rightarrow);
+                }
+
+                @Override
+                public void onAnimationRepeat(Animation animation) {
+
+                }
+            };
+            rotateListen.onAnimationEnd(rotateToLeft);
+            isUploading = true;
+        }
+    }
+
+    public void ok(View view) {
+        if (isUploading && isFTPFile) {
+            Toast chooseAnother = Toast.makeText(getApplicationContext(), getString(R.string.wrongdestination), Toast.LENGTH_LONG);
+            chooseAnother.show();
+        } else if (!isUploading && (!new File(LocalPath).isDirectory())) {
+            Toast chooseAnother = Toast.makeText(getApplicationContext(), getString(R.string.wrongdestination), Toast.LENGTH_LONG);
+            chooseAnother.show();
+        } else {
+            //TODO здесь сохранять в базу данных
+        }
+    }
 
 
 }

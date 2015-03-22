@@ -30,4 +30,6 @@
     <string name="remote">Remote</string>
     <string name="browse">Browse</string>
     <string name="done">Done</string>
+    <string name="name">Name</string>
+    <string name="wrongdestination">Destination can not be a file</string>
 </resources>

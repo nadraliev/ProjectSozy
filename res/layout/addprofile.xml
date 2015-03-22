@@ -7,15 +7,32 @@
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
                   android:orientation="horizontal"
                   android:layout_width="match_parent"
-                  android:layout_height="50dp" android:background="@color/purple">
+                  android:layout_height="50dp" android:background="@color/purple" android:layout_gravity="right"
+            >
         <Button android:layout_width="wrap_content" android:layout_height="match_parent"
                 android:background="@drawable/ic_return"
                 android:onClick="actionbarback"/>
         <TextView android:layout_width="wrap_content" android:layout_height="match_parent"
                   android:text="@string/addprofile" android:textSize="22dp" android:layout_gravity="center_vertical"
-                  android:gravity="center_vertical" android:textColor="@color/white"/>
+                  android:gravity="center_vertical" android:textColor="@color/white" android:layout_weight="1"/>
+        <Button android:layout_width="50dp" android:layout_height="50dp"
+                android:background="@drawable/ic_ok"
+                android:onClick="ok"
+                android:layout_weight="0"/>
     </LinearLayout>
 
+
+    <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:text="@string/name"
+            android:id="@+id/namehead"
+            android:textColor="@color/black"
+            android:layout_gravity="center_horizontal"
+            android:gravity="center_horizontal"/>
+    <EditText android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:id="@+id/nameedit"
+            android:textColor="@color/black"
+            android:gravity="center_horizontal"
+            android:inputType="text"/>
     <TextView
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
@@ -73,7 +90,8 @@
                     android:gravity="center" android:id="@+id/localpath"/>
         </LinearLayout>
         <ImageView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:background="@drawable/ic_rightarrow"/>
+                android:background="@drawable/ic_rightarrow" android:onClick="changeDirection"
+                android:id="@+id/arrow"/>
         <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content"
                       android:orientation="horizontal"
                       android:onClick="chooseremotepath" android:layout_weight="2" android:layout_gravity="right"
