@@ -364,4 +364,9 @@ public class MainActivity extends Activity {
         download.start();
     }
 
+    public void about(View view) {
+        Intent i = new Intent(this, About.class);
+        startActivity(i);
+    }
+
 }

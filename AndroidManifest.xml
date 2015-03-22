@@ -27,5 +27,7 @@
                   android:label="@string/filemanager"/>
         <activity android:name=".Launch"
                   android:label="Launch"/>
+        <activity android:name=".About"
+                  android:label="About"/>
     </application>
 </manifest>

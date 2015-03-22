@@ -32,4 +32,6 @@
     <string name="done">Done</string>
     <string name="name">Name</string>
     <string name="wrongdestination">Destination can not be a file</string>
+    <string name="developedby">Developed by Andrew Nadraliev</string>
+    <string name="version">Version pre-alpha</string>
 </resources>
