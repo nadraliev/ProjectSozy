@@ -21,7 +21,6 @@ public class Settings extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.settings);
-        getActionBar().hide();
 
         final Editable AddressEdit = ((EditText)findViewById(R.id.addreditold)).getText(); //поле ввода адреса
         final Editable UserEdit = ((EditText)findViewById(R.id.usereditold)).getText();    //поле ввода логина

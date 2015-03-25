@@ -111,7 +111,6 @@ public class PathsSelection extends ListActivity {
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
         setContentView(R.layout.pathsselection);
-        getActionBar().hide();
 
         ok = (Button)findViewById(R.id.okbutton);
 

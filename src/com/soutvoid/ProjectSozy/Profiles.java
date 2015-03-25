@@ -27,7 +27,6 @@ public class Profiles extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.profiles);
-        getActionBar().hide();
 
         String[] names = {"First", "Second"};
         String[] localpaths = {"Music", "Ringtones"};

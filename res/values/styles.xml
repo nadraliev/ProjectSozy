@@ -1,4 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <style name="HoloLight" parent="android:Theme.Holo.Light"></style>
+    <style name="ActionBarPurple" parent="@android:style/Widget.Holo.Light.ActionBar.Solid">
+        <item name="android:background">@color/purplelight</item>
+    </style>
+    <style name="AppTheme" parent="android:Animation">
+        <item name="android:actionBarStyle">@style/ActionBarPurple</item>
+        <item name="android:actionBarSize">55dp</item>
+        <item name="android:windowBackground">@color/purple</item>
+        <item name="android:windowTranslucentStatus">true</item>
+        <item name="android:fitsSystemWindows">true</item>
+    </style>
+    <style name="AboutTheme" parent="AppTheme">
+        <item name="android:fitsSystemWindows">false</item>
+    </style>
 </resources>

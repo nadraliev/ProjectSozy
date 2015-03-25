@@ -116,7 +116,6 @@ public class FTPPathsSelection extends ListActivity {
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
         setContentView(R.layout.ftppathsselection);
-        getActionBar().hide();
 
         isFile = false;
         ok = (Button)findViewById(R.id.okbutton);

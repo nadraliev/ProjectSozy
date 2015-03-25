@@ -40,7 +40,6 @@ public class AddProfile extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.addprofile);
-        getActionBar().hide();
 
         isFTPFile = false;
         localpathtext = (TextView)findViewById(R.id.localpath);

@@ -77,7 +77,4 @@
                 android:textColor="@color/black"
                 android:onClick="download"/>
     </LinearLayout>
-    <ImageView android:layout_width="match_parent" android:layout_height="match_parent"
-            android:src="@drawable/sozysecond" android:background="@drawable/purple_background" android:id="@+id/launch"
-            />
 </RelativeLayout>
