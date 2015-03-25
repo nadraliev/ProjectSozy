@@ -2,7 +2,11 @@ package com.soutvoid.ProjectSozy;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.ContentValues;
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -19,6 +23,7 @@ import org.apache.commons.net.ftp.FTPFile;
 import java.io.*;
 import java.net.ConnectException;
 import java.net.UnknownHostException;
+import java.sql.SQLException;
 import java.util.Set;
 
 public class MainActivity extends Activity {
@@ -240,7 +245,6 @@ public class MainActivity extends Activity {
         alpha.onAnimationEnd(anim);
 
         ftpClient.setAutodetectUTF8(true);
-
 
 
         //increase для выгрузки файлов

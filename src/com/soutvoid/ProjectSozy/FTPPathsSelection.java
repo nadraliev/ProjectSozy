@@ -54,8 +54,8 @@ public class FTPPathsSelection extends ListActivity {
             public void run() {
 
                 try {
-                    ftpClient.connect(Settings.FTP.getAddress());
-                    ftpClient.login(Settings.FTP.getUser(), Settings.FTP.getPassword());
+                    ftpClient.connect(AddProfile.addressedit.toString());
+                    ftpClient.login(AddProfile.useredit.toString(), AddProfile.passwordedit.toString());
                     ftpClient.changeWorkingDirectory(currentDirectory);
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -137,8 +137,8 @@ public class FTPPathsSelection extends ListActivity {
             @Override
             public void run() {
                 try {
-                    ftpClient.connect(Settings.FTP.getAddress());
-                    ftpClient.login(Settings.FTP.getUser(), Settings.FTP.getPassword());
+                    ftpClient.connect(AddProfile.addressedit.toString());
+                    ftpClient.login(AddProfile.useredit.toString(), AddProfile.passwordedit.toString());
                     ftpClient.changeWorkingDirectory(currentDirectory);
                     fill();
                     ftpClient.logout();
@@ -148,6 +148,7 @@ public class FTPPathsSelection extends ListActivity {
                     ConnectExceptionToast.show();
                 } catch (IOException e) {
                     e.printStackTrace();
+                    ConnectExceptionToast.show();
                 }
             }
         });

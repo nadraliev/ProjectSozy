@@ -10,17 +10,15 @@
         <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
                       android:orientation="horizontal"
                       android:layout_width="match_parent"
-                      android:layout_height="50dp" android:background="@color/purple">
-            <ImageView android:layout_width="40dp" android:layout_height="40dp"
-                    android:src="@drawable/ic_sync"
-                    android:layout_gravity="center_vertical"/>
+                      android:layout_height="55dp" android:background="@color/purple">
             <TextView android:layout_width="wrap_content" android:layout_height="match_parent"
                       android:text="@string/app_name" android:textSize="22dp" android:layout_gravity="center_vertical"
                       android:gravity="center_vertical" android:textColor="@color/white"
-                    android:paddingLeft="5dp" android:layout_weight="1"/>
+                    android:paddingLeft="10dp" android:layout_weight="1"/>
             <ImageView android:layout_width="40dp" android:layout_height="40dp"
-                    android:src="@drawable/ic_about"
-                    android:onClick="about" android:layout_gravity="center_vertical"/>
+                    android:src="@drawable/ic_info"
+                    android:onClick="about" android:layout_gravity="center_vertical"
+                    android:paddingRight="10dp"/>
         </LinearLayout>
         <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
                 android:text="@string/localpathhead"
@@ -28,14 +26,16 @@
                 android:textColor="@color/black"/>
         <EditText android:layout_width="match_parent" android:layout_height="wrap_content"
                 android:id="@+id/localpathold" style="@android:style/Widget.DeviceDefault.Light.EditText"
-                android:inputType="text" android:textColor="@color/black"/>
+                android:inputType="text" android:textColor="@color/black"
+                android:background="@color/white"/>
         <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
                 android:text="@string/remotepathhead"
                 android:background="@color/white"
                 android:textColor="@color/black"/>
         <EditText android:layout_width="match_parent" android:layout_height="wrap_content"
                 android:id="@+id/remotepathold"
-                android:textColor="@color/black" android:inputType="text"/>
+                android:textColor="@color/black" android:inputType="text"
+                android:background="@color/white"/>
         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                 android:id="@+id/test"
                 android:background="@color/white"
@@ -78,6 +78,6 @@
                 android:onClick="download"/>
     </LinearLayout>
     <ImageView android:layout_width="match_parent" android:layout_height="match_parent"
-            android:src="@drawable/sozy" android:background="@color/purple" android:id="@+id/launch"
+            android:src="@drawable/sozysecond" android:background="@drawable/purple_background" android:id="@+id/launch"
             />
 </RelativeLayout>

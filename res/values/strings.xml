@@ -34,4 +34,6 @@
     <string name="wrongdestination">Destination can not be a file</string>
     <string name="developedby">Developed by Andrew Nadraliev</string>
     <string name="version">Version pre-alpha</string>
+    <string name="nameExists">This name already exists</string>
+    <string name="emptyField">Fields can not be empty</string>
 </resources>

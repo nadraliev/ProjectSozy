@@ -32,7 +32,8 @@
             android:id="@+id/nameedit"
             android:textColor="@color/black"
             android:gravity="center_horizontal"
-            android:inputType="text"/>
+            android:inputType="text"
+            style="@android:style/Widget.DeviceDefault.Light.EditText"/>
     <TextView
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
@@ -43,19 +44,22 @@
     <EditText android:layout_width="match_parent" android:layout_height="wrap_content"
               android:id="@+id/addredit" android:textColor="@color/black"
               style="@android:style/Widget.DeviceDefault.Light.EditText" android:inputType="text"
-              android:gravity="center_horizontal"/>
+              android:gravity="center_horizontal"
+            />
     <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
               android:id="@+id/userhead"
               android:text="@string/userhead" android:textColor="@color/black" android:gravity="center_horizontal"/>
     <EditText android:layout_width="match_parent" android:layout_height="wrap_content"
               android:id="@+id/useredit" android:textColor="@color/black" android:inputType="text"
-              android:gravity="center_horizontal"/>
+              android:gravity="center_horizontal"
+              style="@android:style/Widget.DeviceDefault.Light.EditText"/>
     <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
               android:id="@+id/passwdhead"
               android:text="@string/passwdhead" android:textColor="@color/black" android:gravity="center_horizontal"/>
     <EditText android:layout_width="match_parent" android:layout_height="wrap_content"
               android:id="@+id/passwdedit" android:textColor="@color/black" android:inputType="textPassword"
-              android:gravity="center_horizontal"/>
+              android:gravity="center_horizontal"
+              style="@android:style/Widget.DeviceDefault.Light.EditText"/>
 
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
             android:orientation="horizontal"
@@ -89,9 +93,9 @@
                     android:textSize="15sp"
                     android:gravity="center" android:id="@+id/localpath"/>
         </LinearLayout>
-        <ImageView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:background="@drawable/ic_rightarrow" android:onClick="changeDirection"
-                android:id="@+id/arrow"/>
+        <ImageView android:layout_width="60dp" android:layout_height="50dp"
+                   android:onClick="changeDirection"
+                android:id="@+id/arrow" android:layout_gravity="center_vertical" android:src="@drawable/ic_rightarrow"/>
         <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content"
                       android:orientation="horizontal"
                       android:onClick="chooseremotepath" android:layout_weight="2" android:layout_gravity="right"

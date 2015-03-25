@@ -1,7 +1,11 @@
 package com.soutvoid.ProjectSozy;
 
 import android.app.Activity;
+import android.content.ContentValues;
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
 import android.os.Bundle;
 import android.text.Editable;
 import android.view.View;
@@ -23,15 +27,13 @@ public class AddProfile extends Activity {
     String RemotePath = "";
     TextView localpathtext;
     TextView remotepathtext;
-    Editable addressedit;
-    Editable useredit;
-    Editable passwordedit;
-    Editable nameedit;
-    String address;
-    String user;
-    String password;
+    public static Editable addressedit;
+    public static Editable useredit;
+    public static Editable passwordedit;
+    public static Editable nameedit;
     boolean isUploading = true;
     boolean isFTPFile;
+    String syncType;
 
 
     @Override
@@ -95,7 +97,7 @@ public class AddProfile extends Activity {
 
                 @Override
                 public void onAnimationEnd(Animation animation) {
-                    arrow.setBackgroundResource(R.drawable.ic_lefttarrow);
+                    arrow.setImageResource(R.drawable.ic_lefttarrow);
                 }
 
                 @Override
@@ -116,7 +118,7 @@ public class AddProfile extends Activity {
 
                 @Override
                 public void onAnimationEnd(Animation animation) {
-                    arrow.setBackgroundResource(R.drawable.ic_rightarrow);
+                    arrow.setImageResource(R.drawable.ic_rightarrow);
                 }
 
                 @Override
@@ -137,7 +139,41 @@ public class AddProfile extends Activity {
             Toast chooseAnother = Toast.makeText(getApplicationContext(), getString(R.string.wrongdestination), Toast.LENGTH_LONG);
             chooseAnother.show();
         } else {
-            //TODO здесь сохранять в базу данных
+            SQLiteOpen dbOpen = new SQLiteOpen(this);
+            SQLiteDatabase db;
+            try {
+                db = dbOpen.getWritableDatabase();
+            } catch (SQLiteException e) {
+                e.printStackTrace();
+                db = dbOpen.getReadableDatabase();
+            }
+
+            if (nameedit.toString().trim().equals("") || addressedit.toString().trim().equals("") || useredit.toString().trim().equals("") || passwordedit.toString().trim().equals("") ||
+                    LocalPath.equals("") || RemotePath.equals("")) {
+                Toast emptyField = Toast.makeText(getApplicationContext(), getString(R.string.emptyField), Toast.LENGTH_LONG);
+                emptyField.show();
+            } else {
+
+                if (db.query("profiles", new String[]{"name"}, "name = '" + nameedit.toString() + "'", null, null, null, null).getCount() == 0) {
+
+                    ContentValues newValues = new ContentValues();
+                    newValues.put("name", nameedit.toString());
+                    newValues.put("address", addressedit.toString());
+                    newValues.put("user", useredit.toString());
+                    newValues.put("password", passwordedit.toString());
+                    newValues.put("localpath", "/storage/emulated/0" + LocalPath);
+                    newValues.put("remotepath", RemotePath);
+                    if (isUploading)
+                        syncType = "upload";
+                    else syncType = "download";
+                    newValues.put("type", syncType);
+                    db.insert("profiles", null, newValues);
+                    finish();
+                } else {
+                    Toast nameExists = Toast.makeText(getApplicationContext(), getString(R.string.nameExists), Toast.LENGTH_LONG);
+                    nameExists.show();
+                }
+            }
         }
     }
 

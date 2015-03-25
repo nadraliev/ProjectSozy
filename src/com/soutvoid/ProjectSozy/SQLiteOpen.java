@@ -15,19 +15,23 @@ public class SQLiteOpen extends SQLiteOpenHelper {
 
     //названия столбцов
     private static final String COLUMN_ID = "_id";
+    private static final String COLUMN_NAME = "name";
     private static final String COLUMN_ADDRESS = "address";
     private static final String COLUMN_USER = "user";
     private static final String COLUMN_PASSWORD = "password";
     private static final String COLUMN_LOCAL_PATH = "localpath";
     private static final String COLUMN_REMOTE_PATH = "remotepath";
+    private static final String COLUMN_TYPE = "type";
 
     //номера столбцов
-    private static final int NUM_COLUMN_ID = 1;
+    private static final int NUM_COLUMN_ID = 0;
+    private static final int NUM_COLUMN_NAME = 1;
     private static final int NUM_COLUMN_ADDRESS = 2;
     private static final int NUM_COLUNM_USER = 3;
     private static final int NUM_COLUMN_PASSWORD = 4;
     private static final int NUM_COLUMN_LOCAL_PATH = 5;
     private static final int NUM_COLUMN_REMOTE_PATH = 6;
+    private static final int NUM_COLUMN_TYPE = 7;
 
     SQLiteOpen(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -35,14 +39,14 @@ public class SQLiteOpen extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        String query = "CREATE TABLE " + TABLE_NAME + "(" + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT," + COLUMN_ADDRESS + " STRING," + COLUMN_USER + " STRING," + COLUMN_PASSWORD + " STRING,"
-                + COLUMN_LOCAL_PATH + " STRING," + COLUMN_REMOTE_PATH + " STRING);";
+        String query = "CREATE TABLE " + TABLE_NAME + "(" + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT," + COLUMN_NAME + " STRING," + COLUMN_ADDRESS + " STRING," + COLUMN_USER + " STRING," + COLUMN_PASSWORD + " STRING,"
+                + COLUMN_LOCAL_PATH + " STRING," + COLUMN_REMOTE_PATH + " STRING," + COLUMN_TYPE + " String);";
         db.execSQL(query);
     }
 
-        public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-            db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME);
-            onCreate(db);
-        }
+    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME);
+        onCreate(db);
+    }
 
 }
