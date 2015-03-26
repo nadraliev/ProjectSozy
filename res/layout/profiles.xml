@@ -18,6 +18,9 @@
         <TextView android:layout_width="wrap_content" android:layout_height="match_parent"
                   android:text="@string/profiles" android:textSize="22dp" android:layout_gravity="center_vertical"
                   android:gravity="center_vertical" android:textColor="@color/white"/>
+        <Button android:layout_width="50dp" android:layout_height="50dp"
+                android:background="@drawable/ic_add"
+                android:onClick="popupmenu"/>
     </LinearLayout>
 
     <RelativeLayout

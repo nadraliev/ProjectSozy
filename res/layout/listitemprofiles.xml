@@ -17,7 +17,7 @@
                 android:id="@+id/localpathitem"
                 android:textColor="@color/grey"/>
         <ImageView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:background="@drawable/ic_rightarrow"/>
+                android:id="@+id/typeitem"/>
         <TextView android:layout_width="wrap_content" android:layout_height="match_parent"
                 android:id="@+id/serveraddressitem"
                 android:textColor="@color/grey"/>
