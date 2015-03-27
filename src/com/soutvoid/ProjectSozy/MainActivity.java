@@ -2,20 +2,15 @@ package com.soutvoid.ProjectSozy;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
-import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Message;
-import android.text.Editable;
+import android.view.MenuItem;
 import android.view.View;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.*;
-import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPConnectionClosedException;
 import org.apache.commons.net.ftp.FTPFile;
@@ -23,21 +18,39 @@ import org.apache.commons.net.ftp.FTPFile;
 import java.io.*;
 import java.net.ConnectException;
 import java.net.UnknownHostException;
-import java.sql.SQLException;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
+/**
+ * Created by andrew on 15.03.15.
+ */
 public class MainActivity extends Activity {
+
+    final String ATTRIBUTE_NAME = "name";
+    final String ATTRIBUTE_LOCALPATH = "localpath";
+    final String ATTRIBUTE_SERVER = "server";
+    final String ATTRIBUTE_TYPE = "type";
+
+    ListView profileslist;
+
+    SQLiteDatabase db;
+    SQLiteOpen dbOpen;
+
+    FTPClient ftpClient = new FTPClient();
 
     ProgressDialog progressBar;
     ProgressDialog FTPProgressBar;
+
     Integer filesCount;
     Integer FTPFilesCount = 0;
+
     Handler increase;
     Handler close;
-    TextView test;
     Handler downloadHandler;
-    FTPClient ftpClient = new FTPClient();
-    Boolean FTPIsDir;
+
+    ArrayList<String> names = new ArrayList<String>();
+
 
     //выгрузка все, что с ней связано
     public boolean hasDirectory(File target) {
@@ -78,7 +91,7 @@ public class MainActivity extends Activity {
     public void Uploading(final String address, final String user, final String passwd, final String target, final String destination) {
         filesCount = 0;
         if (new File(target).isDirectory())
-        filesCount(new File(target));
+            filesCount(new File(target));
         else filesCount = 1;
 
 
@@ -109,7 +122,7 @@ public class MainActivity extends Activity {
                     UploadToFTPServer(address, user, passwd, target, destination, ftpClient);
                     ftpClient.logout();
                     ftpClient.disconnect();
-                } catch (UnknownHostException e) {
+                } catch (java.net.UnknownHostException e) {
                     e.printStackTrace();
                     UnknownHostExceptionToast.show();
                     close.sendEmptyMessage(0);   //послать 0 для закрытия прогрессбара
@@ -134,17 +147,17 @@ public class MainActivity extends Activity {
 
         //Создаем папку
         if (targetFile.isDirectory())
-        mkDirFTP(address, user, passwd, targetFile.getName(), destination, ftpClient);
+            mkDirFTP(address, user, passwd, targetFile.getName(), destination, ftpClient);
 
 
         //Загружаем файлы
         if (hasDirectory(targetFile)) {
-                for (int counter = 0; counter < targetFile.listFiles().length; counter++) {
-                    if (targetFile.listFiles()[counter].isDirectory()) {
-                        UploadToFTPServer(address, user, passwd, targetFile.listFiles()[counter].toString(), destination + "/" + targetFile.getName(), ftpClient);
-                    }
+            for (int counter = 0; counter < targetFile.listFiles().length; counter++) {
+                if (targetFile.listFiles()[counter].isDirectory()) {
+                    UploadToFTPServer(address, user, passwd, targetFile.listFiles()[counter].toString(), destination + "/" + targetFile.getName(), ftpClient);
                 }
             }
+        }
 
         progressBar.setIndeterminate(false);
         try {
@@ -155,7 +168,7 @@ public class MainActivity extends Activity {
             if (targetFile.isDirectory()) {
                 for (int counter = 0; counter < targetFile.listFiles().length; counter++) {
                     if (!targetFile.listFiles()[counter].isDirectory())
-                    buffin = new BufferedInputStream(new FileInputStream(targetFile.listFiles()[counter].toString()));
+                        buffin = new BufferedInputStream(new FileInputStream(targetFile.listFiles()[counter].toString()));
                     ftpClient.storeFile(targetFile.listFiles()[counter].getName(), buffin);
                     increase.sendEmptyMessage(1);
                 }
@@ -169,7 +182,6 @@ public class MainActivity extends Activity {
             e.printStackTrace();
         }
     }
-
 
 
     //загрузка и все, что с ней связано
@@ -189,14 +201,14 @@ public class MainActivity extends Activity {
         }
     }
 
-    public void download(FTPFile[] files, final String destination) throws IOException {
+    public void downloadInnerMethod(FTPFile[] files, final String destination) throws IOException {
         String currentDir = ftpClient.printWorkingDirectory();
         for (FTPFile file : files) {
             if (!file.getName().equals(".") && !file.getName().equals("..")) {
                 if (file.isDirectory()) {
                     new File(destination + "/" + file.getName()).mkdir();
                     ftpClient.changeWorkingDirectory(ftpClient.printWorkingDirectory() + "/" + file.getName());
-                    download(ftpClient.listFiles(), destination + "/" + file.getName());
+                    downloadInnerMethod(ftpClient.listFiles(), destination + "/" + file.getName());
                     ftpClient.changeWorkingDirectory(currentDir);
                 } else {
                     downloadHandler.sendEmptyMessage(-1);
@@ -209,34 +221,77 @@ public class MainActivity extends Activity {
         }
     }
 
+    public void download(final String profileName) {
+        final Cursor data = db.query("profiles", new String[] {"address", "user", "password", "localpath", "remotepath"}, "name = '" + profileName + "'", null, null, null, null);
+        data.moveToFirst();
+
+        final String localpath = data.getString(3);
+        final String remotepath = data.getString(4);
+        FTPProgressBar = new ProgressDialog(this);
+        FTPProgressBar.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+        FTPProgressBar.setMax(0);
+        FTPProgressBar.setIndeterminate(true);
+        FTPProgressBar.show();
+
+
+
+        final Thread download = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    ftpClient.connect(data.getString(0));
+                    ftpClient.login(data.getString(1), data.getString(2));
+                    if (ftpClient.changeWorkingDirectory(remotepath)) {
+                        FTPFilesCount(ftpClient.listFiles());
+                        downloadHandler.sendEmptyMessage(FTPFilesCount);
+                        FTPFilesCount = 0;
+                        String destination = localpath + remotepath.substring(remotepath.lastIndexOf("/"));
+                        new File(destination).mkdirs();
+                        downloadInnerMethod(ftpClient.listFiles(), destination);
+                    } else {
+                        downloadHandler.sendEmptyMessage(1);
+                        downloadHandler.sendEmptyMessage(-1);
+                        ftpClient.changeWorkingDirectory(remotepath.substring(0, remotepath.lastIndexOf("/")));
+                        BufferedOutputStream buffout = new BufferedOutputStream(new FileOutputStream(localpath + remotepath.substring(remotepath.lastIndexOf("/"))));
+                        ftpClient.retrieveFile(remotepath, buffout);
+                        buffout.close();
+                        downloadHandler.sendEmptyMessage(-3);
+                    }
+                    ftpClient.logout();
+                    ftpClient.disconnect();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        download.start();
+    }
 
 
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {                                   //Вызывается при создании активности
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.main);
+        setContentView(R.layout.profiles);
+        dbOpen = new SQLiteOpen(this);
+        try {
+            db = dbOpen.getWritableDatabase();
+        } catch (SQLiteException e) {
+            e.printStackTrace();
+            db = dbOpen.getReadableDatabase();
+        }
 
-        final Button UploadButton = (Button)findViewById(R.id.uploadbutton);                //кнопка выгрузки
-        final Editable LocalPath = ((EditText)findViewById(R.id.localpathold)).getText();
-        final Editable RemotePath = ((EditText)findViewById(R.id.remotepathold)).getText();
-        test = (TextView)findViewById(R.id.test);
+        UpdateList();
+
+        profileslist.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                showPopupMenu(view, position);
+            }
+        });
 
 
         ftpClient.setAutodetectUTF8(true);
-
-
-        //increase для выгрузки файлов
-        increase = new Handler() {
-            public void handleMessage(android.os.Message msg) {
-                progressBar.incrementProgressBy(msg.what);
-                if (progressBar.getProgress() == progressBar.getMax()) {
-                    progressBar.dismiss();
-                    Toast doneToast = Toast.makeText(getApplicationContext(), getString(R.string.done), Toast.LENGTH_SHORT);
-                    doneToast.show();
-                }
-            }
-        };
 
         downloadHandler = new Handler() {
             public void handleMessage(android.os.Message msg) {
@@ -259,97 +314,108 @@ public class MainActivity extends Activity {
             }
         };
 
+        increase = new Handler() {
+            public void handleMessage(android.os.Message msg) {
+                progressBar.incrementProgressBy(msg.what);
+                if (progressBar.getProgress() == progressBar.getMax()) {
+                    progressBar.dismiss();
+                    Toast doneToast = Toast.makeText(getApplicationContext(), getString(R.string.done), Toast.LENGTH_SHORT);
+                    doneToast.show();
+                }
+            }
+        };
+
+
         close = new Handler() {
             public void handleMessage(android.os.Message msg) {
                 if (msg.what == 0) progressBar.dismiss();
             }
         };
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        UpdateList();
+    }
+
+    public void UpdateList() {
+
+        names.clear();
+
+        Cursor profiles = db.query("profiles", new String[] {"name", "localpath", "address", "type"}, null, null, null, null, null);
+        profiles.moveToFirst();
+
+        ArrayList<Map<String, Object>> data = new ArrayList<Map<String, Object>>(profiles.getCount());
+        Map<String, Object> map;
+
+        for (int i = 0; i < profiles.getCount(); i++) {
+            map = new HashMap<String, Object>();
+            names.add(profiles.getString(0));
+            map.put(ATTRIBUTE_NAME, profiles.getString(0));
+            map.put(ATTRIBUTE_LOCALPATH, profiles.getString(1).substring(profiles.getString(1).lastIndexOf("/") + 1));   //отрезаем все кроме имени папки
+            map.put(ATTRIBUTE_SERVER, profiles.getString(2));
+            if (profiles.getString(3).equals("upload"))
+                map.put(ATTRIBUTE_TYPE, R.drawable.ic_rightarrow);
+            else map.put(ATTRIBUTE_TYPE, R.drawable.ic_lefttarrow);
+            data.add(map);
+            profiles.moveToNext();
+        }
+        profiles.close();
 
 
-        UploadButton.setOnClickListener(new View.OnClickListener() {                    //Создаем обработчик нажатия для кнопки выгрузки
+        String[] from = {ATTRIBUTE_NAME, ATTRIBUTE_LOCALPATH, ATTRIBUTE_SERVER, ATTRIBUTE_TYPE};
+        int[] to = {R.id.profilenameitem, R.id.localpathitem, R.id.serveraddressitem, R.id.typeitem};
+
+        SimpleAdapter ProfilesAdapter = new SimpleAdapter(this, data, R.layout.listitemprofiles, from, to);
+
+        profileslist = (ListView)findViewById(R.id.profileslist);
+        profileslist.setAdapter(ProfilesAdapter);
+    }
+
+    public void addprofilebutton(View view) {
+        Intent newprofile = new Intent(this, AddProfile.class);
+        startActivity(newprofile);
+    }
+
+    private void showPopupMenu(View view, final int position) {
+        final PopupMenu popupMenu = new PopupMenu(this, view);
+        popupMenu.inflate(R.menu.popupmenufile);
+        final String name = names.get(position);
+
+        popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+
             @Override
-            public void onClick(View v) {
-
-                //во избежание запуска нескольких выгрузок выключаем кнопку до конца загрузки
-                UploadButton.setEnabled(false);
-
-                if (!LocalPath.toString().equals("") && !RemotePath.toString().equals("")) {
-                    Uploading(Settings.FTP.getAddress(), Settings.FTP.getUser(), Settings.FTP.getPassword(), "/storage/emulated/0/" + LocalPath.toString(), "/" + RemotePath.toString());
+            public boolean onMenuItemClick(MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.deletemenu :
+                        db.delete("profiles", "name = '" + name + "'", null);
+                        UpdateList();
+                        break;
+                    case R.id.startmenu :
+                        Cursor types = db.query("profiles", new String[] {"type"}, "name = '" + name + "'", null, null, null, null);
+                        types.moveToFirst();
+                        if (types.getString(0).equals("download")) {
+                            download(name);
+                        } else {
+                            Cursor data = db.query("profiles", new String[] {"address", "user", "password", "localpath", "remotepath"}, "name = '" + name + "'", null, null, null, null);
+                            data.moveToFirst();
+                            Uploading(data.getString(0), data.getString(1), data.getString(2), data.getString(3), data.getString(4));
+                        }
+                        break;
                 }
-                else {
-                    if (LocalPath.toString().equals("")) {
-                        String InputLocalPath = getString(R.string.inputlocalpath);
-                        Toast InputLocalPathToast = Toast.makeText(getApplicationContext(), InputLocalPath, Toast.LENGTH_SHORT);
-                        InputLocalPathToast.show();
-                    }
-                    if (RemotePath.toString().equals("")) {
-                        String InputRemotePath = getString(R.string.inputremotepath);
-                        Toast InputRemotePathToast = Toast.makeText(getApplicationContext(), InputRemotePath, Toast.LENGTH_SHORT);
-                        InputRemotePathToast.show();
-                    }
-                }
-
-                UploadButton.setEnabled(true);
+                return true;
             }
         });
-    }
+        popupMenu.setOnDismissListener(new PopupMenu.OnDismissListener() {
 
-    public void settingsOnClick(View view) {
-        Intent Settings = new Intent(MainActivity.this, Settings.class);
-        startActivity(Settings);
-    }
-
-    public void pathsselectionOnCLick(View view) {
-        Intent PathSelection = new Intent(MainActivity.this, PathsSelection.class);
-        startActivity(PathSelection);
-    }
-
-    public void profiles(View view) {
-        Intent profies = new Intent(MainActivity.this, Profiles.class);
-        startActivity(profies);
-    }
-
-    public void download(View view) {
-        final String localpath = ((EditText)findViewById(R.id.localpathold)).getText().toString();
-        final String remotepath = ((EditText)findViewById(R.id.remotepathold)).getText().toString();
-        FTPProgressBar = new ProgressDialog(this);
-        FTPProgressBar.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-        FTPProgressBar.setMax(0);
-        FTPProgressBar.setIndeterminate(true);
-        FTPProgressBar.show();
-        final Thread download = new Thread(new Runnable() {
             @Override
-            public void run() {
-                try {
-                    ftpClient.connect(Settings.FTP.getAddress());
-                    ftpClient.login(Settings.FTP.getUser(), Settings.FTP.getPassword());
-                    if (ftpClient.changeWorkingDirectory(remotepath)) {
-                        FTPFilesCount(ftpClient.listFiles());
-                        downloadHandler.sendEmptyMessage(FTPFilesCount);
-                        FTPFilesCount = 0;
-                        download(ftpClient.listFiles(), "/storage/emulated/0/" + localpath);
-                    } else {
-                        downloadHandler.sendEmptyMessage(1);
-                        downloadHandler.sendEmptyMessage(-1);
-                        ftpClient.changeWorkingDirectory(remotepath.substring(0, remotepath.lastIndexOf("/")));
-                        BufferedOutputStream buffout = new BufferedOutputStream(new FileOutputStream("/storage/emulated/0/" + localpath + remotepath.substring(remotepath.lastIndexOf("/"))));
-                        ftpClient.retrieveFile(remotepath, buffout);
-                        buffout.close();
-                        downloadHandler.sendEmptyMessage(-3);
-                    }
-                    ftpClient.logout();
-                    ftpClient.disconnect();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+            public void onDismiss(PopupMenu menu) {
+
             }
         });
-        download.start();
-    }
 
-    public void about(View view) {
-        Intent i = new Intent(this, About.class);
-        startActivity(i);
+        popupMenu.show();
     }
 
 }

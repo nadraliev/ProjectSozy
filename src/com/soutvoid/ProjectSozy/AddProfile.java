@@ -71,7 +71,7 @@ public class AddProfile extends Activity {
                 return;
             }
             LocalPath = data.getStringExtra("path");
-            localpathtext.setText((CharSequence) new File(LocalPath).getName());
+            localpathtext.setText(new File(LocalPath).getName());
         }
         if (requestCode == 2) {
             if (data == null) {
@@ -154,6 +154,9 @@ public class AddProfile extends Activity {
             } else {
 
                 if (db.query("profiles", new String[]{"name"}, "name = '" + nameedit.toString() + "'", null, null, null, null).getCount() == 0) {
+
+                    LocalPath = LocalPath.substring(1);
+                    LocalPath = LocalPath.substring(LocalPath.indexOf("/"));
 
                     ContentValues newValues = new ContentValues();
                     newValues.put("name", nameedit.toString());

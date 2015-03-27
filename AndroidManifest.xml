@@ -15,8 +15,6 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <activity android:name="com.soutvoid.ProjectSozy.Settings"
-                  android:label="@string/settingsbutton" />
         <activity android:name=".PathsSelection"
                   android:label="@string/filemanager"/>
         <activity android:name=".Profiles"

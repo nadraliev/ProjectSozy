@@ -11,13 +11,23 @@
         <item name="android:windowTranslucentStatus">true</item>
         <item name="android:fitsSystemWindows">true</item>
         <item name="android:animateOnClick">true</item>
-        <item name="android:textColor">@color/black</item>
         <item name="android:popupMenuStyle">@style/PopupMenuStyle</item>
+        <item name="android:buttonStyle">@style/GreyPressedStyle</item>
+        <item name="android:itemTextAppearance">@style/MenuText</item>
     </style>
     <style name="AboutTheme" parent="AppTheme">
         <item name="android:fitsSystemWindows">false</item>
     </style>
-    <style name="PopupMenuStyle">
-        <item name="android:popupBackground">@drawable/card</item>
+    <style name="PopupMenuStyle" parent="android:Widget.Holo.Light.PopupMenu">
+        <item name="android:popupBackground">@drawable/menu</item>
+        <item name="android:textColor">@color/black</item>
+    </style>
+    <style name="GreyPressedStyle">
+        <item name="android:background">@drawable/button</item>
+        <item name="android:clickable">true</item>
+        <item name="android:textColor">@color/black</item>
+    </style>
+    <style name="MenuText">
+        <item name="android:textColor">@color/black</item>
     </style>
 </resources>

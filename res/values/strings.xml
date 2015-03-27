@@ -37,4 +37,6 @@
     <string name="nameExists">This name already exists</string>
     <string name="emptyField">Fields can not be empty</string>
     <string name="delete">Delete</string>
+    <string name="empty">Empty</string>
+    <string name="start">Start</string>
 </resources>

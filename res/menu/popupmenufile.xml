@@ -5,7 +5,6 @@
         android:title="@string/delete"
         />
     <item
-        android:title="Coool"/>
-    <item android:title="Perfect"/>
-    <item android:title="bad"/>
+        android:id="@+id/startmenu"
+        android:title="@string/start"/>
 </menu>

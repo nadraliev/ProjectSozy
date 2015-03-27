@@ -6,7 +6,7 @@
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
                   android:orientation="vertical"
                   android:layout_width="match_parent"
-                  android:layout_height="match_parent" android:background="@color/white">
+                  android:layout_height="match_parent" android:background="@color/white" style="@style/HoloLight">
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
                   android:orientation="horizontal"
                   android:layout_width="match_parent"
@@ -36,7 +36,7 @@
             android:textColor="@color/black"
             android:gravity="center_horizontal"
             android:inputType="text"
-            style="@android:style/Widget.DeviceDefault.Light.EditText"/>
+            style="@android:style/Widget.Holo.EditText"/>
     <TextView
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
@@ -46,7 +46,7 @@
             android:gravity="center_horizontal"/>
     <EditText android:layout_width="match_parent" android:layout_height="wrap_content"
               android:id="@+id/addredit" android:textColor="@color/black"
-              style="@android:style/Widget.DeviceDefault.Light.EditText" android:inputType="text"
+              style="@android:style/Widget.Holo.EditText" android:inputType="text"
               android:gravity="center_horizontal"
             />
     <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
@@ -55,14 +55,14 @@
     <EditText android:layout_width="match_parent" android:layout_height="wrap_content"
               android:id="@+id/useredit" android:textColor="@color/black" android:inputType="text"
               android:gravity="center_horizontal"
-              style="@android:style/Widget.DeviceDefault.Light.EditText"/>
+              style="@android:style/Widget.Holo.EditText"/>
     <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
               android:id="@+id/passwdhead"
               android:text="@string/passwdhead" android:textColor="@color/black" android:gravity="center_horizontal"/>
     <EditText android:layout_width="match_parent" android:layout_height="wrap_content"
               android:id="@+id/passwdedit" android:textColor="@color/black" android:inputType="textPassword"
               android:gravity="center_horizontal"
-              style="@android:style/Widget.DeviceDefault.Light.EditText"/>
+              style="@android:style/Widget.Holo.EditText"/>
 
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
             android:orientation="horizontal"
@@ -87,7 +87,8 @@
                   android:layout_height="wrap_content" android:gravity="end" android:layout_weight="0">
         <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:onClick="chooselocalpath" android:layout_weight="2" android:paddingLeft="5dp">
+                android:onClick="chooselocalpath" android:layout_weight="2" android:paddingLeft="5dp"
+                style="@style/GreyPressedStyle">
             <ImageView android:layout_width="40dp" android:layout_height="40dp"
                     android:background="@drawable/ic_folder"/>
             <TextView android:layout_width="wrap_content" android:layout_height="match_parent"
@@ -102,7 +103,7 @@
         <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content"
                       android:orientation="horizontal"
                       android:onClick="chooseremotepath" android:layout_weight="2" android:layout_gravity="right"
-                      android:gravity="right" android:paddingRight="5dp">
+                      android:gravity="right" android:paddingRight="5dp" style="@style/GreyPressedStyle">
             <ImageView android:layout_width="40dp" android:layout_height="40dp"
                        android:background="@drawable/ic_folder" android:layout_weight="0"/>
             <TextView android:layout_width="wrap_content" android:layout_height="match_parent"
