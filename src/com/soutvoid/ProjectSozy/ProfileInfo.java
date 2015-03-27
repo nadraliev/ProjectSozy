@@ -2,6 +2,7 @@ package com.soutvoid.ProjectSozy;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
@@ -276,22 +277,7 @@ public class ProfileInfo extends Activity {
             db = dbOpen.getReadableDatabase();
         }
 
-        Cursor data = db.query("profiles", new String[] {"address", "user", "password", "localpath", "remotepath", "type"}, "name = '" + name + "'", null, null, null, null);
-        data.moveToFirst();
-
-        infoName = (TextView)findViewById(R.id.info_name);
-        infoAddress = (TextView)findViewById(R.id.info_address);
-        infoUser = (TextView)findViewById(R.id.info_user);
-        infoLocalPath = (TextView)findViewById(R.id.info_localpath);
-        infoRemotePath = (TextView)findViewById(R.id.info_remotepath);
-        infoType = (TextView)findViewById(R.id.info_type);
-        infoName.setText(name);
-        infoAddress.setText(data.getString(0));
-        infoUser.setText(data.getString(1));
-        infoLocalPath.setText(data.getString(3));
-        infoRemotePath.setText(data.getString(4));
-        infoType.setText(data.getString(5));
-
+        UpdateInfo();
 
         ftpClient.setAutodetectUTF8(true);
 
@@ -335,6 +321,30 @@ public class ProfileInfo extends Activity {
         };
     }
 
+    public void onResume() {
+        super.onResume();
+        UpdateInfo();
+    }
+
+    public void UpdateInfo() {
+        name = MainActivity.currentName;
+        Cursor data = db.query("profiles", new String[] {"address", "user", "password", "localpath", "remotepath", "type"}, "name = '" + name + "'", null, null, null, null);
+        data.moveToFirst();
+
+        infoName = (TextView)findViewById(R.id.info_name);
+        infoAddress = (TextView)findViewById(R.id.info_address);
+        infoUser = (TextView)findViewById(R.id.info_user);
+        infoLocalPath = (TextView)findViewById(R.id.info_localpath);
+        infoRemotePath = (TextView)findViewById(R.id.info_remotepath);
+        infoType = (TextView)findViewById(R.id.info_type);
+        infoName.setText(name);
+        infoAddress.setText(data.getString(0));
+        infoUser.setText(data.getString(1));
+        infoLocalPath.setText(data.getString(3));
+        infoRemotePath.setText(data.getString(4));
+        infoType.setText(data.getString(5));
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.info_actions, menu);
@@ -345,11 +355,17 @@ public class ProfileInfo extends Activity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home :
+                MainActivity.currentName = "";
                 onBackPressed();
                 break;
             case R.id.deletemenu :
                 db.delete("profiles", "name = '" + name + "'", null);
                 finish();
+                break;
+            case R.id.editmenu :
+                AddProfile.isChanging = true;
+                Intent i = new Intent(ProfileInfo.this, AddProfile.class);
+                startActivity(i);
                 break;
             case R.id.startmenu :
                 Cursor types = db.query("profiles", new String[] {"type"}, "name = '" + name + "'", null, null, null, null);

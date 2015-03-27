@@ -41,4 +41,6 @@
     <string name="start">Start</string>
     <string name="info">Info</string>
     <string name="typehead">Type: </string>
+    <string name="about">About</string>
+    <string name="edit">Edit profile</string>
 </resources>
