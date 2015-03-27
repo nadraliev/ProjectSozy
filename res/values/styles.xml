@@ -14,6 +14,8 @@
         <item name="android:popupMenuStyle">@style/PopupMenuStyle</item>
         <item name="android:buttonStyle">@style/GreyPressedStyle</item>
         <item name="android:itemTextAppearance">@style/MenuText</item>
+        <item name="android:actionBarItemBackground">@drawable/purple_selector</item>
+        <item name="android:fontFamily">sans-serif-light</item>
     </style>
     <style name="AboutTheme" parent="AppTheme">
         <item name="android:fitsSystemWindows">false</item>

@@ -6,6 +6,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.*;
 import org.apache.commons.net.ftp.FTPClient;
@@ -21,7 +23,6 @@ import java.util.Collections;
  */
 public class FTPPathsSelection extends ListActivity {
 
-    private Button ok;
     private FTPClient ftpClient = new FTPClient();
     private ArrayList<String> directoryEntries = new ArrayList<String>();
     private String currentDirectory = "/";
@@ -92,7 +93,11 @@ public class FTPPathsSelection extends ListActivity {
                     } else {
                         currentDirectory = currentDirectory.concat("/" + selectedItem);
                         isFile = true;
-                        ok(ok);
+                        Intent i = new Intent();
+                        i.putExtra("isFile", isFile);
+                        i.putExtra("remotepathtext", currentDirectory);
+                        setResult(RESULT_OK, i);
+                        finish();
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -117,9 +122,10 @@ public class FTPPathsSelection extends ListActivity {
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
         setContentView(R.layout.ftppathsselection);
+        getActionBar().setIcon(R.drawable.ic_action_back);
+        getActionBar().setHomeButtonEnabled(true);
 
-        isFile = false;
-        ok = (Button)findViewById(R.id.okbutton);
+        isFile = false;;
         final Toast ConnectExceptionToast = Toast.makeText(getApplicationContext(), getString(R.string.connectexception), Toast.LENGTH_SHORT);
         abspath = (TextView)findViewById(R.id.ftpabsolutepathtitle);
 
@@ -155,16 +161,28 @@ public class FTPPathsSelection extends ListActivity {
         thread.start();
     }
 
-    public void actionbarback(View view) {
-        onBackPressed();
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.add_profile_actions, menu);
+        return true;
     }
 
-    public void ok(View view) {
-        Intent i = new Intent();
-        i.putExtra("isFile", isFile);
-        i.putExtra("remotepathtext", currentDirectory);
-        setResult(RESULT_OK, i);
-        finish();
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                onBackPressed();
+                break;
+            case R.id.ok_action:
+                Intent i = new Intent();
+                i.putExtra("isFile", isFile);
+                i.putExtra("remotepathtext", currentDirectory);
+                setResult(RESULT_OK, i);
+                finish();
+                break;
+        }
+        return true;
     }
+
 
 }

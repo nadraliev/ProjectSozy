@@ -16,13 +16,16 @@
             </intent-filter>
         </activity>
         <activity android:name=".PathsSelection"
-                  android:label="@string/filemanager"/>
+                  android:label="@string/choosepath"/>
         <activity android:name=".AddProfile"
                   android:label="@string/addprofile"/>
         <activity android:name=".FTPPathsSelection"
-                  android:label="@string/filemanager"/>
+                  android:label="@string/choosepath"/>
         <activity android:name=".About"
                   android:label="About"
                 android:theme="@style/AboutTheme"/>
+        <activity android:name=".ProfileInfo"
+                  android:label="@string/info"
+                android:theme="@style/AppTheme"/>
     </application>
 </manifest>

@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">SozySync</string>
-    <string name="addrhead">Server Address:</string>
-    <string name="userhead">Login:</string>
+    <string name="addrhead">Server Address: </string>
+    <string name="userhead">Login: </string>
     <string name="passwdhead">Password:</string>
     <string name="uploadbutton">Upload</string>
     <string name="download">Download</string>
     <string name="settingsbutton">Settings</string>
     <string name="savebutton">Save</string>
     <string name="pathtohome">/storage/emulated/0/</string>
-    <string name="localpathhead">Local path</string>
-    <string name="remotepathhead">Remote path</string>
+    <string name="localpathhead">Local path: </string>
+    <string name="remotepathhead">Remote path: </string>
     <string name="unknownhostexception">Unknown/Unreachable host: </string>
     <string name="connectexception">Connection failed</string>
     <string name="saved">Saved</string>
@@ -39,4 +39,6 @@
     <string name="delete">Delete</string>
     <string name="empty">Empty</string>
     <string name="start">Start</string>
+    <string name="info">Info</string>
+    <string name="typehead">Type: </string>
 </resources>

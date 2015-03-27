@@ -8,6 +8,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.os.Bundle;
 import android.text.Editable;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -40,6 +42,8 @@ public class AddProfile extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.addprofile);
+        getActionBar().setIcon(R.drawable.ic_action_back);
+        getActionBar().setHomeButtonEnabled(true);
 
         isFTPFile = false;
         localpathtext = (TextView)findViewById(R.id.localpath);
@@ -51,8 +55,69 @@ public class AddProfile extends Activity {
 
     }
 
-    public void actionbarback(View view) {
-        onBackPressed();
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.add_profile_actions, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home :
+                onBackPressed();
+                break;
+            case R.id.ok_action :
+                if (isUploading && isFTPFile) {
+                    Toast chooseAnother = Toast.makeText(getApplicationContext(), getString(R.string.wrongdestination), Toast.LENGTH_LONG);
+                    chooseAnother.show();
+                } else if (!isUploading && (!new File(LocalPath).isDirectory())) {
+                    Toast chooseAnother = Toast.makeText(getApplicationContext(), getString(R.string.wrongdestination), Toast.LENGTH_LONG);
+                    chooseAnother.show();
+                } else {
+                    SQLiteOpen dbOpen = new SQLiteOpen(this);
+                    SQLiteDatabase db;
+                    try {
+                        db = dbOpen.getWritableDatabase();
+                    } catch (SQLiteException e) {
+                        e.printStackTrace();
+                        db = dbOpen.getReadableDatabase();
+                    }
+
+                    if (nameedit.toString().trim().equals("") || addressedit.toString().trim().equals("") || useredit.toString().trim().equals("") || passwordedit.toString().trim().equals("") ||
+                            LocalPath.equals("") || RemotePath.equals("")) {
+                        Toast emptyField = Toast.makeText(getApplicationContext(), getString(R.string.emptyField), Toast.LENGTH_LONG);
+                        emptyField.show();
+                    } else {
+
+                        if (db.query("profiles", new String[]{"name"}, "name = '" + nameedit.toString() + "'", null, null, null, null).getCount() == 0) {
+
+                            LocalPath = LocalPath.substring(1);
+                            LocalPath = LocalPath.substring(LocalPath.indexOf("/"));
+
+                            ContentValues newValues = new ContentValues();
+                            newValues.put("name", nameedit.toString());
+                            newValues.put("address", addressedit.toString());
+                            newValues.put("user", useredit.toString());
+                            newValues.put("password", passwordedit.toString());
+                            newValues.put("localpath", "/storage/emulated/0" + LocalPath);
+                            newValues.put("remotepath", RemotePath);
+                            if (isUploading)
+                                syncType = "upload";
+                            else syncType = "download";
+                            newValues.put("type", syncType);
+                            db.insert("profiles", null, newValues);
+                            finish();
+                        } else {
+                            Toast nameExists = Toast.makeText(getApplicationContext(), getString(R.string.nameExists), Toast.LENGTH_LONG);
+                            nameExists.show();
+                        }
+                    }
+                }
+                break;
+        }
+
+        return true;
     }
 
     public void chooselocalpath(View view) {
@@ -127,55 +192,6 @@ public class AddProfile extends Activity {
             };
             rotateListen.onAnimationEnd(rotateToLeft);
             isUploading = true;
-        }
-    }
-
-    public void ok(View view) {
-        if (isUploading && isFTPFile) {
-            Toast chooseAnother = Toast.makeText(getApplicationContext(), getString(R.string.wrongdestination), Toast.LENGTH_LONG);
-            chooseAnother.show();
-        } else if (!isUploading && (!new File(LocalPath).isDirectory())) {
-            Toast chooseAnother = Toast.makeText(getApplicationContext(), getString(R.string.wrongdestination), Toast.LENGTH_LONG);
-            chooseAnother.show();
-        } else {
-            SQLiteOpen dbOpen = new SQLiteOpen(this);
-            SQLiteDatabase db;
-            try {
-                db = dbOpen.getWritableDatabase();
-            } catch (SQLiteException e) {
-                e.printStackTrace();
-                db = dbOpen.getReadableDatabase();
-            }
-
-            if (nameedit.toString().trim().equals("") || addressedit.toString().trim().equals("") || useredit.toString().trim().equals("") || passwordedit.toString().trim().equals("") ||
-                    LocalPath.equals("") || RemotePath.equals("")) {
-                Toast emptyField = Toast.makeText(getApplicationContext(), getString(R.string.emptyField), Toast.LENGTH_LONG);
-                emptyField.show();
-            } else {
-
-                if (db.query("profiles", new String[]{"name"}, "name = '" + nameedit.toString() + "'", null, null, null, null).getCount() == 0) {
-
-                    LocalPath = LocalPath.substring(1);
-                    LocalPath = LocalPath.substring(LocalPath.indexOf("/"));
-
-                    ContentValues newValues = new ContentValues();
-                    newValues.put("name", nameedit.toString());
-                    newValues.put("address", addressedit.toString());
-                    newValues.put("user", useredit.toString());
-                    newValues.put("password", passwordedit.toString());
-                    newValues.put("localpath", "/storage/emulated/0" + LocalPath);
-                    newValues.put("remotepath", RemotePath);
-                    if (isUploading)
-                        syncType = "upload";
-                    else syncType = "download";
-                    newValues.put("type", syncType);
-                    db.insert("profiles", null, newValues);
-                    finish();
-                } else {
-                    Toast nameExists = Toast.makeText(getApplicationContext(), getString(R.string.nameExists), Toast.LENGTH_LONG);
-                    nameExists.show();
-                }
-            }
         }
     }
 
