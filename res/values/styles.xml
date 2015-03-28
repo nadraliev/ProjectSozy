@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="HoloLight" parent="android:Theme.Holo.Light"></style>
+    <style name="ActionBarPurple" parent="@android:style/Widget.Holo.Light.ActionBar.Solid">
+        <item name="android:background">@color/purplelight</item>
+    </style>
+    <style name="AppTheme" parent="android:Animation.Activity">
+        <item name="android:actionBarStyle">@style/ActionBarPurple</item>
+        <item name="android:actionBarSize">55dp</item>
+        <item name="android:windowBackground">@color/purple</item>
+        <item name="android:windowTranslucentStatus">true</item>
+        <item name="android:fitsSystemWindows">true</item>
+        <item name="android:animateOnClick">true</item>
+        <item name="android:popupMenuStyle">@style/PopupMenuStyle</item>
+        <item name="android:buttonStyle">@style/GreyPressedStyle</item>
+        <item name="android:itemTextAppearance">@style/MenuText</item>
+        <item name="android:actionBarItemBackground">@drawable/purple_selector</item>
+        <item name="android:fontFamily">sans-serif-light</item>
+    </style>
+    <style name="AboutTheme" parent="AppTheme">
+        <item name="android:fitsSystemWindows">false</item>
+    </style>
+    <style name="PopupMenuStyle" parent="android:Widget.Holo.Light.PopupMenu">
+        <item name="android:popupBackground">@drawable/menu</item>
+        <item name="android:textColor">@color/black</item>
+    </style>
+    <style name="GreyPressedStyle">
+        <item name="android:background">@drawable/button</item>
+        <item name="android:clickable">true</item>
+        <item name="android:textColor">@color/black</item>
+    </style>
+    <style name="MenuText">
+        <item name="android:textColor">@color/black</item>
+    </style>
+</resources>

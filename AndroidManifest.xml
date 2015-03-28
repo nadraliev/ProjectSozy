@@ -7,7 +7,7 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-sdk android:minSdkVersion="19"/>
-    <application android:label="@string/app_name" android:icon="@drawable/ic_launcher">
+    <application android:label="@string/app_name" android:theme="@style/AppTheme" android:icon="@drawable/ic_launcher">
         <activity android:name="com.soutvoid.ProjectSozy.MainActivity"
                   android:label="@string/app_name">
             <intent-filter>
@@ -15,7 +15,17 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <activity android:name="com.soutvoid.ProjectSozy.Settings"
-                  android:label="@string/settingsbutton" />
+        <activity android:name=".PathsSelection"
+                  android:label="@string/choosepath"/>
+        <activity android:name=".AddProfile"
+                  android:label="@string/addprofile"/>
+        <activity android:name=".FTPPathsSelection"
+                  android:label="@string/choosepath"/>
+        <activity android:name=".About"
+                  android:label="About"
+                android:theme="@style/AboutTheme"/>
+        <activity android:name=".ProfileInfo"
+                  android:label="@string/info"
+                android:theme="@style/AppTheme"/>
     </application>
 </manifest>

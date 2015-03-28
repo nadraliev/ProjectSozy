@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent">
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                  android:orientation="vertical"
+                  android:layout_width="match_parent"
+                  android:layout_height="match_parent" android:background="@color/white"
+                  android:id="@+id/mainlayoutprofiles">
+
+    <RelativeLayout
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent">
+        <TextView
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:text="@string/empty"
+                android:gravity="center_vertical|center_horizontal"
+                android:textColor="@color/greylight" android:textSize="30sp"/>
+        <ListView android:layout_width="match_parent" android:layout_height="match_parent"
+                android:id="@+id/profileslist"
+                style="@android:style/Widget.DeviceDefault.Light.ListView">
+        </ListView>
+        <Button
+                android:layout_width="75dp"
+                android:layout_height="75dp"
+                android:id="@+id/addprofilebutton"
+                android:background="@drawable/ic_add_selector" android:layout_alignParentEnd="true"
+                android:layout_alignBottom="@+id/profileslist" android:layout_marginBottom="10dp"
+                android:layout_marginRight="10dp"
+                android:onClick="addprofilebutton"/>
+    </RelativeLayout>
+        </LinearLayout>
+</LinearLayout>
