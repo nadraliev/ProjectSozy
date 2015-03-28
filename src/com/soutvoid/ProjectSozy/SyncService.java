@@ -97,6 +97,7 @@ public class SyncService extends Service {
                     UploadToFTPServer(address, user, passwd, target, destination, ftpClient);
                     ftpClient.logout();
                     ftpClient.disconnect();
+                    showNotif.sendEmptyMessage(0);
                 } catch (java.net.UnknownHostException e) {
                     e.printStackTrace();
                     UnknownHostExceptionToast.show();
@@ -220,6 +221,7 @@ public class SyncService extends Service {
                     }
                     ftpClient.logout();
                     ftpClient.disconnect();
+                    showNotif.sendEmptyMessage(0);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -275,8 +277,9 @@ public class SyncService extends Service {
         return null;
     }
 
-    public void sendNotif(int id) {
+    public void sendNotif(int notId) {
         Cursor names = db.query("profiles", new String[] {"name"}, "_id = " + id, null, null, null, null);
+        names.moveToFirst();
         Intent intent = new Intent(this, ProfileInfo.class).putExtra("name", names.getString(0));
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
 
@@ -298,7 +301,7 @@ public class SyncService extends Service {
         Notification notification = builder.build();
 
         NotificationManager notificationManager = (NotificationManager)context.getSystemService(NOTIFICATION_SERVICE);
-        notificationManager.notify(id, notification);
+        notificationManager.notify(notId, notification);
     }
 
 }

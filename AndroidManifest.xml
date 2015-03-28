@@ -26,7 +26,8 @@
                 android:theme="@style/AboutTheme"/>
         <activity android:name=".ProfileInfo"
                   android:label="@string/info"
-                android:theme="@style/AppTheme"/>
+                android:theme="@style/AppTheme"
+                  android:launchMode="singleTop"/>
         <service android:name=".SyncService"/>
     </application>
 </manifest>
