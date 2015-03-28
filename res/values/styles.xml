@@ -4,7 +4,7 @@
     <style name="ActionBarPurple" parent="@android:style/Widget.Holo.Light.ActionBar.Solid">
         <item name="android:background">@color/purplelight</item>
     </style>
-    <style name="AppTheme" parent="android:Animation.Activity">
+    <style name="AppTheme" parent="android:Theme.Holo">
         <item name="android:actionBarStyle">@style/ActionBarPurple</item>
         <item name="android:actionBarSize">55dp</item>
         <item name="android:windowBackground">@color/purple</item>

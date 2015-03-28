@@ -24,7 +24,7 @@ public class MainActivity extends Activity {
     final String ATTRIBUTE_LOCALPATH = "localpath";
     final String ATTRIBUTE_SERVER = "server";
     final String ATTRIBUTE_TYPE = "type";
-    public static String currentName;
+    public static String currentName;                                       //TODO избавиться от всех переопределений строк!
 
     ListView profileslist;
 

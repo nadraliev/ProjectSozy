@@ -2,6 +2,7 @@ package com.soutvoid.ProjectSozy;
 
 import android.app.AlertDialog;
 import android.app.ListActivity;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -31,6 +32,9 @@ public class FTPPathsSelection extends ListActivity {
     TextView abspath;
     boolean isFile = false;
 
+    ProgressBar spinner;
+    Handler progress;
+
     public void fill() throws IOException {
         directoryEntries.clear();
         FTPFile[] files = ftpClient.listFiles();
@@ -42,12 +46,14 @@ public class FTPPathsSelection extends ListActivity {
         directoryList = new ArrayAdapter<String>(this, R.layout.row, this.directoryEntries);
 
         printList.sendEmptyMessage(1);
+        progress.sendEmptyMessage(0);
     }
 
     @Override
     protected void onListItemClick(ListView l, View v, int position, long id) {
         final int selectedRowID = position;
         final String selectedItem = directoryEntries.get(selectedRowID);
+        progress.sendEmptyMessage(1);
 
 
         Thread network = new Thread(new Runnable() {
@@ -125,7 +131,18 @@ public class FTPPathsSelection extends ListActivity {
         getActionBar().setIcon(R.drawable.ic_action_back);
         getActionBar().setHomeButtonEnabled(true);
 
-        isFile = false;;
+        spinner = (ProgressBar)findViewById(R.id.spinner);
+        spinner.setVisibility(View.INVISIBLE);
+        spinner.setIndeterminate(true);
+
+        progress = new Handler() {
+            public void handleMessage(android.os.Message message) {
+                if (message.what == 1) spinner.setVisibility(View.VISIBLE);
+                else spinner.setVisibility(View.INVISIBLE);
+            }
+        };
+
+        isFile = false;
         final Toast ConnectExceptionToast = Toast.makeText(getApplicationContext(), getString(R.string.connectexception), Toast.LENGTH_SHORT);
         abspath = (TextView)findViewById(R.id.ftpabsolutepathtitle);
 
@@ -138,6 +155,7 @@ public class FTPPathsSelection extends ListActivity {
             }
         };
 
+        progress.sendEmptyMessage(1);
 
         Thread thread = new Thread(new Runnable() {
             @Override
@@ -152,9 +170,11 @@ public class FTPPathsSelection extends ListActivity {
                 } catch (ConnectException e) {
                     e.printStackTrace();
                     ConnectExceptionToast.show();
+                    progress.sendEmptyMessage(0);
                 } catch (IOException e) {
                     e.printStackTrace();
                     ConnectExceptionToast.show();
+                    progress.sendEmptyMessage(0);
                 }
             }
         });
