@@ -46,4 +46,6 @@
     <string name="synccomplete">Sync completed</string>
     <string name="showprofile">Show profile</string>
     <string name="syncstarted">Sync started</string>
+    <string name="syncing">Syncing</string>
+    <string name="is">is</string>
 </resources>
