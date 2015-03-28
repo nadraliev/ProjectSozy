@@ -43,4 +43,7 @@
     <string name="typehead">Type: </string>
     <string name="about">About</string>
     <string name="edit">Edit profile</string>
+    <string name="synccomplete">Sync completed</string>
+    <string name="showprofile">Show profile</string>
+    <string name="syncstarted">Sync started</string>
 </resources>

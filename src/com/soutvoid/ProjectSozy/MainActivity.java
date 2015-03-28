@@ -55,7 +55,7 @@ public class MainActivity extends Activity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 currentName = names.get(position);
-                Intent i = new Intent(MainActivity.this, ProfileInfo.class);
+                Intent i = new Intent(MainActivity.this, ProfileInfo.class).putExtra("name", currentName);
                 startActivity(i);
                 UpdateList();
             }
