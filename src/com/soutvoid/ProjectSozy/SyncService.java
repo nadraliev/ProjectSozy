@@ -34,8 +34,9 @@ public class SyncService extends Service {
     Integer counter;
 
     Handler showNotif;
-
-    Notification start;
+    Handler showNotifStarting;
+    Handler showNotifProcessing;
+    Handler showNotifDone;
 
     //выгрузка все, что с ней связано
     public boolean hasDirectory(File target) {
@@ -74,14 +75,14 @@ public class SyncService extends Service {
     }
 
     public void Uploading(final String address, final String user, final String passwd, final String target, final String destination) {
-        showNotif.sendEmptyMessage(0);
+        showNotifStarting.sendEmptyMessage(0);
 
         filesCount = 0;
         if (new File(target).isDirectory())
             filesCount(new File(target));
         else filesCount = 1;
 
-        showNotif.sendEmptyMessage(0);
+        showNotifProcessing.sendEmptyMessage(0);
 
         //Инициализируем строки исключений
         final String UnknownHostException = getString(R.string.unknownhostexception);
@@ -105,7 +106,7 @@ public class SyncService extends Service {
                     ftpClient.disconnect();
                 } catch (java.net.UnknownHostException e) {
                     e.printStackTrace();
-                    UnknownHostExceptionToast.show();
+                    UnknownHostExceptionToast.show();                       //TODO вставить оповещения об ошибках в уведомлениях
                 } catch (ConnectException e) {
                     e.printStackTrace();                                    //TODO улучшиь распознавание исключений
                     ConnectionExceptionToast.show();
@@ -114,6 +115,8 @@ public class SyncService extends Service {
                     ConnectionClosedExceptionToast.show();
                 } catch (IOException e) {
                     e.printStackTrace();
+                } finally {
+                    showNotifDone.sendEmptyMessage(0);
                 }
             }
         });
@@ -147,14 +150,14 @@ public class SyncService extends Service {
                     if (!targetFile.listFiles()[counter].isDirectory())
                         buffin = new BufferedInputStream(new FileInputStream(targetFile.listFiles()[counter].toString()));
                     ftpClient.storeFile(targetFile.listFiles()[counter].getName(), buffin);
-                    showNotif.sendEmptyMessage(0);
+                    showNotifProcessing.sendEmptyMessage(0);
                     //здесь увеличиваем счетчик
                 }
             } else {
                 buffin = new BufferedInputStream(new FileInputStream(targetFile.toString()));
                 ftpClient.storeFile(targetFile.getName(), buffin);
                 buffin.close();
-                showNotif.sendEmptyMessage(0);
+                showNotifProcessing.sendEmptyMessage(0);
                 //и здесь тоже
             }
         } catch (IOException e) {
@@ -193,7 +196,7 @@ public class SyncService extends Service {
                     BufferedOutputStream buffout = new BufferedOutputStream(new FileOutputStream(destination + "/" + file.getName()));
                     ftpClient.retrieveFile(ftpClient.printWorkingDirectory() + "/" + file.getName(), buffout);
                     buffout.close();
-                    showNotif.sendEmptyMessage(1);
+                    showNotifProcessing.sendEmptyMessage(1);
                     //здесь увеличиваем счетчик
                 }
             }
@@ -207,7 +210,7 @@ public class SyncService extends Service {
         final String localpath = data.getString(3);
         final String remotepath = data.getString(4);
 
-        showNotif.sendEmptyMessage(1);
+        showNotifStarting.sendEmptyMessage(0);
 
         final Thread download = new Thread(new Runnable() {
             @Override
@@ -217,24 +220,25 @@ public class SyncService extends Service {
                     ftpClient.login(data.getString(1), data.getString(2));
                     if (ftpClient.changeWorkingDirectory(remotepath)) {
                         FTPFilesCount(ftpClient.listFiles());
-                        showNotif.sendEmptyMessage(1);
+                        showNotifProcessing.sendEmptyMessage(1);
                         //здесь определяется кол-во файлов
                         String destination = localpath + remotepath.substring(remotepath.lastIndexOf("/"));
                         new File(destination).mkdirs();
                         downloadInnerMethod(ftpClient.listFiles(), destination);
                     } else {   //если таргет это файл
                         FTPFilesCount = 1;
-                        showNotif.sendEmptyMessage(1);
                         ftpClient.changeWorkingDirectory(remotepath.substring(0, remotepath.lastIndexOf("/")));
                         BufferedOutputStream buffout = new BufferedOutputStream(new FileOutputStream(localpath + remotepath.substring(remotepath.lastIndexOf("/"))));
                         ftpClient.retrieveFile(remotepath, buffout);
                         buffout.close();
-                        showNotif.sendEmptyMessage(1);
+                        showNotifProcessing.sendEmptyMessage(1);
                     }
                     ftpClient.logout();
                     ftpClient.disconnect();
                 } catch (IOException e) {
                     e.printStackTrace();
+                } finally {
+                    showNotifDone.sendEmptyMessage(0);
                 }
             }
         });
@@ -255,19 +259,12 @@ public class SyncService extends Service {
 
         ftpClient.setAutodetectUTF8(true);
 
-        showNotif = new Handler() {
+        showNotifStarting = new Handler() {
             public void handleMessage(android.os.Message message) {
                 Context context = SyncService.this;
 
-                Resources resources = context.getResources();  //посылать 0, если идет выгрузка и 1, если загрузка
+                Resources resources = context.getResources();
 
-                int maxCount = 0;
-                if (message.what == 0) maxCount = filesCount;
-                else if (message.what == 1) maxCount = FTPFilesCount;
-                int notText;
-                if (maxCount == counter)
-                    notText = R.string.synccomplete;
-                else  notText = R.string.syncing;
                 Cursor names = db.query("profiles", new String[] {"name"}, "_id = " + id, null, null, null, null);
                 names.moveToFirst();
                 Intent intent = new Intent(SyncService.this, ProfileInfo.class).putExtra("name", names.getString(0));
@@ -280,36 +277,102 @@ public class SyncService extends Service {
                 builder.setContentIntent(pendingIntent)
                         .setSmallIcon(R.drawable.ic_notif)
                         .setLargeIcon(BitmapFactory.decodeResource(resources, R.drawable.ic_notif))
-                        .setTicker(resources.getString(notText))
+                        .setTicker(resources.getString(R.string.syncstarted))
                         .setWhen(System.currentTimeMillis())
-                        .setAutoCancel(true)
-                        .setContentTitle('"' + names.getString(0) + '"' + " " + resources.getString(R.string.is) + " " + resources.getString(notText))
-                        .setContentText(resources.getString(R.string.showprofile));
+                        .setContentTitle('"' + names.getString(0) + '"' + " " + resources.getString(R.string.is) + " " + resources.getString(R.string.syncstarted))
+                        .setContentText(resources.getString(R.string.showprofile))
+                        .setProgress(0, 0, true)
+                        .setAutoCancel(false);
 
-                if (counter != -1) {
-                    if (maxCount != counter) {
-                        builder.setProgress(maxCount, counter, false);
-                        builder.setAutoCancel(false);
-                    }
-                } else builder.setProgress(0, 0, true);
+                Notification notification = builder.build();
 
-                start = builder.build();
-
-                if (maxCount != counter) start.flags = start.flags | Notification.FLAG_ONGOING_EVENT;
+                notification.flags = notification.flags | Notification.FLAG_ONGOING_EVENT;
 
                 NotificationManager notificationManager = (NotificationManager)context.getSystemService(NOTIFICATION_SERVICE);
+                notificationManager.notify(1, notification);
 
-                notificationManager.notify(1, start);
+            }
+        };
+
+        //посылать 0, если идет выгрузка и 1, если загрузка
+        showNotifProcessing = new Handler() {
+            public void handleMessage(android.os.Message message) {
+                Context context = SyncService.this;
+
+                Resources resources = context.getResources();
+
+                Cursor names = db.query("profiles", new String[]{"name"}, "_id = " + id, null, null, null, null);
+                names.moveToFirst();
+                Intent intent = new Intent(SyncService.this, ProfileInfo.class).putExtra("name", names.getString(0));
+                PendingIntent pendingIntent = PendingIntent.getActivity(SyncService.this, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+
+                int maxCount = 0;
+                if (message.what == 0) maxCount = filesCount;
+                else if (message.what == 1) maxCount = FTPFilesCount;
+
+                Notification.Builder builder = new Notification.Builder(context);
+
+
+                builder.setContentIntent(pendingIntent)
+                        .setSmallIcon(R.drawable.ic_notif)
+                        .setLargeIcon(BitmapFactory.decodeResource(resources, R.drawable.ic_notif))
+                        .setTicker(resources.getString(R.string.syncing))
+                        .setWhen(System.currentTimeMillis())
+                        .setContentTitle('"' + names.getString(0) + '"' + " " + resources.getString(R.string.is) + " " + resources.getString(R.string.syncing))
+                        .setContentText(resources.getString(R.string.showprofile))
+                        .setProgress(maxCount, counter, false)
+                        .setAutoCancel(false);
+
+                Notification notification = builder.build();
+
+                notification.flags = notification.flags | Notification.FLAG_ONGOING_EVENT;
+
+                NotificationManager notificationManager = (NotificationManager) context.getSystemService(NOTIFICATION_SERVICE);
+                notificationManager.notify(1, notification);
 
                 counter++;
             }
+
         };
+
+        showNotifDone = new Handler() {
+            public void handleMessage(android.os.Message message) {
+                Context context = SyncService.this;
+
+                Resources resources = context.getResources();
+
+                Cursor names = db.query("profiles", new String[] {"name"}, "_id = " + id, null, null, null, null);
+                names.moveToFirst();
+                Intent intent = new Intent(SyncService.this, ProfileInfo.class).putExtra("name", names.getString(0));
+                PendingIntent pendingIntent = PendingIntent.getActivity(SyncService.this, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+
+
+                Notification.Builder builder = new Notification.Builder(context);
+
+
+                builder.setContentIntent(pendingIntent)
+                        .setSmallIcon(R.drawable.ic_notif)
+                        .setLargeIcon(BitmapFactory.decodeResource(resources, R.drawable.ic_notif))
+                        .setTicker(resources.getString(R.string.synccomplete))
+                        .setWhen(System.currentTimeMillis())
+                        .setContentTitle('"' + names.getString(0) + '"' + " " + resources.getString(R.string.synccomplete))
+                        .setContentText(resources.getString(R.string.showprofile))
+                        .setAutoCancel(true);
+
+                Notification notification = builder.build();
+
+                NotificationManager notificationManager = (NotificationManager)context.getSystemService(NOTIFICATION_SERVICE);
+                notificationManager.notify(1, notification);
+            }
+        };
+
+
     }
 
     public int onStartCommand(Intent intent, int flags, int startId) {
         id = intent.getIntExtra("_id", 1);
 
-        counter = -1;
+        counter = 0;
 
         Cursor types = db.query("profiles", new String[]{"type", "name"}, "_id = " + id, null, null, null, null);
         types.moveToFirst();
