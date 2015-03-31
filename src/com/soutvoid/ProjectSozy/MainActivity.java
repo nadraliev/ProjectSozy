@@ -1,6 +1,9 @@
 package com.soutvoid.ProjectSozy;
 
 import android.app.Activity;
+import android.app.Fragment;
+import android.app.FragmentManager;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -21,16 +24,10 @@ import java.util.Map;
  */
 public class MainActivity extends Activity {
 
-    final String ATTRIBUTE_NAME = "name";
-    final String ATTRIBUTE_LOCALPATH = "localpath";
-    final String ATTRIBUTE_SERVER = "server";
-    final String ATTRIBUTE_TYPE = "type";
+    public static Context context;
+
     public static String currentName;                                       //TODO избавиться от всех переопределений строк!
 
-    ListView profileslist;
-
-    SQLiteDatabase db;
-    SQLiteOpen dbOpen;
 
     ArrayList<String> names = new ArrayList<String>();
 
@@ -38,7 +35,6 @@ public class MainActivity extends Activity {
     DrawerLayout navigationDrawer;
     ListView navigationDrawerList;
     int[] navigationDrawerIcons;
-    int[] navigationDrawerIconsPurple;
 
 
     @Override
@@ -48,13 +44,19 @@ public class MainActivity extends Activity {
         getActionBar().setIcon(R.drawable.ic_title);
         getActionBar().setTitle("");
 
-        String itemName = getResources().getStringArray(R.array.navigationdrawer)[0];
+        context = getApplicationContext();
+
+        FragmentManager fragmentManager = getFragmentManager();
+        Fragment fragment = new ProfilesFragment();
+        fragmentManager.beginTransaction()
+                .add(R.id.main_container, fragment)
+                .commit();
+
 
         navigationDrawerItems = getResources().getStringArray(R.array.navigationdrawer);
         navigationDrawer = (DrawerLayout)findViewById(R.id.drawer_layout);
         navigationDrawerList = (ListView)findViewById(R.id.left_drawer);
-        navigationDrawerIcons = new int[] {R.drawable.ic_list};
-        navigationDrawerIconsPurple = new int[] {R.drawable.ic_list_purple};
+        navigationDrawerIcons = new int[] {R.drawable.ic_list, R.drawable.ic_processing};
 
         navigationDrawer.setDrawerShadow(R.drawable.drawer_shadow, 20);
 
@@ -64,11 +66,8 @@ public class MainActivity extends Activity {
         Map<String, Object> map;
         for (int i = 0; i < navigationDrawerItems.length; i++) {
             map = new HashMap<String, Object>();
-            if (navigationDrawerItems[i].equals(itemName)) {
-                map.put("icon", navigationDrawerIconsPurple[i]);
-                map.put("background", R.drawable.grey_light_background);
-            }
-            else map.put("icon", navigationDrawerIcons[i]);
+            map.put("background", R.drawable.white_background);
+            map.put("icon", navigationDrawerIcons[i]);
             map.put("text", navigationDrawerItems[i]);
             data.add(map);
         }
@@ -81,32 +80,34 @@ public class MainActivity extends Activity {
         navigationDrawerList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Fragment fragment;
+                FragmentManager fragmentManager;
                 switch (position) {
                     case 0 :
+                        fragment = new ProfilesFragment();
+
+                        fragmentManager = getFragmentManager();
+                        fragmentManager.beginTransaction()
+                                .replace(R.id.main_container, fragment)
+                                .commit();
+
                         navigationDrawerList.setItemChecked(position, true);
                         navigationDrawer.closeDrawer(navigationDrawerList);
+                        setTitle(getResources().getStringArray(R.array.navigationdrawer)[0]);
+                        break;
+                    case 1 :
+                        fragment = new ProcessesFragment();
+
+                        fragmentManager = getFragmentManager();
+                        fragmentManager.beginTransaction()
+                                .replace(R.id.main_container, fragment)
+                                .commit();
+
+                        navigationDrawerList.setItemChecked(position, true);
+                        navigationDrawer.closeDrawer(navigationDrawerList);
+                        setTitle(getResources().getStringArray(R.array.navigationdrawer)[1]);
                         break;
                 }
-            }
-        });
-
-        dbOpen = new SQLiteOpen(this);
-        try {
-            db = dbOpen.getWritableDatabase();
-        } catch (SQLiteException e) {
-            e.printStackTrace();
-            db = dbOpen.getReadableDatabase();
-        }
-
-        UpdateList();
-
-        profileslist.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                currentName = names.get(position);
-                Intent i = new Intent(MainActivity.this, ProfileInfo.class).putExtra("name", currentName);
-                startActivity(i);
-                UpdateList();
             }
         });
 
@@ -116,7 +117,6 @@ public class MainActivity extends Activity {
     @Override
     public void onResume() {
         super.onResume();
-        UpdateList();
     }
 
     @Override
@@ -136,39 +136,7 @@ public class MainActivity extends Activity {
         return true;
     }
 
-    public void UpdateList() {
 
-        names.clear();
-
-        Cursor profiles = db.query("profiles", new String[] {"name", "localpath", "address", "type"}, null, null, null, null, null);
-        profiles.moveToFirst();
-
-        ArrayList<Map<String, Object>> data = new ArrayList<Map<String, Object>>(profiles.getCount());
-        Map<String, Object> map;
-
-        for (int i = 0; i < profiles.getCount(); i++) {
-            map = new HashMap<String, Object>();
-            names.add(profiles.getString(0));
-            map.put(ATTRIBUTE_NAME, profiles.getString(0));
-            map.put(ATTRIBUTE_LOCALPATH, profiles.getString(1).substring(profiles.getString(1).lastIndexOf("/") + 1));   //отрезаем все кроме имени папки
-            map.put(ATTRIBUTE_SERVER, profiles.getString(2));
-            if (profiles.getString(3).equals("upload"))
-                map.put(ATTRIBUTE_TYPE, R.drawable.ic_rightarrow);
-            else map.put(ATTRIBUTE_TYPE, R.drawable.ic_lefttarrow);
-            data.add(map);
-            profiles.moveToNext();
-        }
-        profiles.close();
-
-
-        String[] from = {ATTRIBUTE_NAME, ATTRIBUTE_LOCALPATH, ATTRIBUTE_SERVER, ATTRIBUTE_TYPE};
-        int[] to = {R.id.profilenameitem, R.id.localpathitem, R.id.serveraddressitem, R.id.typeitem};
-
-        SimpleAdapter ProfilesAdapter = new SimpleAdapter(this, data, R.layout.listitemprofiles, from, to);
-
-        profileslist = (ListView)findViewById(R.id.profileslist);
-        profileslist.setAdapter(ProfilesAdapter);
-    }
 
     public void addprofilebutton(View view) {
         Intent newprofile = new Intent(this, AddProfile.class);

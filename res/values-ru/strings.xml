@@ -50,5 +50,6 @@
     <string name="is"></string>
     <string-array name="navigationdrawer">
         <item>Профили</item>
+        <item>Процессы</item>
     </string-array>
 </resources>
