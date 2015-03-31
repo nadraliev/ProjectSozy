@@ -17,7 +17,7 @@
     <string name="inputlocalpath">Введите локальный путь</string>
     <string name="inputremotepath">Введите удаленный путь</string>
     <string name="connectionclosedexception">Проверьте логин и пароль</string>
-    <string name="confirmation">Полтверждение</string>
+    <string name="confirmation">Подтверждение</string>
     <string name="wantopen">Вы уверены, что хотите выбрать</string>
     <string name="yes">Да</string>
     <string name="no">Нет</string>
@@ -48,4 +48,7 @@
     <string name="syncstarted">Синхронизация запущена</string>
     <string name="syncing">Синхронизация...</string>
     <string name="is"></string>
+    <string-array name="navigationdrawer">
+        <item>Профили</item>
+    </string-array>
 </resources>

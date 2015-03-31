@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.DialogPreference;
+import android.view.ContextThemeWrapper;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -85,7 +86,7 @@ public class PathsSelection extends ListActivity {
                 }
             };
 
-            new AlertDialog.Builder(this)
+            new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.alertDialogStyle))
                     .setTitle(getString(R.string.confirmation))
                     .setMessage(getString(R.string.wantopen) + " " + aDirectory.getName() + "?")
                     .setPositiveButton(getString(R.string.yes), okButtonListener)

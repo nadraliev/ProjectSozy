@@ -32,4 +32,7 @@
     <style name="MenuText">
         <item name="android:textColor">@color/black</item>
     </style>
+    <style name="alertDialogStyle" parent="android:Theme.Holo.Light">
+        <item name="android:textColor">@color/black</item>
+    </style>
 </resources>

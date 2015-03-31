@@ -48,4 +48,7 @@
     <string name="syncstarted">Sync started</string>
     <string name="syncing">Syncing</string>
     <string name="is">is</string>
+    <string-array name="navigationdrawer">
+        <item>Profiles</item>
+    </string-array>
 </resources>

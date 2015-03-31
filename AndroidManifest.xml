@@ -9,21 +9,26 @@
     <uses-sdk android:minSdkVersion="19"/>
     <application android:label="@string/app_name" android:theme="@style/AppTheme" android:icon="@drawable/ic_launcher">
         <activity android:name="com.soutvoid.ProjectSozy.MainActivity"
-                  android:label="@string/app_name">
+                  android:label="@string/app_name"
+                  android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
         <activity android:name=".PathsSelection"
-                  android:label="@string/choosepath"/>
+                  android:label="@string/choosepath"
+                  android:launchMode="singleTop"/>
         <activity android:name=".AddProfile"
-                  android:label="@string/addprofile"/>
+                  android:label="@string/addprofile"
+                  android:launchMode="singleTop"/>
         <activity android:name=".FTPPathsSelection"
-                  android:label="@string/choosepath"/>
+                  android:label="@string/choosepath"
+                  android:launchMode="singleTop"/>
         <activity android:name=".About"
                   android:label="About"
-                android:theme="@style/AboutTheme"/>
+                android:theme="@style/AboutTheme"
+                  android:launchMode="singleTop"/>
         <activity android:name=".ProfileInfo"
                   android:label="@string/info"
                 android:theme="@style/AppTheme"
