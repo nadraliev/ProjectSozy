@@ -23,96 +23,85 @@ import java.net.ConnectException;
  */
 public class SyncService extends Service {
 
+    //TODO реализовать отмену загрузки/выгрузки
+
+
     SQLiteDatabase db;
     SQLiteOpen dbOpen;
 
-    FTPClient ftpClient = new FTPClient();
+    FTPClient ftpClient;
 
     Integer filesCount = 0;
     Integer FTPFilesCount = 0;
     Integer id = 0;
     Integer counter;
 
-    Handler showNotif;
     Handler showNotifStarting;
     Handler showNotifProcessing;
     Handler showNotifDone;
 
-    //выгрузка все, что с ней связано
-    public boolean hasDirectory(File target) {
-        boolean flag = false;
-        if (target.isDirectory()) {
-            for (int counter = 0; counter < target.listFiles().length; counter++) {
-                if (target.listFiles()[counter].isDirectory()) flag = true;
-            }
-        }
-        return flag;
-    }
 
-    public void mkDirFTP(final String address, final String user, final String passwd, final String dirName, final String destination, final FTPClient ftpClient) {
-        try {
-            ftpClient.changeWorkingDirectory(destination);
-            boolean isContains = false;
-            if (ftpClient.listFiles().length != 0)
-                for (int counter = 0; counter < ftpClient.listFiles().length; counter++) {
-                    if (dirName.equals(ftpClient.listFiles()[counter].getName())) isContains = true;
-                }
-            if (!isContains) {
-                ftpClient.makeDirectory(dirName);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
+    //выгрузка и все, что с ней связано
+    //вторая попытка
+    public void filesCount(File[] files) {
+        for (File file : files) {
+            if (file.isDirectory())
+                filesCount(new File(file.getAbsolutePath()).listFiles());
+            else filesCount++;
         }
     }
 
-    public void filesCount(File dir) {
-        for (int counter = 0; counter < dir.listFiles().length; counter++) {
-            if (dir.listFiles()[counter].isDirectory()) filesCount(new File(dir.toString() + "/" + dir.listFiles()[counter].getName()));
-            else {
-                filesCount += 1;
+    public void uploadInnerMethod(File[] files, final String destination) throws IOException {
+        for (File file : files) {
+            if (file.isDirectory()) {
+                ftpClient.makeDirectory(destination + "/" + file.getName());
+                uploadInnerMethod(file.listFiles(), destination + "/" + file.getName());
+            } else {
+                BufferedInputStream buffin = new BufferedInputStream((new FileInputStream(file.getAbsolutePath())));
+                ftpClient.changeWorkingDirectory(destination);
+                ftpClient.storeFile(file.getName(), buffin);
+                buffin.close();
+                showNotifProcessing.sendEmptyMessage(0);
             }
         }
     }
 
-    public void Uploading(final String address, final String user, final String passwd, final String target, final String destination) {
+    public void upload(final String profileName) {
+        final Cursor data = db.query("profiles", new String[] {"address", "user", "password", "localpath", "remotepath"}, "name = '" + profileName + "'", null, null, null, null);
+        data.moveToFirst();
+
+        final String localpath = data.getString(3);
+        final String remotepath = data.getString(4);
+
         showNotifStarting.sendEmptyMessage(0);
 
-        filesCount = 0;
-        if (new File(target).isDirectory())
-            filesCount(new File(target));
-        else filesCount = 1;
-
-        showNotifProcessing.sendEmptyMessage(0);
-
-        //Инициализируем строки исключений
-        final String UnknownHostException = getString(R.string.unknownhostexception);
-        final String ConnectionException = getString(R.string.connectexception);
-        final String ConnectionClosedException = getString(R.string.connectionclosedexception);
-
-        //Инициализируем тосты для исключений
-        final Toast UnknownHostExceptionToast = Toast.makeText(getApplicationContext(), UnknownHostException + address, Toast.LENGTH_LONG);
-        final Toast ConnectionExceptionToast = Toast.makeText(getApplicationContext(), ConnectionException, Toast.LENGTH_LONG);
-        final Toast ConnectionClosedExceptionToast = Toast.makeText(getApplicationContext(), ConnectionClosedException, Toast.LENGTH_LONG);
-
-        Thread upload = new Thread(new Runnable() {
+        final Thread upload = new Thread(new Runnable() {
             @Override
             public void run() {
-                final FTPClient ftpClient = new FTPClient();
                 try {
-                    ftpClient.connect(address);
-                    ftpClient.login(user, passwd);
-                    UploadToFTPServer(address, user, passwd, target, destination, ftpClient);
+                    ftpClient.connect(data.getString(0));
+                    ftpClient.login(data.getString(1), data.getString(2));
+                    data.close();
+                    File localPathFile = new File(localpath);
+                    filesCount = 0;
+                    if (localPathFile.isDirectory()) {
+                        filesCount(localPathFile.listFiles());
+                        showNotifProcessing.sendEmptyMessage(0);
+                        String destination = remotepath + "/" + localPathFile.getName();
+                        ftpClient.changeWorkingDirectory(remotepath);
+                        ftpClient.makeDirectory(localPathFile.getName());
+                        uploadInnerMethod(localPathFile.listFiles(), destination);
+                    } else {
+                        filesCount = 1;
+                        showNotifProcessing.sendEmptyMessage(0);
+                        BufferedInputStream buffin = new BufferedInputStream(new FileInputStream(localpath));
+                        ftpClient.changeWorkingDirectory(remotepath);
+                        ftpClient.storeFile(localPathFile.getName(), buffin);
+                        buffin.close();
+                        showNotifProcessing.sendEmptyMessage(0);
+                    }
                     ftpClient.logout();
                     ftpClient.disconnect();
-                } catch (java.net.UnknownHostException e) {
-                    e.printStackTrace();
-                    UnknownHostExceptionToast.show();                       //TODO вставить оповещения об ошибках в уведомлениях
-                } catch (ConnectException e) {
-                    e.printStackTrace();                                    //TODO улучшиь распознавание исключений
-                    ConnectionExceptionToast.show();
-                } catch (FTPConnectionClosedException e) {
-                    e.printStackTrace();
-                    ConnectionClosedExceptionToast.show();
                 } catch (IOException e) {
                     e.printStackTrace();
                 } finally {
@@ -122,49 +111,6 @@ public class SyncService extends Service {
         });
         upload.start();
     }
-
-    public void UploadToFTPServer(final String address, final String user, final String passwd, final String target, final String destination, final FTPClient ftpClient) {
-        final File targetFile = new File(target);
-
-        //Создаем папку
-        if (targetFile.isDirectory())
-            mkDirFTP(address, user, passwd, targetFile.getName(), destination, ftpClient);
-
-
-        //Загружаем файлы
-        if (hasDirectory(targetFile)) {
-            for (int counter = 0; counter < targetFile.listFiles().length; counter++) {
-                if (targetFile.listFiles()[counter].isDirectory()) {
-                    UploadToFTPServer(address, user, passwd, targetFile.listFiles()[counter].toString(), destination + "/" + targetFile.getName(), ftpClient);
-                }
-            }
-        }
-
-        try {
-            if (targetFile.isDirectory())
-                ftpClient.changeWorkingDirectory(destination + "/" + targetFile.getName());
-            else ftpClient.changeWorkingDirectory(destination);
-            BufferedInputStream buffin = null;
-            if (targetFile.isDirectory()) {
-                for (int counter = 0; counter < targetFile.listFiles().length; counter++) {
-                    if (!targetFile.listFiles()[counter].isDirectory())
-                        buffin = new BufferedInputStream(new FileInputStream(targetFile.listFiles()[counter].toString()));
-                    ftpClient.storeFile(targetFile.listFiles()[counter].getName(), buffin);
-                    showNotifProcessing.sendEmptyMessage(0);
-                    //здесь увеличиваем счетчик
-                }
-            } else {
-                buffin = new BufferedInputStream(new FileInputStream(targetFile.toString()));
-                ftpClient.storeFile(targetFile.getName(), buffin);
-                buffin.close();
-                showNotifProcessing.sendEmptyMessage(0);
-                //и здесь тоже
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
 
     //загрузка и все, что с ней связано
     //вторая попытка
@@ -218,6 +164,8 @@ public class SyncService extends Service {
                 try {
                     ftpClient.connect(data.getString(0));
                     ftpClient.login(data.getString(1), data.getString(2));
+                    data.close();
+                    FTPFilesCount = 0;
                     if (ftpClient.changeWorkingDirectory(remotepath)) {
                         FTPFilesCount(ftpClient.listFiles());
                         showNotifProcessing.sendEmptyMessage(1);
@@ -227,6 +175,7 @@ public class SyncService extends Service {
                         downloadInnerMethod(ftpClient.listFiles(), destination);
                     } else {   //если таргет это файл
                         FTPFilesCount = 1;
+                        showNotifProcessing.sendEmptyMessage(1);
                         ftpClient.changeWorkingDirectory(remotepath.substring(0, remotepath.lastIndexOf("/")));
                         BufferedOutputStream buffout = new BufferedOutputStream(new FileOutputStream(localpath + remotepath.substring(remotepath.lastIndexOf("/"))));
                         ftpClient.retrieveFile(remotepath, buffout);
@@ -257,6 +206,7 @@ public class SyncService extends Service {
             db = dbOpen.getReadableDatabase();
         }
 
+        ftpClient = new FTPClient();
         ftpClient.setAutodetectUTF8(true);
 
         showNotifStarting = new Handler() {
@@ -283,6 +233,8 @@ public class SyncService extends Service {
                         .setContentText(resources.getString(R.string.showprofile))
                         .setProgress(0, 0, true)
                         .setAutoCancel(false);
+
+                names.close();
 
                 Notification notification = builder.build();
 
@@ -323,6 +275,8 @@ public class SyncService extends Service {
                         .setProgress(maxCount, counter, false)
                         .setAutoCancel(false);
 
+                names.close();
+
                 Notification notification = builder.build();
 
                 notification.flags = notification.flags | Notification.FLAG_ONGOING_EVENT;
@@ -359,6 +313,8 @@ public class SyncService extends Service {
                         .setContentText(resources.getString(R.string.showprofile))
                         .setAutoCancel(true);
 
+                names.close();
+
                 Notification notification = builder.build();
 
                 NotificationManager notificationManager = (NotificationManager)context.getSystemService(NOTIFICATION_SERVICE);
@@ -381,10 +337,10 @@ public class SyncService extends Service {
         } else {
             Cursor data = db.query("profiles", new String[] {"address", "user", "password", "localpath", "remotepath"}, "_id = " + id, null, null, null, null);
             data.moveToFirst();
-            Uploading(data.getString(0), data.getString(1), data.getString(2), data.getString(3), data.getString(4));
+            upload(types.getString(1));
         }
 
-
+        types.close();
 
         return START_STICKY;
     }
