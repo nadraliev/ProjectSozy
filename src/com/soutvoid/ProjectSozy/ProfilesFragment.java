@@ -50,6 +50,11 @@ public class ProfilesFragment extends android.app.Fragment {
         return rootView;
     }
 
+    public void onResume() {
+        super.onResume();
+        UpdateList();
+    }
+
     public void UpdateList() {
 
         dbOpen = new SQLiteOpen(MainActivity.context);

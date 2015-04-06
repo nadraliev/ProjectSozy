@@ -3,100 +3,139 @@
               android:orientation="vertical"
               android:layout_width="match_parent"
               android:layout_height="match_parent">
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                  android:orientation="vertical"
-                  android:layout_width="match_parent"
-                  android:layout_height="match_parent" android:background="@color/white" style="@style/HoloLight">
-
-
-        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:text="@string/name"
-            android:id="@+id/namehead"
-            android:textColor="@color/black"
-            android:layout_gravity="center_horizontal"
-            android:gravity="center_horizontal"/>
-    <EditText android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:id="@+id/nameedit"
-            android:textColor="@color/black"
-            android:gravity="center_horizontal"
-            android:inputType="text"
-            style="@android:style/Widget.Holo.EditText"/>
-    <TextView
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/addrhead"
-            android:id="@+id/addrhead"
-            android:textColor="@color/black" android:layout_gravity="center_horizontal"
-            android:gravity="center_horizontal"/>
-    <EditText android:layout_width="match_parent" android:layout_height="wrap_content"
-              android:id="@+id/addredit" android:textColor="@color/black"
-              style="@android:style/Widget.Holo.EditText" android:inputType="text"
-              android:gravity="center_horizontal"
-            />
-    <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
-              android:id="@+id/userhead"
-              android:text="@string/userhead" android:textColor="@color/black" android:gravity="center_horizontal"/>
-    <EditText android:layout_width="match_parent" android:layout_height="wrap_content"
-              android:id="@+id/useredit" android:textColor="@color/black" android:inputType="text"
-              android:gravity="center_horizontal"
-              style="@android:style/Widget.Holo.EditText"/>
-    <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
-              android:id="@+id/passwdhead"
-              android:text="@string/passwdhead" android:textColor="@color/black" android:gravity="center_horizontal"/>
-    <EditText android:layout_width="match_parent" android:layout_height="wrap_content"
-              android:id="@+id/passwdedit" android:textColor="@color/black" android:inputType="textPassword"
-              android:gravity="center_horizontal"
-              style="@android:style/Widget.Holo.EditText"/>
-
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-            android:orientation="horizontal"
+    <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" android:gravity="end" android:layout_weight="0">
-        <TextView android:layout_width="0dp" android:layout_height="wrap_content"
-                android:text="@string/local"
-                android:textSize="20sp"
-                android:textColor="@color/black"
-                android:gravity="left" android:layout_gravity="left" android:layout_weight="10"
-                android:paddingLeft="5dp"/>
-        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:text="@string/remote"
-                android:textSize="20sp"
-                android:textColor="@color/black"
-                android:layout_gravity="center_horizontal" android:paddingRight="5dp"/>
-    </LinearLayout>
+            android:layout_height="match_parent"
+            android:id="@+id/scrollView" android:background="@color/white">
+        <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                      android:orientation="vertical"
+                      android:layout_width="match_parent"
+                      android:layout_height="match_parent" android:background="@color/white" style="@style/HoloLight">
 
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                  android:orientation="horizontal"
-                  android:layout_width="match_parent"
-                  android:layout_height="wrap_content" android:gravity="end" android:layout_weight="0">
-        <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content"
+
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:text="@string/name"
+                android:id="@+id/namehead"
+                android:textColor="@color/black"
+                android:layout_gravity="center_horizontal"
+                android:gravity="center_horizontal"/>
+        <EditText android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:id="@+id/nameedit"
+                android:textColor="@color/black"
+                android:gravity="center_horizontal"
+                android:inputType="text"
+                style="@android:style/Widget.Holo.EditText"/>
+        <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/addrhead"
+                android:id="@+id/addrhead"
+                android:textColor="@color/black" android:layout_gravity="center_horizontal"
+                android:gravity="center_horizontal"/>
+        <EditText android:layout_width="match_parent" android:layout_height="wrap_content"
+                  android:id="@+id/addredit" android:textColor="@color/black"
+                  style="@android:style/Widget.Holo.EditText" android:inputType="text"
+                  android:gravity="center_horizontal"
+                />
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                  android:id="@+id/userhead"
+                  android:text="@string/userhead" android:textColor="@color/black" android:gravity="center_horizontal"/>
+        <EditText android:layout_width="match_parent" android:layout_height="wrap_content"
+                  android:id="@+id/useredit" android:textColor="@color/black" android:inputType="text"
+                  android:gravity="center_horizontal"
+                  style="@android:style/Widget.Holo.EditText"/>
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                  android:id="@+id/passwdhead"
+                  android:text="@string/passwdhead" android:textColor="@color/black" android:gravity="center_horizontal"/>
+        <EditText android:layout_width="match_parent" android:layout_height="wrap_content"
+                  android:id="@+id/passwdedit" android:textColor="@color/black" android:inputType="textPassword"
+                  android:gravity="center_horizontal"
+                  style="@android:style/Widget.Holo.EditText"/>
+
+            <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:orientation="horizontal"
+                          android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="end"
+                          android:layout_weight="0">
+                <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:text="@string/day"
+                          android:textSize="20sp" android:textColor="@color/black" android:gravity="left"
+                          android:layout_gravity="left" android:layout_weight="10" android:paddingLeft="5dp"/>
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                          android:text="@string/time" android:textSize="20sp" android:textColor="@color/black"
+                          android:layout_gravity="center_horizontal" android:paddingRight="5dp"/>
+            </LinearLayout>
+            <LinearLayout
+                    android:orientation="horizontal"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content" style="@style/HoloLight">
+                <Spinner
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/days" style="@style/spinnerDropDown"
+                        android:prompt="@color/black"
+                        android:popupBackground="@color/greylight" android:theme="@style/AppTheme"
+                        android:layout_weight="0"/>
+                <Space
+                        android:layout_width="30dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"/>
+                <Spinner style="@style/spinnerDropDown" android:layout_width="wrap_content"
+                         android:layout_height="wrap_content" android:id="@+id/hours" android:prompt="@color/black"
+                         android:popupBackground="@color/greylight" android:theme="@style/AppTheme"
+                        />
+                <Spinner style="@style/spinnerDropDown" android:layout_width="wrap_content"
+                         android:layout_height="wrap_content" android:id="@+id/minutes" android:prompt="@color/black"
+                         android:popupBackground="@color/greylight" android:theme="@style/AppTheme"
+                        />
+            </LinearLayout>
+            <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
                 android:orientation="horizontal"
-                android:onClick="chooselocalpath" android:layout_weight="2" android:paddingLeft="5dp"
-                style="@style/GreyPressedStyle">
-            <ImageView android:layout_width="40dp" android:layout_height="40dp"
-                    android:background="@drawable/ic_folder"/>
-            <TextView android:layout_width="wrap_content" android:layout_height="match_parent"
-                    android:textColor="@color/grey"
-                    android:text="@string/browse"
-                    android:textSize="15sp"
-                    android:gravity="center" android:id="@+id/localpath"/>
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:gravity="end" android:layout_weight="0">
+            <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                    android:text="@string/local"
+                    android:textSize="20sp"
+                    android:textColor="@color/black"
+                    android:gravity="left" android:layout_gravity="left" android:layout_weight="10"
+                    android:paddingLeft="5dp"/>
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="@string/remote"
+                    android:textSize="20sp"
+                    android:textColor="@color/black"
+                    android:layout_gravity="center_horizontal" android:paddingRight="5dp"/>
         </LinearLayout>
-        <ImageView android:layout_width="60dp" android:layout_height="50dp"
-                   android:onClick="changeDirection"
-                android:id="@+id/arrow" android:layout_gravity="center_vertical" android:src="@drawable/ic_rightarrow"/>
-        <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content"
+
+        <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
                       android:orientation="horizontal"
-                      android:onClick="chooseremotepath" android:layout_weight="2" android:layout_gravity="right"
-                      android:gravity="right" android:paddingRight="5dp" style="@style/GreyPressedStyle">
-            <ImageView android:layout_width="40dp" android:layout_height="40dp"
-                       android:background="@drawable/ic_folder" android:layout_weight="0"/>
-            <TextView android:layout_width="wrap_content" android:layout_height="match_parent"
-                      android:textColor="@color/grey"
-                      android:text="@string/browse"
-                      android:textSize="15sp"
-                      android:gravity="center" android:layout_gravity="right" android:layout_weight="0"
-                      android:id="@+id/remotepath"/>
+                      android:layout_width="match_parent"
+                      android:layout_height="wrap_content" android:gravity="end" android:layout_weight="0">
+            <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:onClick="chooselocalpath" android:layout_weight="2" android:paddingLeft="5dp"
+                    style="@style/GreyPressedStyle">
+                <ImageView android:layout_width="40dp" android:layout_height="40dp"
+                        android:background="@drawable/ic_folder"/>
+                <TextView android:layout_width="wrap_content" android:layout_height="match_parent"
+                        android:textColor="@color/grey"
+                        android:text="@string/browse"
+                        android:textSize="15sp"
+                        android:gravity="center" android:id="@+id/localpath"/>
+            </LinearLayout>
+            <ImageView android:layout_width="60dp" android:layout_height="50dp"
+                       android:onClick="changeDirection"
+                    android:id="@+id/arrow" android:layout_gravity="center_vertical" android:src="@drawable/ic_rightarrow"/>
+            <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content"
+                          android:orientation="horizontal"
+                          android:onClick="chooseremotepath" android:layout_weight="2" android:layout_gravity="right"
+                          android:gravity="right" android:paddingRight="5dp" style="@style/GreyPressedStyle">
+                <ImageView android:layout_width="40dp" android:layout_height="40dp"
+                           android:background="@drawable/ic_folder" android:layout_weight="0"/>
+                <TextView android:layout_width="wrap_content" android:layout_height="match_parent"
+                          android:textColor="@color/grey"
+                          android:text="@string/browse"
+                          android:textSize="15sp"
+                          android:gravity="center" android:layout_gravity="right" android:layout_weight="0"
+                          android:id="@+id/remotepath"/>
+            </LinearLayout>
         </LinearLayout>
     </LinearLayout>
-</LinearLayout>
+    </ScrollView>
 </LinearLayout>

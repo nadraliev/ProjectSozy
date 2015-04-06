@@ -33,12 +33,13 @@ public class SyncService extends Service {
 
     Integer filesCount = 0;
     Integer FTPFilesCount = 0;
-    Integer id = 0;
-    Integer counter;
+    public Integer id = 0;
+    Integer counter;  //TODO это была плохая идея
 
     Handler showNotifStarting;
     Handler showNotifProcessing;
     Handler showNotifDone;
+
 
 
     //выгрузка и все, что с ней связано
