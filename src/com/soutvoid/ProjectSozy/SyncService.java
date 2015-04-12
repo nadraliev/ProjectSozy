@@ -18,10 +18,8 @@ import org.apache.commons.net.ftp.FTPFile;
 
 import java.io.*;
 import java.net.ConnectException;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.sql.Array;
+import java.util.*;
 import java.util.concurrent.*;
 
 /**
@@ -48,7 +46,10 @@ public class SyncService extends Service {
 
     ExecutorService executorService;
 
-    ArrayList<Integer> ids;
+    ArrayList<Integer[]> delays;
+    TimerTask timerTask;
+
+    int currentDay;
 
     //выгрузка и все, что с ней связано
     //вторая попытка
@@ -347,43 +348,48 @@ public class SyncService extends Service {
         }
         final Calendar calendar = Calendar.getInstance();   //номер понедельника - 2
 
-        long delay;
+        Integer delay;
         Timer timer = new Timer();
-        ArrayList<TimerTask> timerTasks = new ArrayList<TimerTask>();
 
-        ids = new ArrayList<Integer>();
+        delays = new ArrayList<Integer[]>();
+
+        currentDay = calendar.get(Calendar.DAY_OF_WEEK) == 1?6:calendar.get(Calendar.DAY_OF_WEEK) - 2;
 
         for (int i = 0; i < data.getCount(); i++) {
-            final int currentDay = calendar.get(Calendar.DAY_OF_WEEK) == 1?6:calendar.get(Calendar.DAY_OF_WEEK) - 2;
-            timerTasks.add(new TimerTask() {
-                @Override
-                public void run() {
-                    Cursor idsCursor = db.query("profiles", new String[] {"_id"}, "daynumber = " + currentDay + " and time = " + (calendar.get(Calendar.HOUR_OF_DAY)*60 + calendar.get(Calendar.MINUTE)), null, null, null, null);
-                    idsCursor.moveToFirst();
-                    try {
-                        startProfile(idsCursor.getInt(0));   //TODO не работает для одновременных задач
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        Cursor idCursor = db.query("profiles", new String[] {"_id"}, "daynumber = " + currentDay + " and time = " + (calendar.get(Calendar.HOUR_OF_DAY)*60 + (calendar.get(Calendar.MINUTE) + 1)%60), null, null, null, null);
-                        idCursor.moveToFirst();
-                        startProfile(idsCursor.getInt(0));
-                        idCursor.close();
-                    }
-                    idsCursor.close();
-                }
-            });
             if (currentDay*24*60 + calendar.get(Calendar.HOUR_OF_DAY)*60 + calendar.get(Calendar.MINUTE) < data.getInt(1)*24*60 + data.getInt(2)) {
                 if (currentDay == data.getInt(1)) {
-                    delay = (data.getInt(2) - (calendar.get(Calendar.HOUR_OF_DAY) * 60 + calendar.get(Calendar.MINUTE))) * 60 * 1000;
+                    delay = data.getInt(2) - (calendar.get(Calendar.HOUR_OF_DAY) * 60 + calendar.get(Calendar.MINUTE));
                 } else
-                    delay = (24 * 60 - (calendar.get(Calendar.HOUR_OF_DAY) * 60 + calendar.get(Calendar.MINUTE)) + 24 * 60 * (data.getInt(1) - currentDay) + data.getInt(2)) * 60 * 1000;
+                    delay = 24 * 60 - (calendar.get(Calendar.HOUR_OF_DAY) * 60 + calendar.get(Calendar.MINUTE)) + 24 * 60 * (data.getInt(1) - currentDay) + data.getInt(2);
             } else if (currentDay*24*60 + calendar.get(Calendar.HOUR_OF_DAY)*60 + calendar.get(Calendar.MINUTE) > data.getInt(1)*24*60 + data.getInt(2)) {
-                delay = (24 * 60 - (calendar.get(Calendar.HOUR_OF_DAY) * 60 + calendar.get(Calendar.MINUTE)) + 24 * 60 * (6 - currentDay + data.getInt(1)) + data.getInt(2)) * 60 * 1000;
+                delay = 24 * 60 - (calendar.get(Calendar.HOUR_OF_DAY) * 60 + calendar.get(Calendar.MINUTE)) + 24 * 60 * (6 - currentDay + data.getInt(1)) + data.getInt(2);
             } else delay = 0;
-            timer.schedule(timerTasks.get(i), delay, 1000*60*60*24*7);   //задержка и период в миллисекундах!
+
+            delays.add(new Integer[] {data.getInt(0), delay});
             data.moveToNext();
         }
 
+        Integer[][] delaysArray = delays.toArray(new Integer[delays.size()][2]);
+
+        Arrays.sort(delaysArray, new ComparatorDelays());
+
+        final ArrayDeque<Integer[]> arrayDeque = new ArrayDeque<Integer[]>();
+
+        for (int i = 0; i < delaysArray.length; i ++)
+            arrayDeque.add(delaysArray[i]);
+
+        int count = delaysArray.length;
+
+
+        for (int i = 0; i < count; i++) {
+            timerTask = new TimerTask() {
+                @Override
+                public void run() {
+                    startProfile(arrayDeque.pollFirst()[0]);
+                }
+            };
+            timer.schedule(timerTask, delaysArray[i][1]*60*1000, 1000*60*60*24*7);
+        }
 
         //TODO сервис не возмобновляет работу после падения!
     }
@@ -407,6 +413,27 @@ public class SyncService extends Service {
             }
         });
 
+    }
+
+    public void sendTextOnNotif(String input, int id) {
+        Context context = SyncService.this;
+
+        Notification.Builder builder = new Notification.Builder(context);
+
+
+        builder
+                .setSmallIcon(R.drawable.ic_notif)
+                .setTicker(input)
+                .setWhen(System.currentTimeMillis())
+                .setContentTitle(input)
+                .setContentText(input)
+                .setAutoCancel(true);
+
+
+        Notification notification = builder.build();
+
+        NotificationManager notificationManager = (NotificationManager)context.getSystemService(NOTIFICATION_SERVICE);
+        notificationManager.notify(id, notification);
     }
 
     public IBinder onBind(Intent intent) {
