@@ -24,6 +24,7 @@ public class SQLiteOpen extends SQLiteOpenHelper {
     private static final String COLUMN_TYPE = "type";
     private static final String COLUMN_DAYNUMBER = "daynumber";
     private static final String COLUMN_TIME = "time";
+    private static final String COLUMN_SHEDULED ="sheduled";
 
     //номера столбцов
     private static final int NUM_COLUMN_ID = 0;
@@ -36,6 +37,7 @@ public class SQLiteOpen extends SQLiteOpenHelper {
     private static final int NUM_COLUMN_TYPE = 7;
     private static final int NUM_COLUMN_DAYNUMBER = 8;
     private static final int NUM_COLUMN_TIME = 9;
+    private static final int NUM_COLUMN_SHEDULED = 10;
 
     SQLiteOpen(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -44,7 +46,7 @@ public class SQLiteOpen extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         String query = "CREATE TABLE " + TABLE_NAME + "(" + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT," + COLUMN_NAME + " STRING," + COLUMN_ADDRESS + " STRING," + COLUMN_USER + " STRING," + COLUMN_PASSWORD + " STRING,"
-                + COLUMN_LOCAL_PATH + " STRING," + COLUMN_REMOTE_PATH + " STRING," + COLUMN_TYPE + " String," + COLUMN_DAYNUMBER + " integer," + COLUMN_TIME + " integer);";
+                + COLUMN_LOCAL_PATH + " STRING," + COLUMN_REMOTE_PATH + " STRING," + COLUMN_TYPE + " String," + COLUMN_DAYNUMBER + " integer," + COLUMN_TIME + " integer," + COLUMN_SHEDULED + " integer" + ");";
         db.execSQL(query);
     }
 

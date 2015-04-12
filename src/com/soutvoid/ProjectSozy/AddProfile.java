@@ -195,6 +195,7 @@ public class AddProfile extends Activity {
                                 newValues.put("remotepath", RemotePath);
                                 newValues.put("daynumber", day);
                                 newValues.put("time", time);
+                                newValues.put("sheduled", 0);
                                 if (isUploading)
                                     syncType = "upload";
                                 else syncType = "download";
@@ -202,7 +203,7 @@ public class AddProfile extends Activity {
                                 db.insert("profiles", null, newValues);
                                 isChanging = false;
                                 finish();
-                            } else {
+                            } else {  //при изменении времени и дня могут возникнуть проблемы с запланированной задачей
                                 ContentValues newValues = new ContentValues();
                                 newValues.put("name", nameedit.getText().toString());
                                 newValues.put("address", addressedit.getText().toString());
@@ -231,6 +232,7 @@ public class AddProfile extends Activity {
                         }
                     }
                 }
+                startService(new Intent(AddProfile.this, SyncService.class));
                 break;
         }
 

@@ -45,6 +45,8 @@ public class MainActivity extends Activity {
         getActionBar().setIcon(R.drawable.ic_title);
         getActionBar().setTitle("");
 
+        startService(new Intent(this, SyncService.class));
+
         context = getApplicationContext();
 
         FragmentManager fragmentManager = getFragmentManager();

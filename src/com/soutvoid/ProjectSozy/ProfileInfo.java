@@ -79,7 +79,7 @@ public class ProfileInfo extends Activity {
         infoLocalPath.setText(data.getString(3));
         infoRemotePath.setText(data.getString(4));
         infoType.setText(data.getString(5));
-        infoDay.setText(MainActivity.context.getResources().getStringArray(R.array.daysofweek)[data.getInt(7)]);
+        infoDay.setText(getApplicationContext().getResources().getStringArray(R.array.daysofweek)[data.getInt(7)]);
         infoTime.setText(data.getInt(8)/60 + ":" + data.getInt(8)%60/10 + "0");
 
         data.close();
@@ -100,6 +100,7 @@ public class ProfileInfo extends Activity {
                 break;
             case R.id.deletemenu :
                 db.delete("profiles", "name = '" + name + "'", null);
+                startService(new Intent(ProfileInfo.this, SyncService.class));
                 finish();
                 break;
             case R.id.editmenu :
@@ -108,7 +109,7 @@ public class ProfileInfo extends Activity {
                 startActivity(i);
                 break;
             case R.id.startmenu :
-                startService(new Intent(this, SyncService.class).putExtra("_id", id));
+                startService(new Intent(this, SyncService.class));
                 break;
         }
         return true;
