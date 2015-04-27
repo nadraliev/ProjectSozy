@@ -109,7 +109,8 @@ public class ProfileInfo extends Activity {
                 startActivity(i);
                 break;
             case R.id.startmenu :
-                startService(new Intent(this, SyncService.class));
+                Profile profile = new Profile(name);
+                profile.startProfile();
                 break;
         }
         return true;

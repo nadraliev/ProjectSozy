@@ -5,9 +5,6 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteException;
 import android.os.Bundle;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -29,8 +26,6 @@ public class MainActivity extends Activity {
 
     public static String currentName;                                       //TODO избавиться от всех переопределений строк!
 
-
-    ArrayList<String> names = new ArrayList<String>();
 
     String[] navigationDrawerItems;
     DrawerLayout navigationDrawer;
