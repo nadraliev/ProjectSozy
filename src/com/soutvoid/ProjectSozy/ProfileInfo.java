@@ -9,6 +9,10 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 /**
  * Created by andrew on 27.03.15.
  */
@@ -109,8 +113,14 @@ public class ProfileInfo extends Activity {
                 startActivity(i);
                 break;
             case R.id.startmenu :
-                Profile profile = new Profile(name);
-                profile.startProfile();
+                final Profile profile = new Profile(name);
+                Thread thread = new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        profile.startProfile();
+                    }
+                });
+                thread.start();
                 break;
         }
         return true;

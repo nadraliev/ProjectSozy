@@ -119,7 +119,7 @@ public class SyncService extends Service {
             timer.schedule(timerTask, delaysArray[i][1]*60*1000, 1000*60*60*24*7);
         }
 
-        //TODO сервис не возмобновляет работу после падения!
+        //TODO сервис не поднимается после падения!
     }
 
 
