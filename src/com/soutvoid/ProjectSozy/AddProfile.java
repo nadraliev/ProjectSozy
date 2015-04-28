@@ -122,7 +122,7 @@ public class AddProfile extends Activity {
         });
 
 
-        if(isChanging) {
+        if(isChanging) {     //заполнить поля текущими данными, если профиль изменяется
             Cursor data = db.query("profiles", new String[] {"_id", "name", "address", "user", "password", "localpath", "remotepath", "type", "daynumber", "time"}, "name = '" + MainActivity.currentName + "'", null, null, null, null);
             data.moveToFirst();
             currentId = data.getInt(0);
@@ -164,6 +164,7 @@ public class AddProfile extends Activity {
                 onBackPressed();
                 break;
             case R.id.ok_action :
+                //проверка, что путь назначения - не файл
                 if (isUploading && isFTPFile) {
                     Toast chooseAnother = Toast.makeText(getApplicationContext(), getString(R.string.wrongdestination), Toast.LENGTH_LONG);
                     chooseAnother.show();
@@ -232,7 +233,6 @@ public class AddProfile extends Activity {
                         }
                     }
                 }
-                startService(new Intent(AddProfile.this, SyncService.class));
                 break;
         }
 

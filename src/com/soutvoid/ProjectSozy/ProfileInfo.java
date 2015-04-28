@@ -69,6 +69,7 @@ public class ProfileInfo extends Activity {
         Cursor data = db.query("profiles", new String[] {"address", "user", "password", "localpath", "remotepath", "type", "name", "daynumber", "time"}, "_id = " + id, null, null, null, null);
         data.moveToFirst();
 
+        //заполняем поля информацией
         infoName = (TextView)findViewById(R.id.info_name);
         infoAddress = (TextView)findViewById(R.id.info_address);
         infoUser = (TextView)findViewById(R.id.info_user);

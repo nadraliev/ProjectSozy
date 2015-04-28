@@ -44,13 +44,14 @@ public class MainActivity extends Activity {
 
         context = getApplicationContext();
 
+        //вставить фрагмент профилей
         FragmentManager fragmentManager = getFragmentManager();
         Fragment fragment = new ProfilesFragment();
         fragmentManager.beginTransaction()
                 .add(R.id.main_container, fragment)
                 .commit();
 
-
+        //инициализация бокового меню
         navigationDrawerItems = getResources().getStringArray(R.array.navigationdrawer);
         navigationDrawer = (DrawerLayout)findViewById(R.id.drawer_layout);
         navigationDrawerList = (ListView)findViewById(R.id.left_drawer);
@@ -96,6 +97,7 @@ public class MainActivity extends Activity {
                         setTitle(getResources().getStringArray(R.array.navigationdrawer)[0]);
                         break;
                     case 1 :
+                        //вставка фрагмента процессов
                         fragment = new ProcessesFragment();
 
                         fragmentManager = getFragmentManager();

@@ -46,20 +46,22 @@ public class SyncService extends Service {
             db = dbOpen.getReadableDatabase();
         }
 
-
+        sendTextOnNotif("born", 1);
 
     }
 
     public int onStartCommand(Intent intent, int flags, int startId) {
+        super.onStartCommand(intent, flags, startId);
 
         updateTimers();
+        sendTextOnNotif("started", 2);
 
-
-        return START_REDELIVER_INTENT;
+        return START_STICKY;
     }
 
     public void onDestroy() {
         super.onDestroy();
+        sendTextOnNotif("died", 3);
     }
 
     public void updateTimers() {

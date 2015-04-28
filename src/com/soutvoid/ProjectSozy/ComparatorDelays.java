@@ -7,6 +7,8 @@ import java.util.Comparator;
  */
 public class ComparatorDelays implements Comparator<Integer[]> {
 
+    //нужен для сортировки массива, содержащего времена задержки
+
     @Override
     public int compare(Integer[] obj1, Integer[] obj2) {
         if (obj1[1] > obj2[1])
