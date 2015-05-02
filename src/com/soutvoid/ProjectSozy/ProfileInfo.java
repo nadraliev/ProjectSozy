@@ -10,9 +10,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
 /**
  * Created by andrew on 27.03.15.
  */
@@ -28,7 +25,7 @@ public class ProfileInfo extends Activity {
     TextView infoTime;
 
     SQLiteDatabase db;
-    SQLiteOpen dbOpen;
+    SQLiteOpenProfiles dbOpen;
 
     String name;
 
@@ -43,7 +40,7 @@ public class ProfileInfo extends Activity {
         Intent intent = getIntent();
         name = intent.getStringExtra("name");
 
-        dbOpen = new SQLiteOpen(this);
+        dbOpen = new SQLiteOpenProfiles(this);
         try {
             db = dbOpen.getWritableDatabase();
         } catch (SQLiteException e) {
@@ -104,8 +101,11 @@ public class ProfileInfo extends Activity {
                 onBackPressed();
                 break;
             case R.id.deletemenu :
+                Cursor cursor = db.query("profiles", new String[] {"_id"}, "name = '" + name + "'", null, null, null, null);
+                cursor.moveToFirst();
+                dbOpen.dropTable(db, "profile" + cursor.getInt(0));
                 db.delete("profiles", "name = '" + name + "'", null);
-                startService(new Intent(ProfileInfo.this, SyncService.class));
+                cursor.close();
                 finish();
                 break;
             case R.id.editmenu :

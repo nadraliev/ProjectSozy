@@ -10,12 +10,15 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.accessibility.AccessibilityManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.*;
+import org.apache.commons.net.ftp.FTPClient;
+import org.apache.commons.net.ftp.FTPFile;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
 
 /**
  * Created by andrew on 15.03.15.
@@ -38,13 +41,16 @@ public class AddProfile extends Activity {
     Integer currentId;
     Integer day;
     Integer time;
+    Integer filesCount = 0;
 
-    SQLiteOpen dbOpen;
+    SQLiteOpenProfiles dbOpen;
     SQLiteDatabase db;
 
     Spinner daysSpinner;
     Spinner hoursSpinner;
     Spinner minutesSpinner;
+
+    ArrayList<File> filesList = new ArrayList<File>();
 
 
     @Override
@@ -58,7 +64,7 @@ public class AddProfile extends Activity {
 
         if(isChanging) getActionBar().setTitle(R.string.edit);
 
-        dbOpen = new SQLiteOpen(this);
+        dbOpen = new SQLiteOpenProfiles(this);
         try {
             db = dbOpen.getWritableDatabase();
         } catch (SQLiteException e) {
@@ -203,6 +209,68 @@ public class AddProfile extends Activity {
                                 newValues.put("type", syncType);
                                 db.insert("profiles", null, newValues);
                                 isChanging = false;
+
+
+
+
+                                Cursor cursor = db.query("profiles", new String[] {"_id"}, "name = '" + nameedit.getText().toString() + "'", null, null, null, null);
+                                cursor.moveToFirst();
+                                final String tableName = "profile" + cursor.getInt(0);
+                                dbOpen.createTable(db, tableName);
+                                cursor.close();
+
+                                if (syncType.equals("upload")) {
+                                    if (!(new File("/storage/emulated/0" + LocalPath).isDirectory())) {
+                                        ContentValues contentValues = new ContentValues();
+                                        contentValues.put("path", "/storage/emulated/0" + LocalPath);
+                                        contentValues.put("size", (new File("/storage/emulated/0" + LocalPath).length()));
+                                        db.insert(tableName, null, contentValues);
+                                    } else {
+                                        ContentValues contentValues = new ContentValues();
+                                        File file = new File("/storage/emulated/0" + LocalPath);
+                                        contentValues.put("path", file.getAbsolutePath());
+                                        contentValues.put("size", file.length());
+                                        db.insert(tableName, null, contentValues);
+                                        countAndListFiles(file.listFiles());
+
+                                        for (int i = 0; i < filesCount; i++) {
+                                            contentValues = new ContentValues();
+                                            contentValues.put("path", filesList.get(i).getAbsolutePath());
+                                            contentValues.put("size", filesList.get(i).length());
+                                            db.insert(tableName, null, contentValues);
+                                        }
+
+                                        filesList.clear();
+                                        filesCount = 0;
+                                    }
+                                } else {
+                                    Thread thread = new Thread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            final FTPClient ftpClient = new FTPClient();
+                                            try {
+                                                Cursor data = db.query("profiles", new String[] {"address", "user", "password"}, "name = '" + nameedit.getText().toString() + "'", null, null, null, null);
+                                                data.moveToFirst();
+                                                ftpClient.connect(data.getString(0));
+                                                ftpClient.login(data.getString(1), data.getString(2));
+                                            } catch (Exception e) {
+                                                e.printStackTrace();
+                                            }
+                                            if (isFTPFile) {
+                                                try {
+                                                    FTPFile[] files = ftpClient.listFiles(RemotePath);
+                                                    MainActivity.sendTextOnNotif(files[0].getName() + "", 1);
+                                                } catch (IOException e) {
+                                                    e.printStackTrace();
+                                                }
+                                            }
+                                        }
+                                    });
+                                    thread.start();
+                                }
+
+
+
                                 finish();
                             } else {  //при изменении времени и дня могут возникнуть проблемы с запланированной задачей
                                 ContentValues newValues = new ContentValues();
@@ -319,5 +387,15 @@ public class AddProfile extends Activity {
         return result;
     }
 
+    public void countAndListFiles(File[] files) {
+        for (File file : files) {
+            if (file.isDirectory())
+                countAndListFiles(new File(file.getAbsolutePath()).listFiles());
+            else {
+                filesCount++;
+                filesList.add(file);
+            }
+        }
+    }
 
 }

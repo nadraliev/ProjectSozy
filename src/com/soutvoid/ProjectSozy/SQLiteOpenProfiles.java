@@ -7,7 +7,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 /**
  * Created by andrew on 18.03.15.
  */
-public class SQLiteOpen extends SQLiteOpenHelper {
+public class SQLiteOpenProfiles extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "sozy.db";
     private static final int DATABASE_VERSION = 1;
@@ -25,6 +25,8 @@ public class SQLiteOpen extends SQLiteOpenHelper {
     private static final String COLUMN_DAYNUMBER = "daynumber";
     private static final String COLUMN_TIME = "time";
     private static final String COLUMN_SHEDULED ="sheduled";
+    private static final String COLUMN_PATH = "path";
+    private static final String COLUMN_SIZE = "size";
 
     //номера столбцов
     private static final int NUM_COLUMN_ID = 0;
@@ -39,15 +41,24 @@ public class SQLiteOpen extends SQLiteOpenHelper {
     private static final int NUM_COLUMN_TIME = 9;
     private static final int NUM_COLUMN_SHEDULED = 10;
 
-    SQLiteOpen(Context context) {
+    SQLiteOpenProfiles(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
     @Override
     public void onCreate(SQLiteDatabase db) {
         String query = "CREATE TABLE " + TABLE_NAME + "(" + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT," + COLUMN_NAME + " STRING," + COLUMN_ADDRESS + " STRING," + COLUMN_USER + " STRING," + COLUMN_PASSWORD + " STRING,"
-                + COLUMN_LOCAL_PATH + " STRING," + COLUMN_REMOTE_PATH + " STRING," + COLUMN_TYPE + " String," + COLUMN_DAYNUMBER + " integer," + COLUMN_TIME + " integer," + COLUMN_SHEDULED + " integer" + ");";
+                + COLUMN_LOCAL_PATH + " STRING," + COLUMN_REMOTE_PATH + " STRING," + COLUMN_TYPE + " String," + COLUMN_DAYNUMBER + " integer," + COLUMN_TIME + " integer" + ");";
         db.execSQL(query);
+    }
+
+    public void createTable(SQLiteDatabase db, final String name) {
+        String dquery = "CREATE TABLE " + name + "(" + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT," + COLUMN_PATH + " STRING," + COLUMN_SIZE + " INTEGER);";
+        db.execSQL(dquery);
+    }
+
+    public void dropTable(SQLiteDatabase db, final String name) {
+        db.execSQL("DROP TABLE IF EXISTS " + name);
     }
 
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {

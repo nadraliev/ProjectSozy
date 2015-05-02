@@ -1,21 +1,16 @@
 package com.soutvoid.ProjectSozy;
 
 import android.app.*;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
-import android.graphics.BitmapFactory;
-import android.os.Handler;
 import android.os.IBinder;
-import org.apache.commons.net.ftp.FTPClient;
-import org.apache.commons.net.ftp.FTPFile;
 
-import java.io.*;
+import java.io.File;
 import java.util.*;
-import java.util.concurrent.*;
 
 /**
  * Created by andrew on 28.03.15.
@@ -26,7 +21,7 @@ public class SyncService extends Service {
 
 
     SQLiteDatabase db;
-    SQLiteOpen dbOpen;
+    SQLiteOpenProfiles dbOpen;
 
     Integer id;
 
@@ -35,10 +30,14 @@ public class SyncService extends Service {
 
     int currentDay;
 
+    public static Context context;
+
     public void onCreate() {
         super.onCreate();
 
-        dbOpen = new SQLiteOpen(this);
+        context = getApplicationContext();
+
+        dbOpen = new SQLiteOpenProfiles(this);
         try {
             db = dbOpen.getWritableDatabase();
         } catch (SQLiteException e) {
@@ -46,22 +45,47 @@ public class SyncService extends Service {
             db = dbOpen.getReadableDatabase();
         }
 
-        sendTextOnNotif("born", 1);
 
     }
 
     public int onStartCommand(Intent intent, int flags, int startId) {
-        super.onStartCommand(intent, flags, startId);
 
-        updateTimers();
-        sendTextOnNotif("started", 2);
+        dbOpen = new SQLiteOpenProfiles(context);
+        try {
+            db = dbOpen.getWritableDatabase();
+        } catch (SQLiteException e) {
+            e.printStackTrace();
+            db = dbOpen.getReadableDatabase();
+        }
 
-        return START_STICKY;
+        Cursor cursor = db.query("profiles", new String[] {"_id"}, "name = 'passwords'", null, null, null, null);
+        cursor.moveToFirst();
+        if (cursor.getCount() != 0) {
+            Cursor cursor1 = db.query("profile" + cursor.getInt(0), new String[]{"path", "size"}, null, null, null, null, null);
+            cursor1.moveToFirst();
+            final File file = new File(cursor1.getString(0));
+            if (cursor1.getInt(1) != file.length()) {
+                Thread thread = new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Profile profile = new Profile("passwords");
+                        profile.startProfile();
+                    }
+                });
+                thread.start();
+                ContentValues contentValues = new ContentValues();
+                contentValues.put("size", file.length());
+                db.update("profile" + cursor.getInt(0), contentValues, null, null);
+            }
+
+        }
+        stopSelf();
+
+        return START_NOT_STICKY;
     }
 
     public void onDestroy() {
         super.onDestroy();
-        sendTextOnNotif("died", 3);
     }
 
     public void updateTimers() {

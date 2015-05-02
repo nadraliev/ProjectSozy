@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">SozySync</string>
-    <string name="addrhead">Server Address: </string>
+    <string name="addrhead">FTP Server Address: </string>
     <string name="userhead">Login: </string>
     <string name="passwdhead">Password:</string>
     <string name="uploadbutton">Upload</string>

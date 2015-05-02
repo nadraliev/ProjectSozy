@@ -26,7 +26,7 @@ public class ProfilesFragment extends android.app.Fragment {
     final String ATTRIBUTE_TYPE = "type";
 
     SQLiteDatabase db;
-    SQLiteOpen dbOpen;
+    SQLiteOpenProfiles dbOpen;
 
     ListView profileslist;
 
@@ -56,7 +56,7 @@ public class ProfilesFragment extends android.app.Fragment {
 
     public void UpdateList() {
 
-        dbOpen = new SQLiteOpen(MainActivity.context);
+        dbOpen = new SQLiteOpenProfiles(MainActivity.context);
         try {
             db = dbOpen.getWritableDatabase();
         } catch (SQLiteException e) {

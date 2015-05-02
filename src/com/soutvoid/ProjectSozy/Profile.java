@@ -10,7 +10,6 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.graphics.BitmapFactory;
-import android.os.Handler;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
 
@@ -25,12 +24,12 @@ public class Profile {
     public String name;
 
     SQLiteDatabase db;
-    SQLiteOpen dbOpen;
+    SQLiteOpenProfiles dbOpen;
 
     FTPClient ftpClient;
 
     Integer filesCount = 0;
-    public Integer counter = 0;  //TODO это плохая идея
+    public Integer counter = 0;
 
     public Profile(int id) {
         this.id = id;
@@ -187,10 +186,10 @@ public class Profile {
 
 
     public void startProfile() {
-        dbOpen = new SQLiteOpen(MainActivity.context);
         try {
+            dbOpen = new SQLiteOpenProfiles(SyncService.context);
             db = dbOpen.getWritableDatabase();
-        } catch (SQLiteException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             db = dbOpen.getReadableDatabase();
         }
@@ -235,12 +234,12 @@ public class Profile {
     }
 
     public void sendNotifStart() {
-        Context context = MainActivity.context;
+        Context context = SyncService.context;
 
         Resources resources = context.getResources();
 
-        Intent intent = new Intent(MainActivity.context, ProfileInfo.class).putExtra("name", name);
-        PendingIntent pendingIntent = PendingIntent.getActivity(MainActivity.context, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+        Intent intent = new Intent(SyncService.context, ProfileInfo.class).putExtra("name", name);
+        PendingIntent pendingIntent = PendingIntent.getActivity(SyncService.context, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
 
 
         Notification.Builder builder = new Notification.Builder(context);
@@ -267,7 +266,7 @@ public class Profile {
     }
 
     public void sendNotifDone() {
-        Context context = MainActivity.context;
+        Context context = SyncService.context;
 
         Resources resources = context.getResources();
 
@@ -295,12 +294,12 @@ public class Profile {
     }
 
     public void sendNotifProcessing() {
-        Context context = MainActivity.context;
+        Context context = SyncService.context;
 
         Resources resources = context.getResources();
 
-        Intent intent = new Intent(MainActivity.context, ProfileInfo.class).putExtra("name", name);
-        PendingIntent pendingIntent = PendingIntent.getActivity(MainActivity.context, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+        Intent intent = new Intent(context, ProfileInfo.class).putExtra("name", name);
+        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
 
         int maxCount = 0;
         maxCount = filesCount;
