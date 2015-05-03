@@ -21,8 +21,6 @@ public class ProfileInfo extends Activity {
     TextView infoLocalPath;
     TextView infoRemotePath;
     TextView infoType;
-    TextView infoDay;
-    TextView infoTime;
 
     SQLiteDatabase db;
     SQLiteOpenProfiles dbOpen;
@@ -73,16 +71,12 @@ public class ProfileInfo extends Activity {
         infoLocalPath = (TextView)findViewById(R.id.info_localpath);
         infoRemotePath = (TextView)findViewById(R.id.info_remotepath);
         infoType = (TextView)findViewById(R.id.info_type);
-        infoDay = (TextView)findViewById(R.id.info_day);
-        infoTime = (TextView)findViewById(R.id.info_time);
         infoName.setText(data.getString(6));
         infoAddress.setText(data.getString(0));
         infoUser.setText(data.getString(1));
         infoLocalPath.setText(data.getString(3));
         infoRemotePath.setText(data.getString(4));
         infoType.setText(data.getString(5));
-        infoDay.setText(getApplicationContext().getResources().getStringArray(R.array.daysofweek)[data.getInt(7)]);
-        infoTime.setText(data.getInt(8)/60 + ":" + data.getInt(8)%60/10 + "0");
 
         data.close();
     }

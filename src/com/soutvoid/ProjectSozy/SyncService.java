@@ -37,15 +37,6 @@ public class SyncService extends Service {
 
         context = getApplicationContext();
 
-        dbOpen = new SQLiteOpenProfiles(this);
-        try {
-            db = dbOpen.getWritableDatabase();
-        } catch (SQLiteException e) {
-            e.printStackTrace();
-            db = dbOpen.getReadableDatabase();
-        }
-
-
     }
 
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -79,6 +70,8 @@ public class SyncService extends Service {
             }
 
         }
+        db.close();
+        dbOpen.close();
         stopSelf();
 
         return START_NOT_STICKY;

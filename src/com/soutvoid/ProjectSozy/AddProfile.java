@@ -7,6 +7,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.os.Bundle;
+import android.os.Environment;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -39,18 +40,16 @@ public class AddProfile extends Activity {
     String syncType;
 
     Integer currentId;
-    Integer day;
-    Integer time;
     Integer filesCount = 0;
 
     SQLiteOpenProfiles dbOpen;
     SQLiteDatabase db;
 
-    Spinner daysSpinner;
-    Spinner hoursSpinner;
-    Spinner minutesSpinner;
-
     ArrayList<File> filesList = new ArrayList<File>();
+    ArrayList<FTPFile> ftpFilesList = new ArrayList<FTPFile>();
+    ArrayList<String> ftpFilesListPaths = new ArrayList<String>();
+
+    final FTPClient ftpClient = new FTPClient();
 
 
     @Override
@@ -79,57 +78,10 @@ public class AddProfile extends Activity {
         useredit = ((EditText)findViewById(R.id.useredit));
         passwordedit = ((EditText)findViewById(R.id.passwdedit));
         nameedit = ((EditText)findViewById(R.id.nameedit));
-        daysSpinner = (Spinner)findViewById(R.id.days);
-        hoursSpinner = (Spinner)findViewById(R.id.hours);
-        minutesSpinner = (Spinner)findViewById(R.id.minutes);
-
-        //Инициализация спиннера дней недели
-        ArrayAdapter<CharSequence> days = ArrayAdapter.createFromResource(this, R.array.daysofweek, R.layout.spinner_row);
-        days.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        daysSpinner.setAdapter(days);
-        day = 0;
-        daysSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            public void onItemSelected(AdapterView<?> parent, View itemSelected, int selectedItemPosition, long selectedId) {
-                day = selectedItemPosition;
-            }
-
-            public void onNothingSelected(AdapterView<?> parent) {
-                //ничего не делать
-            }
-        });
-
-        //инициализация спиннеров времени
-        ArrayAdapter<CharSequence> hours = ArrayAdapter.createFromResource(this, R.array.hours, R.layout.spinner_row);
-        ArrayAdapter<CharSequence> minutes = ArrayAdapter.createFromResource(this, R.array.minutes, R.layout.spinner_row);
-        hours.setDropDownViewResource(R.layout.dropdown_spinner_item);
-        minutes.setDropDownViewResource(R.layout.dropdown_spinner_item);
-        hoursSpinner.setAdapter(hours);
-        minutesSpinner.setAdapter(minutes);
-        hoursSpinner.setSelection(22);
-        minutesSpinner.setSelection(0);
-        time = timeToMinutes(22, 0);
-        hoursSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            public void onItemSelected(AdapterView<?> parent, View itemSelected, int selectedItemPosition, long selectedId) {
-                hoursSpinner.setSelection(selectedItemPosition);
-            }
-
-            public void onNothingSelected(AdapterView<?> parent) {
-                //ничего не делать
-            }
-        });
-        minutesSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            public void onItemSelected(AdapterView<?> parent, View itemSelected, int selectedItemPosition, long selectedId) {
-                minutesSpinner.setSelection(selectedItemPosition);
-            }
-
-            public void onNothingSelected(AdapterView<?> parent) {
-                //ничего не делать
-            }
-        });
 
 
         if(isChanging) {     //заполнить поля текущими данными, если профиль изменяется
-            Cursor data = db.query("profiles", new String[] {"_id", "name", "address", "user", "password", "localpath", "remotepath", "type", "daynumber", "time"}, "name = '" + MainActivity.currentName + "'", null, null, null, null);
+            Cursor data = db.query("profiles", new String[] {"_id", "name", "address", "user", "password", "localpath", "remotepath", "type"}, "name = '" + MainActivity.currentName + "'", null, null, null, null);
             data.moveToFirst();
             currentId = data.getInt(0);
             localpathtext.setText(data.getString(5).substring(data.getString(5).lastIndexOf("/") + 1));
@@ -138,9 +90,6 @@ public class AddProfile extends Activity {
             useredit.setText(data.getString(3));
             passwordedit.setText(data.getString(4));
             nameedit.setText(data.getString(1));
-            daysSpinner.setSelection(data.getInt(8));
-            hoursSpinner.setSelection(data.getInt(9)/60);
-            minutesSpinner.setSelection(data.getInt(9)%60/10);
 
             LocalPath = data.getString(5);
             RemotePath = data.getString(6);
@@ -187,22 +136,18 @@ public class AddProfile extends Activity {
 
                         if (db.query("profiles", new String[]{"name"}, "name = '" + nameedit.getText().toString() + "'", null, null, null, null).getCount() == 0 || (isChanging && MainActivity.currentName.equals(nameedit.getText().toString()))) {
 
-                            time = hoursSpinner.getSelectedItemPosition()*60 + minutesSpinner.getSelectedItemPosition()*10;
                             if(!isChanging) {
 
                                 LocalPath = LocalPath.substring(1);
                                 LocalPath = LocalPath.substring(LocalPath.indexOf("/"));
 
                                 ContentValues newValues = new ContentValues();
-                                newValues.put("name", nameedit.getText().toString());
-                                newValues.put("address", addressedit.getText().toString());
-                                newValues.put("user", useredit.getText().toString());
-                                newValues.put("password", passwordedit.getText().toString());
-                                newValues.put("localpath", "/storage/emulated/0" + LocalPath);
+                                newValues.put("name", nameedit.getText().toString().trim());
+                                newValues.put("address", addressedit.getText().toString().trim());
+                                newValues.put("user", useredit.getText().toString().trim());
+                                newValues.put("password", passwordedit.getText().toString().trim());
+                                newValues.put("localpath", Environment.getExternalStorageDirectory().getAbsolutePath() + LocalPath);
                                 newValues.put("remotepath", RemotePath);
-                                newValues.put("daynumber", day);
-                                newValues.put("time", time);
-                                newValues.put("sheduled", 0);
                                 if (isUploading)
                                     syncType = "upload";
                                 else syncType = "download";
@@ -219,15 +164,16 @@ public class AddProfile extends Activity {
                                 dbOpen.createTable(db, tableName);
                                 cursor.close();
 
+                                //создание таблицы всех файлов
                                 if (syncType.equals("upload")) {
-                                    if (!(new File("/storage/emulated/0" + LocalPath).isDirectory())) {
+                                    if (!(new File(Environment.getExternalStorageDirectory().getAbsolutePath() + LocalPath).isDirectory())) {
                                         ContentValues contentValues = new ContentValues();
-                                        contentValues.put("path", "/storage/emulated/0" + LocalPath);
-                                        contentValues.put("size", (new File("/storage/emulated/0" + LocalPath).length()));
+                                        contentValues.put("path", Environment.getExternalStorageDirectory().getAbsolutePath() + LocalPath);
+                                        contentValues.put("size", (new File(Environment.getExternalStorageDirectory().getAbsolutePath() + LocalPath).length()));
                                         db.insert(tableName, null, contentValues);
                                     } else {
                                         ContentValues contentValues = new ContentValues();
-                                        File file = new File("/storage/emulated/0" + LocalPath);
+                                        File file = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + LocalPath);
                                         contentValues.put("path", file.getAbsolutePath());
                                         contentValues.put("size", file.length());
                                         db.insert(tableName, null, contentValues);
@@ -247,22 +193,49 @@ public class AddProfile extends Activity {
                                     Thread thread = new Thread(new Runnable() {
                                         @Override
                                         public void run() {
-                                            final FTPClient ftpClient = new FTPClient();
+                                            ftpClient.setAutodetectUTF8(true);
                                             try {
                                                 Cursor data = db.query("profiles", new String[] {"address", "user", "password"}, "name = '" + nameedit.getText().toString() + "'", null, null, null, null);
                                                 data.moveToFirst();
                                                 ftpClient.connect(data.getString(0));
                                                 ftpClient.login(data.getString(1), data.getString(2));
+                                                FTPFile[] files = ftpClient.listFiles(RemotePath);    //Первые два элемента - "." и ".."
+                                                ContentValues contentValues = new ContentValues();
+                                                if (files.length == 1) {
+                                                    contentValues.put("path", RemotePath);
+                                                    contentValues.put("size", files[0].getSize());
+                                                    db.insert(tableName, null, contentValues);
+                                                } else {
+                                                    ftpClient.changeWorkingDirectory(RemotePath);
+                                                    ftpClient.changeToParentDirectory();
+                                                    FTPFile[] parentDirs = ftpClient.listDirectories();
+                                                    FTPFile dir = new FTPFile();
+                                                    for (FTPFile file : parentDirs) {
+                                                        if (file.getName().equals(RemotePath.substring(RemotePath.lastIndexOf('/') + 1)))
+                                                            dir = file;
+                                                    }
+                                                    contentValues.put("path", RemotePath);
+                                                    contentValues.put("size", dir.getSize());
+                                                    db.insert(tableName, null, contentValues);
+                                                    ftpClient.changeWorkingDirectory(RemotePath);
+                                                    FTPFilesList(files);
+                                                    for (int i = 0; i < ftpFilesList.size(); i++) {
+                                                        if (!(ftpFilesList.get(i).getName().equals(".") || ftpFilesList.get(i).getName().equals(".."))) {
+                                                            contentValues = new ContentValues();
+                                                            contentValues.put("path", ftpFilesListPaths.get(i));
+                                                            contentValues.put("size", ftpFilesList.get(i).getSize());
+                                                            db.insert(tableName, null, contentValues);
+                                                        }
+                                                    }
+                                                }
+                                                ftpFilesList.clear();
+                                                ftpFilesListPaths.clear();
+                                                contentValues.clear();
+                                                db.close();
+                                                ftpClient.logout();
+                                                ftpClient.disconnect();
                                             } catch (Exception e) {
                                                 e.printStackTrace();
-                                            }
-                                            if (isFTPFile) {
-                                                try {
-                                                    FTPFile[] files = ftpClient.listFiles(RemotePath);
-                                                    MainActivity.sendTextOnNotif(files[0].getName() + "", 1);
-                                                } catch (IOException e) {
-                                                    e.printStackTrace();
-                                                }
                                             }
                                         }
                                     });
@@ -272,22 +245,111 @@ public class AddProfile extends Activity {
 
 
                                 finish();
-                            } else {  //при изменении времени и дня могут возникнуть проблемы с запланированной задачей
+                            } else { //если профиль изменяется
+                                try {
+                                    db = dbOpen.getWritableDatabase();
+                                } catch (SQLiteException e) {
+                                    e.printStackTrace();
+                                    db = dbOpen.getReadableDatabase();
+                                }
                                 ContentValues newValues = new ContentValues();
-                                newValues.put("name", nameedit.getText().toString());
-                                newValues.put("address", addressedit.getText().toString());
-                                newValues.put("user", useredit.getText().toString());
-                                newValues.put("password", passwordedit.getText().toString());
+                                newValues.put("name", nameedit.getText().toString().trim());
+                                newValues.put("address", addressedit.getText().toString().trim());
+                                newValues.put("user", useredit.getText().toString().trim());
+                                newValues.put("password", passwordedit.getText().toString().trim());
                                 newValues.put("localpath", LocalPath);
                                 newValues.put("remotepath", RemotePath);
-                                newValues.put("daynumber", day);
-                                newValues.put("time", time);
                                 if (isUploading)
                                     syncType = "upload";
                                 else syncType = "download";
                                 newValues.put("type", syncType);
                                 db.update("profiles", newValues, "_id = " + currentId, null);
                                 MainActivity.currentName = nameedit.getText().toString();
+
+                                Cursor cursor = db.query("profiles", new String[] {"_id"}, "name = '" + nameedit.getText().toString() + "'", null, null, null, null);
+                                cursor.moveToFirst();
+                                final String tableName = "profile" + cursor.getInt(0);
+                                dbOpen.dropTable(db, tableName);
+                                dbOpen.createTable(db, tableName);
+                                cursor.close();
+
+                                //создание таблицы всех файлов
+                                if (syncType.equals("upload")) {
+                                    if (!(new File(Environment.getExternalStorageDirectory().getAbsolutePath() + LocalPath).isDirectory())) {
+                                        ContentValues contentValues = new ContentValues();
+                                        contentValues.put("path", Environment.getExternalStorageDirectory().getAbsolutePath() + LocalPath);
+                                        contentValues.put("size", (new File(Environment.getExternalStorageDirectory().getAbsolutePath() + LocalPath).length()));
+                                        db.insert(tableName, null, contentValues);
+                                    } else {
+                                        ContentValues contentValues = new ContentValues();
+                                        File file = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + LocalPath);
+                                        contentValues.put("path", file.getAbsolutePath());
+                                        contentValues.put("size", file.length());
+                                        db.insert(tableName, null, contentValues);
+                                        countAndListFiles(file.listFiles());
+
+                                        for (int i = 0; i < filesCount; i++) {
+                                            contentValues = new ContentValues();
+                                            contentValues.put("path", filesList.get(i).getAbsolutePath());
+                                            contentValues.put("size", filesList.get(i).length());
+                                            db.insert(tableName, null, contentValues);
+                                        }
+
+                                        filesList.clear();
+                                        filesCount = 0;
+                                    }
+                                } else {
+                                    Thread thread = new Thread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            ftpClient.setAutodetectUTF8(true);
+                                            try {
+                                                Cursor data = db.query("profiles", new String[] {"address", "user", "password"}, "name = '" + nameedit.getText().toString() + "'", null, null, null, null);
+                                                data.moveToFirst();
+                                                ftpClient.connect(data.getString(0));
+                                                ftpClient.login(data.getString(1), data.getString(2));
+                                                FTPFile[] files = ftpClient.listFiles(RemotePath);    //Первые два элемента - "." и ".."
+                                                ContentValues contentValues = new ContentValues();
+                                                if (files.length == 1) {
+                                                    contentValues.put("path", RemotePath);
+                                                    contentValues.put("size", files[0].getSize());
+                                                    db.insert(tableName, null, contentValues);
+                                                } else {
+                                                    ftpClient.changeWorkingDirectory(RemotePath);
+                                                    ftpClient.changeToParentDirectory();
+                                                    FTPFile[] parentDirs = ftpClient.listDirectories();
+                                                    FTPFile dir = new FTPFile();
+                                                    for (FTPFile file : parentDirs) {
+                                                        if (file.getName().equals(RemotePath.substring(RemotePath.lastIndexOf('/') + 1)))
+                                                            dir = file;
+                                                    }
+                                                    contentValues.put("path", RemotePath);
+                                                    contentValues.put("size", dir.getSize());
+                                                    db.insert(tableName, null, contentValues);
+                                                    ftpClient.changeWorkingDirectory(RemotePath);
+                                                    FTPFilesList(files);
+                                                    for (int i = 0; i < ftpFilesList.size(); i++) {
+                                                        if (!(ftpFilesList.get(i).getName().equals(".") || ftpFilesList.get(i).getName().equals(".."))) {
+                                                            contentValues = new ContentValues();
+                                                            contentValues.put("path", ftpFilesListPaths.get(i));
+                                                            contentValues.put("size", ftpFilesList.get(i).getSize());
+                                                            db.insert(tableName, null, contentValues);
+                                                        }
+                                                    }
+                                                }
+                                                ftpFilesList.clear();
+                                                ftpFilesListPaths.clear();
+                                                contentValues.clear();
+                                                db.close();
+                                                ftpClient.logout();
+                                                ftpClient.disconnect();
+                                            } catch (Exception e) {
+                                                e.printStackTrace();
+                                            }
+                                        }
+                                    });
+                                    thread.start();
+                                }
 
                                 isChanging = false;
                                 finish();
@@ -394,6 +456,22 @@ public class AddProfile extends Activity {
             else {
                 filesCount++;
                 filesList.add(file);
+            }
+        }
+    }
+
+    public void FTPFilesList(FTPFile[] files) throws IOException {
+        String currentDir = ftpClient.printWorkingDirectory();
+        for (FTPFile file : files) {
+            if (!file.getName().equals(".") && !file.getName().equals("..")) {
+                if (file.isDirectory()) {
+                    ftpClient.changeWorkingDirectory(ftpClient.printWorkingDirectory() + "/" + file.getName());
+                    FTPFilesList(ftpClient.listFiles());
+                    ftpClient.changeWorkingDirectory(currentDir);
+                } else {
+                    ftpFilesList.add(file);
+                    ftpFilesListPaths.add(currentDir + "/" + file.getName());
+                }
             }
         }
     }

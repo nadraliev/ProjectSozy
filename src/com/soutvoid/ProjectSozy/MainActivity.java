@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.view.Menu;
@@ -50,6 +51,7 @@ public class MainActivity extends Activity {
         PendingIntent pendingIntent = PendingIntent.getService(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         alarmManager.setInexactRepeating(AlarmManager.RTC, System.currentTimeMillis(), 10000, pendingIntent);
 
+        sendTextOnNotif(Environment.getExternalStorageDirectory().getAbsolutePath(), 1);
 
         //вставить фрагмент профилей
         FragmentManager fragmentManager = getFragmentManager();

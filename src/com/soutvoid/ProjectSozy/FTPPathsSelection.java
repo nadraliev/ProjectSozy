@@ -63,8 +63,8 @@ public class FTPPathsSelection extends ListActivity {
             public void run() {
 
                 try {
-                    ftpClient.connect(AddProfile.addressedit.getText().toString());
-                    ftpClient.login(AddProfile.useredit.getText().toString(), AddProfile.passwordedit.getText().toString());
+                    ftpClient.connect(AddProfile.addressedit.getText().toString().trim());
+                    ftpClient.login(AddProfile.useredit.getText().toString().trim(), AddProfile.passwordedit.getText().toString().trim());
                     ftpClient.changeWorkingDirectory(currentDirectory);
                 } catch (IOException e) {
                     e.printStackTrace();
