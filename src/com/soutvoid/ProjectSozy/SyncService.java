@@ -8,8 +8,9 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.os.IBinder;
+import org.apache.commons.net.ftp.FTPClient;
 
-import java.io.File;
+import java.io.*;
 import java.util.*;
 
 /**
@@ -23,14 +24,9 @@ public class SyncService extends Service {
     SQLiteDatabase db;
     SQLiteOpenProfiles dbOpen;
 
-    Integer id;
-
-    ArrayList<Integer[]> delays;
-    TimerTask timerTask;
-
-    int currentDay;
-
     public static Context context;
+
+    FTPClient ftpClient;
 
     public void onCreate() {
         super.onCreate();
@@ -49,27 +45,40 @@ public class SyncService extends Service {
             db = dbOpen.getReadableDatabase();
         }
 
-        Cursor cursor = db.query("profiles", new String[] {"_id"}, "name = 'passwords'", null, null, null, null);
-        cursor.moveToFirst();
-        if (cursor.getCount() != 0) {
-            Cursor cursor1 = db.query("profile" + cursor.getInt(0), new String[]{"path", "size"}, null, null, null, null, null);
-            cursor1.moveToFirst();
-            final File file = new File(cursor1.getString(0));
-            if (cursor1.getInt(1) != file.length()) {
-                Thread thread = new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Profile profile = new Profile("passwords");
-                        profile.startProfile();
-                    }
-                });
-                thread.start();
-                ContentValues contentValues = new ContentValues();
-                contentValues.put("size", file.length());
-                db.update("profile" + cursor.getInt(0), contentValues, null, null);
-            }
 
+        Cursor profiles = db.query("profiles", new String[] {"_id"}, "type = 'upload'", null, null, null, null);
+        profiles.moveToFirst();
+        Cursor profile;
+        ArrayList<Profile> forUpload = new ArrayList<Profile>();
+        ArrayList<String> paths;
+        Profile curProfile;
+        for (int i = 0; i < profiles.getCount(); i++) {
+            profile = db.query("profile" + profiles.getInt(0), new String[] {"path", "size"}, null, null, null, null, null);
+            profile.moveToFirst();
+            curProfile = new Profile(profiles.getInt(0));
+            paths = new ArrayList<String>();
+            if ((profile.getInt(1) != (new File(profile.getString(0))).length()) || !(new File(profile.getString(0))).exists()) {
+                if (profile.getCount() == 1)
+                    paths.add(profile.getString(0));
+                else {
+                    profile.moveToNext();
+                    for (int k = 1; k < profile.getCount(); k++) {
+                        if ((profile.getInt(1) != (new File(profile.getString(0))).length()) || !(new File(profile.getString(0))).exists())
+                            paths.add(profile.getString(0));
+                        profile.moveToNext();
+                    }
+                }
+            }
+            curProfile.uploadListArray = paths.toArray(new String[paths.size()]);
+            forUpload.add(curProfile);
+            profiles.moveToNext();
         }
+
+        for (int i = 0; i < forUpload.size(); i++) {
+            forUpload.get(i).uploadList();
+        }
+
+
         db.close();
         dbOpen.close();
         stopSelf();
@@ -80,67 +89,6 @@ public class SyncService extends Service {
     public void onDestroy() {
         super.onDestroy();
     }
-
-    public void updateTimers() {
-
-        final Cursor data = db.query("profiles", new String[] {"_id", "daynumber", "time"}, null, null, null, null, null, null);
-        data.moveToFirst();
-        try {
-            id = data.getInt(0);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        final Calendar calendar = Calendar.getInstance();   //номер понедельника - 2
-
-        Integer delay;
-        Timer timer = new Timer();
-
-        delays = new ArrayList<Integer[]>();   //здесь хранятся кол-во минут до начала профилей и id, им соответствующие
-
-        currentDay = calendar.get(Calendar.DAY_OF_WEEK) == 1?6:calendar.get(Calendar.DAY_OF_WEEK) - 2;
-
-        for (int i = 0; i < data.getCount(); i++) {    //ищем задержку для каждого  профиля
-            if (currentDay*24*60 + calendar.get(Calendar.HOUR_OF_DAY)*60 + calendar.get(Calendar.MINUTE) < data.getInt(1)*24*60 + data.getInt(2)) {
-                if (currentDay == data.getInt(1)) {
-                    delay = data.getInt(2) - (calendar.get(Calendar.HOUR_OF_DAY) * 60 + calendar.get(Calendar.MINUTE));
-                } else
-                    delay = 24 * 60 - (calendar.get(Calendar.HOUR_OF_DAY) * 60 + calendar.get(Calendar.MINUTE)) + 24 * 60 * (data.getInt(1) - currentDay) + data.getInt(2);
-            } else if (currentDay*24*60 + calendar.get(Calendar.HOUR_OF_DAY)*60 + calendar.get(Calendar.MINUTE) > data.getInt(1)*24*60 + data.getInt(2)) {
-                delay = 24 * 60 - (calendar.get(Calendar.HOUR_OF_DAY) * 60 + calendar.get(Calendar.MINUTE)) + 24 * 60 * (6 - currentDay + data.getInt(1)) + data.getInt(2);
-            } else delay = 0;
-
-            delays.add(new Integer[] {data.getInt(0), delay});
-            data.moveToNext();
-        }
-
-        data.close();
-
-        Integer[][] delaysArray = delays.toArray(new Integer[delays.size()][2]);   //преобразуем в массив для сортировки
-
-        Arrays.sort(delaysArray, new ComparatorDelays());
-
-        final ArrayDeque<Integer[]> arrayDeque = new ArrayDeque<Integer[]>();
-
-        for (int i = 0; i < delaysArray.length; i ++)
-            arrayDeque.add(delaysArray[i]);
-
-        int count = delaysArray.length;
-
-
-        for (int i = 0; i < count; i++) {
-            timerTask = new TimerTask() {
-                @Override
-                public void run() {
-                    Profile profile = new Profile(arrayDeque.pollFirst()[0]);
-                    profile.startProfile();
-                }
-            };
-            timer.schedule(timerTask, delaysArray[i][1]*60*1000, 1000*60*60*24*7);
-        }
-
-        //TODO сервис не поднимается после падения!
-    }
-
 
     public void sendTextOnNotif(String input, int id) {
         Context context = SyncService.this;
@@ -166,6 +114,7 @@ public class SyncService extends Service {
     public IBinder onBind(Intent intent) {
         return null;
     }
+
 
 
 }

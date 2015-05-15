@@ -31,12 +31,38 @@ public class Profile {
     Integer filesCount = 0;
     public Integer counter = 0;
 
+    String[] uploadListArray;
+
     public Profile(int id) {
         this.id = id;
+        try {
+            dbOpen = new SQLiteOpenProfiles(SyncService.context);
+            db = dbOpen.getWritableDatabase();
+        } catch (Exception e) {
+            e.printStackTrace();
+            db = dbOpen.getReadableDatabase();
+        }
+        Cursor cursor = db.query("profiles", new String[] {"name"}, "_id = " + id, null, null, null, null);
+        cursor.moveToFirst();
+        name = cursor.getString(0);
+        cursor.close();
+        db.close();
     }
 
     public Profile(String name) {
         this.name = name;
+        try {
+            dbOpen = new SQLiteOpenProfiles(SyncService.context);
+            db = dbOpen.getWritableDatabase();
+        } catch (Exception e) {
+            e.printStackTrace();
+            db = dbOpen.getReadableDatabase();
+        }
+        Cursor cursor = db.query("profiles", new String[] {"_id"}, "name = '" + name + "'", null, null, null, null);
+        cursor.moveToFirst();
+        this.id = cursor.getInt(0);
+        cursor.close();
+        db.close();
     }
 
     //выгрузка и все, что с ней связано
@@ -64,7 +90,7 @@ public class Profile {
     }
 
     public void upload(final String profileName) {
-        final Cursor data = db.query("profiles", new String[] {"address", "user", "password", "localpath", "remotepath"}, "name = '" + profileName + "'", null, null, null, null);
+        final Cursor data = db.query("profiles", new String[] {"address", "user", "password", "localpath", "remotepath", "_id"}, "name = '" + profileName + "'", null, null, null, null);
         data.moveToFirst();
 
         ftpClient = new FTPClient();
@@ -95,15 +121,61 @@ public class Profile {
                 ftpClient.changeWorkingDirectory(remotepath);
                 ftpClient.storeFile(localPathFile.getName(), buffin);
                 buffin.close();
-                sendNotifProcessing();
             }
             ftpClient.logout();
             ftpClient.disconnect();
+            data.close();
+            db.close();
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
             sendNotifDone();
         }
+    }
+
+    public void uploadList() {
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    dbOpen = new SQLiteOpenProfiles(SyncService.context);
+                    db = dbOpen.getWritableDatabase();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    db = dbOpen.getReadableDatabase();
+                }
+                ftpClient = new FTPClient();
+                Cursor cursor = db.query("profiles", new String[] {"address", "user", "password", "remotepath"}, "name = '" + name + "'", null, null, null, null);
+                cursor.moveToFirst();
+                try {
+                    ftpClient.connect(cursor.getString(0));
+                    ftpClient.login(cursor.getString(1), cursor.getString(2));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                BufferedInputStream buffin = null;
+                for (int i = 0; i < uploadListArray.length; i++) {
+                    try {
+                        buffin = new BufferedInputStream((new FileInputStream(uploadListArray[i])));
+                        ftpClient.changeWorkingDirectory(cursor.getString(3));
+                        ftpClient.storeFile(uploadListArray[i].substring(uploadListArray[i].lastIndexOf('/') + 1), buffin);
+                        buffin.close();
+                    } catch (FileNotFoundException e) {
+                        e.printStackTrace();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                db.close();
+                try {
+                    ftpClient.logout();
+                    ftpClient.disconnect();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        thread.start();
     }
 
     //загрузка и все, что с ней связано
@@ -212,27 +284,6 @@ public class Profile {
         cursor.close();
     }
 
-    public void sendTextOnNotif(String input, int id) {
-        Context context = MainActivity.context;
-
-        Notification.Builder builder = new Notification.Builder(context);
-
-
-        builder
-                .setSmallIcon(R.drawable.ic_notif)
-                .setTicker(input)
-                .setWhen(System.currentTimeMillis())
-                .setContentTitle(input)
-                .setContentText(input)
-                .setAutoCancel(true);
-
-
-        Notification notification = builder.build();
-
-        NotificationManager notificationManager = (NotificationManager)context.getSystemService(context.NOTIFICATION_SERVICE);
-        notificationManager.notify(id, notification);
-    }
-
     public void sendNotifStart() {
         Context context = SyncService.context;
 
@@ -250,7 +301,7 @@ public class Profile {
                 .setLargeIcon(BitmapFactory.decodeResource(resources, R.drawable.ic_notif))
                 .setTicker(resources.getString(R.string.syncstarted))
                 .setWhen(System.currentTimeMillis())
-                .setContentTitle('"' + name + '"' + " " + resources.getString(R.string.is) + " " + resources.getString(R.string.syncstarted))
+                .setContentTitle('"' + name + '"')
                 .setContentText(resources.getString(R.string.showprofile))
                 .setProgress(0, 0, true)
                 .setAutoCancel(false);
@@ -282,7 +333,7 @@ public class Profile {
                 .setLargeIcon(BitmapFactory.decodeResource(resources, R.drawable.ic_notif))
                 .setTicker(resources.getString(R.string.synccomplete))
                 .setWhen(System.currentTimeMillis())
-                .setContentTitle('"' + name + '"' + " " + resources.getString(R.string.synccomplete))
+                .setContentTitle('"' + name + '"')
                 .setContentText(resources.getString(R.string.showprofile))
                 .setAutoCancel(true);
 
@@ -312,7 +363,7 @@ public class Profile {
                 .setLargeIcon(BitmapFactory.decodeResource(resources, R.drawable.ic_notif))
                 .setTicker(resources.getString(R.string.syncing))
                 .setWhen(System.currentTimeMillis())
-                .setContentTitle('"' + name + '"' + " " + resources.getString(R.string.is) + " " + resources.getString(R.string.syncing))
+                .setContentTitle('"' + name + '"')
                 .setContentText(resources.getString(R.string.showprofile))
                 .setProgress(maxCount, counter, false)
                 .setAutoCancel(false);

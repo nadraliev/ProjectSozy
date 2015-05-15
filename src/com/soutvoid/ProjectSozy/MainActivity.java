@@ -49,9 +49,8 @@ public class MainActivity extends Activity {
         AlarmManager alarmManager = (AlarmManager)context.getSystemService(context.ALARM_SERVICE);
         Intent intent = new Intent(MainActivity.this, SyncService.class);
         PendingIntent pendingIntent = PendingIntent.getService(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        alarmManager.setInexactRepeating(AlarmManager.RTC, System.currentTimeMillis(), 10000, pendingIntent);
+        alarmManager.setInexactRepeating(AlarmManager.RTC, System.currentTimeMillis(), 60000, pendingIntent);
 
-        sendTextOnNotif(Environment.getExternalStorageDirectory().getAbsolutePath(), 1);
 
         //вставить фрагмент профилей
         FragmentManager fragmentManager = getFragmentManager();
