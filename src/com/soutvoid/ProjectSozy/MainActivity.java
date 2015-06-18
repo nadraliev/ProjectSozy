@@ -1,13 +1,9 @@
 package com.soutvoid.ProjectSozy;
 
 import android.app.*;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
-import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteException;
 import android.os.Bundle;
-import android.os.Environment;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.view.Menu;
@@ -15,7 +11,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.*;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -36,7 +31,6 @@ public class MainActivity extends Activity {
     int[] navigationDrawerIcons;
 
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -49,8 +43,7 @@ public class MainActivity extends Activity {
         AlarmManager alarmManager = (AlarmManager)context.getSystemService(context.ALARM_SERVICE);
         Intent intent = new Intent(MainActivity.this, SyncService.class);
         PendingIntent pendingIntent = PendingIntent.getService(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        alarmManager.setInexactRepeating(AlarmManager.RTC, System.currentTimeMillis(), 60000, pendingIntent);
-
+        alarmManager.setInexactRepeating(AlarmManager.RTC, System.currentTimeMillis(), 1000*60*10, pendingIntent);
 
         //вставить фрагмент профилей
         FragmentManager fragmentManager = getFragmentManager();
@@ -146,26 +139,7 @@ public class MainActivity extends Activity {
         return true;
     }
 
-    public static void sendTextOnNotif(String input, int id) {
-        Context context = MainActivity.context;
 
-        Notification.Builder builder = new Notification.Builder(context);
-
-
-        builder
-                .setSmallIcon(R.drawable.ic_notif)
-                .setTicker(input)
-                .setWhen(System.currentTimeMillis())
-                .setContentTitle(input)
-                .setContentText(input)
-                .setAutoCancel(true);
-
-
-        Notification notification = builder.build();
-
-        NotificationManager notificationManager = (NotificationManager)context.getSystemService(NOTIFICATION_SERVICE);
-        notificationManager.notify(id, notification);
-    }
 
     public void addprofilebutton(View view) {
         Intent newprofile = new Intent(this, AddProfile.class);
