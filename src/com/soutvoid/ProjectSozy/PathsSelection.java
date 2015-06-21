@@ -28,6 +28,36 @@ public class PathsSelection extends ListActivity {
     private List<String> directoryEntriesShow = new ArrayList<String>();
     private File currentDirectory = new File("/");
     private File currentFile = new File("");
+    private ArrayList<String> allFiles = new ArrayList<String>();
+    private ArrayList<String> sizes = new ArrayList<String>();
+
+
+    private void findAllFiles(String path, String prefix) {
+        for (File file : new File(path).listFiles()) {
+            if (file.isDirectory()) {
+                findAllFiles(path + "/" + file.getName(), prefix + "/" + file.getName());
+            } else {
+                allFiles.add(prefix + "/" + file.getName());
+                sizes.add(Profile.md5(file.length() + ""));
+            }
+        }
+    }
+
+    private void sendResult() {
+        Intent i = new Intent();
+        allFiles.clear();
+        sizes.clear();
+        if (currentFile.getName() == "") {
+            findAllFiles(currentDirectory.getAbsolutePath(), "");
+        } else {
+            allFiles.add("/" + currentFile.getName());
+            sizes.add(Profile.md5(currentFile.length() + ""));
+        }
+        i.putExtra("files", allFiles);
+        i.putExtra("sizes", sizes);
+        i.putExtra("path", currentDirectory.getAbsolutePath());
+        setResult(RESULT_OK, i);
+    }
 
 
     //заполняем лист содержимым папки
@@ -69,11 +99,7 @@ public class PathsSelection extends ListActivity {
                 public void onClick(DialogInterface dialog, int which) {
                     //дествия по нажатию да
                     currentFile = aDirectory;
-                    Intent i = new Intent();
-                    if (currentFile.getName() == "")
-                        i.putExtra("path", currentDirectory.getAbsolutePath());
-                    else i.putExtra("path", currentFile.getAbsolutePath());
-                    setResult(RESULT_OK, i);
+                    sendResult();
                     finish();
 
                 }
@@ -137,11 +163,7 @@ public class PathsSelection extends ListActivity {
                 onBackPressed();
                 break;
             case R.id.ok_action:
-                Intent i = new Intent();
-                if (currentFile.getName() == "")
-                    i.putExtra("path", currentDirectory.getAbsolutePath());
-                else i.putExtra("path", currentFile.getAbsolutePath());
-                setResult(RESULT_OK, i);
+                sendResult();
                 finish();
                 break;
         }

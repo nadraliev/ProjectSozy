@@ -19,14 +19,12 @@ public class SQLiteOpenProfiles extends SQLiteOpenHelper {
     private static final String COLUMN_ADDRESS = "address";
     private static final String COLUMN_USER = "user";
     private static final String COLUMN_PASSWORD = "password";
-    private static final String COLUMN_LOCAL_PATH = "localpath";
-    private static final String COLUMN_REMOTE_PATH = "remotepath";
+    private static final String COLUMN_PATH = "path";
+    private static final String COLUMN_DESTINATION = "destination";
     private static final String COLUMN_TYPE = "type";
     private static final String COLUMN_DAYNUMBER = "daynumber";
     private static final String COLUMN_TIME = "time";
-    private static final String COLUMN_SHEDULED ="sheduled";
-    private static final String COLUMN_PATH = "path";
-    private static final String COLUMN_SIZE = "size";
+    private static final String COLUMN_SIZE_DIGEST = "sizedigest";
 
     //номера столбцов
     private static final int NUM_COLUMN_ID = 0;
@@ -48,13 +46,13 @@ public class SQLiteOpenProfiles extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         String query = "CREATE TABLE " + TABLE_NAME + "(" + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT," + COLUMN_NAME + " STRING," + COLUMN_ADDRESS + " STRING," + COLUMN_USER + " STRING," + COLUMN_PASSWORD + " STRING,"
-                + COLUMN_LOCAL_PATH + " STRING," + COLUMN_REMOTE_PATH + " STRING," + COLUMN_TYPE + " String," + COLUMN_DAYNUMBER + " integer," + COLUMN_TIME + " integer," + COLUMN_SHEDULED + " integer" + ");";
+                + COLUMN_PATH + " STRING," + COLUMN_DESTINATION + " STRING," + COLUMN_TYPE + " String," + COLUMN_DAYNUMBER + " integer," + COLUMN_TIME + " integer" + ");";
         db.execSQL(query);
     }
 
     public void createTable(SQLiteDatabase db, final String name) {
-        String dquery = "CREATE TABLE " + name + "(" + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT," + COLUMN_PATH + " STRING," + COLUMN_SIZE + " INTEGER);";
-        db.execSQL(dquery);
+        String query = "CREATE TABLE " + name + "(" + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT," + COLUMN_PATH + " STRING," + COLUMN_SIZE_DIGEST + " STRING);";
+        db.execSQL(query);
     }
 
     public void dropTable(SQLiteDatabase db, final String name) {

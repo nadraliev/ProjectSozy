@@ -18,8 +18,8 @@ public class ProfileInfo extends Activity {
     TextView infoName;
     TextView infoAddress;
     TextView infoUser;
-    TextView infoLocalPath;
-    TextView infoRemotePath;
+    TextView infoPath;
+    TextView infoDestination;
     TextView infoType;
 
     SQLiteDatabase db;
@@ -61,21 +61,21 @@ public class ProfileInfo extends Activity {
     }
 
     public void UpdateInfo() {
-        Cursor data = db.query("profiles", new String[] {"address", "user", "password", "localpath", "remotepath", "type", "name", "daynumber", "time"}, "_id = " + id, null, null, null, null);
+        Cursor data = db.query("profiles", new String[] {"address", "user", "password", "path", "destination", "type", "name", "daynumber", "time"}, "_id = " + id, null, null, null, null);
         data.moveToFirst();
 
         //заполняем поля информацией
         infoName = (TextView)findViewById(R.id.info_name);
         infoAddress = (TextView)findViewById(R.id.info_address);
         infoUser = (TextView)findViewById(R.id.info_user);
-        infoLocalPath = (TextView)findViewById(R.id.info_localpath);
-        infoRemotePath = (TextView)findViewById(R.id.info_remotepath);
+        infoPath = (TextView)findViewById(R.id.info_localpath);
+        infoDestination = (TextView)findViewById(R.id.info_remotepath);
         infoType = (TextView)findViewById(R.id.info_type);
         infoName.setText(data.getString(6));
         infoAddress.setText(data.getString(0));
         infoUser.setText(data.getString(1));
-        infoLocalPath.setText(data.getString(3));
-        infoRemotePath.setText(data.getString(4));
+        infoPath.setText(data.getString(3));
+        infoDestination.setText(data.getString(4));
         infoType.setText(data.getString(5));
 
         data.close();
@@ -112,7 +112,7 @@ public class ProfileInfo extends Activity {
                 Thread thread = new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        profile.startProfile();
+                        profile.sync();
                     }
                 });
                 thread.start();

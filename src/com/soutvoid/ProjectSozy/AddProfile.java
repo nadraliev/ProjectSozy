@@ -16,6 +16,9 @@ import android.view.animation.AnimationUtils;
 import android.widget.*;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Created by andrew on 15.03.15.
@@ -31,7 +34,6 @@ public class AddProfile extends Activity {
     public static EditText passwordedit;
     public static EditText nameedit;
     boolean isUploading = true;
-    boolean isFTPFile;
     public static boolean isChanging = false;    //если true, то активность вызвана, чтобы изменить профиль
     String syncType;
 
@@ -46,6 +48,10 @@ public class AddProfile extends Activity {
     Spinner hoursSpinner;
     Spinner minutesSpinner;
 
+    private ArrayList<String> localFiles = new ArrayList<String>();
+    private ArrayList<String> remoteFiles = new ArrayList<String>();
+    private ArrayList<String> localSizes = new ArrayList<String>();
+    private ArrayList<String> remoteSizes = new ArrayList<String>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,7 +72,6 @@ public class AddProfile extends Activity {
             db = dbOpen.getReadableDatabase();
         }
 
-        isFTPFile = false;
         localpathtext = (TextView)findViewById(R.id.localpath);
         remotepathtext = (TextView)findViewById(R.id.remotepath);
         addressedit = ((EditText)findViewById(R.id.addredit));
@@ -123,7 +128,7 @@ public class AddProfile extends Activity {
 
 
         if(isChanging) {     //заполнить поля текущими данными, если профиль изменяется
-            Cursor data = db.query("profiles", new String[] {"_id", "name", "address", "user", "password", "localpath", "remotepath", "type", "daynumber", "time"}, "name = '" + MainActivity.currentName + "'", null, null, null, null);
+            Cursor data = db.query("profiles", new String[] {"_id", "name", "address", "user", "password", "path", "destination", "type", "daynumber", "time"}, "name = '" + MainActivity.currentName + "'", null, null, null, null);
             data.moveToFirst();
             currentId = data.getInt(0);
             localpathtext.setText(data.getString(5).substring(data.getString(5).lastIndexOf("/") + 1));
@@ -164,60 +169,87 @@ public class AddProfile extends Activity {
                 onBackPressed();
                 break;
             case R.id.ok_action :
-                //проверка, что путь назначения - не файл
-                if (isUploading && isFTPFile) {
-                    Toast chooseAnother = Toast.makeText(getApplicationContext(), getString(R.string.wrongdestination), Toast.LENGTH_LONG);
-                    chooseAnother.show();
-                } else if (!isUploading && (!new File(LocalPath).isDirectory())) {
-                    Toast chooseAnother = Toast.makeText(getApplicationContext(), getString(R.string.wrongdestination), Toast.LENGTH_LONG);
-                    chooseAnother.show();
-                } else {
-
                     if (nameedit.getText().toString().trim().equals("") || addressedit.getText().toString().trim().equals("") || useredit.getText().toString().trim().equals("") || passwordedit.getText().toString().trim().equals("") ||
                             LocalPath.equals("") || RemotePath.equals("")) {
                         Toast emptyField = Toast.makeText(getApplicationContext(), getString(R.string.emptyField), Toast.LENGTH_LONG);
                         emptyField.show();
                     } else {
-
                         if (db.query("profiles", new String[]{"name"}, "name = '" + nameedit.getText().toString() + "'", null, null, null, null).getCount() == 0 || (isChanging && MainActivity.currentName.equals(nameedit.getText().toString()))) {
-
                             time = hoursSpinner.getSelectedItemPosition()*60 + minutesSpinner.getSelectedItemPosition()*10;
                             if(!isChanging) {
 
-                                LocalPath = LocalPath.substring(1);
-                                LocalPath = LocalPath.substring(LocalPath.indexOf("/"));
-
+                                ArrayList<String> listFiles;
+                                ArrayList<String> sizesDigests;
                                 ContentValues newValues = new ContentValues();
                                 newValues.put("name", nameedit.getText().toString());
                                 newValues.put("address", addressedit.getText().toString());
                                 newValues.put("user", useredit.getText().toString());
                                 newValues.put("password", passwordedit.getText().toString());
-                                newValues.put("localpath", "/storage/emulated/0" + LocalPath);
-                                newValues.put("remotepath", RemotePath);
                                 newValues.put("daynumber", day);
                                 newValues.put("time", time);
-                                if (isUploading)
+                                if (isUploading) {
                                     syncType = "upload";
-                                else syncType = "download";
+                                    newValues.put("path", LocalPath);
+                                    newValues.put("destination", RemotePath);
+                                    listFiles = localFiles;
+                                    sizesDigests = localSizes;
+                                } else {
+                                    syncType = "download";
+                                    newValues.put("path", RemotePath);
+                                    newValues.put("destination", LocalPath);
+                                    listFiles = remoteFiles;
+                                    sizesDigests = remoteSizes;
+                                }
                                 newValues.put("type", syncType);
                                 db.insert("profiles", null, newValues);
+                                Cursor cursor = db.query("profiles", new String[]{"_id"}, "name = '" + nameedit.getText().toString() + "'", null, null, null, null);
+                                cursor.moveToFirst();
+                                dbOpen.createTable(db, "profile" + cursor.getInt(0));
+                                for (int i = 0; i < listFiles.size(); i++) {
+                                    newValues = new ContentValues();
+                                    newValues.put("path", listFiles.get(i));
+                                    newValues.put("sizedigest", sizesDigests.get(i));
+                                    db.insert("profile" + cursor.getInt(0), null, newValues);
+                                }
+                                cursor.close();
                                 isChanging = false;
                                 finish();
-                            } else {  //при изменении времени и дня могут возникнуть проблемы с запланированной задачей
+                            } else {
+                                ArrayList<String> listFiles;
+                                ArrayList<String> sizesDigests;
                                 ContentValues newValues = new ContentValues();
                                 newValues.put("name", nameedit.getText().toString());
                                 newValues.put("address", addressedit.getText().toString());
                                 newValues.put("user", useredit.getText().toString());
                                 newValues.put("password", passwordedit.getText().toString());
-                                newValues.put("localpath", LocalPath);
-                                newValues.put("remotepath", RemotePath);
                                 newValues.put("daynumber", day);
                                 newValues.put("time", time);
-                                if (isUploading)
+                                if (isUploading) {
                                     syncType = "upload";
-                                else syncType = "download";
+                                    newValues.put("path", LocalPath);
+                                    newValues.put("destination", RemotePath);
+                                    listFiles = localFiles;
+                                    sizesDigests = localSizes;
+                                } else {
+                                    syncType = "download";
+                                    newValues.put("path", RemotePath);
+                                    newValues.put("destination", LocalPath);
+                                    listFiles = remoteFiles;
+                                    sizesDigests = remoteSizes;
+                                }
                                 newValues.put("type", syncType);
                                 db.update("profiles", newValues, "_id = " + currentId, null);
+                                Cursor cursor = db.query("profiles", new String[]{"_id"}, "name = '" + nameedit.getText().toString() + "'", null, null, null, null);
+                                cursor.moveToFirst();
+                                dbOpen.dropTable(db, "profile" + cursor.getInt(0));
+                                dbOpen.createTable(db, "profile" + cursor.getInt(0));
+                                for (int i = 0; i < listFiles.size(); i++) {
+                                    newValues = new ContentValues();
+                                    newValues.put("path", listFiles.get(i));
+                                    newValues.put("sizedigest", sizesDigests.get(i));
+                                    db.insert("profile" + cursor.getInt(0), null, newValues);
+                                }
+                                cursor.close();
                                 MainActivity.currentName = nameedit.getText().toString();
 
                                 isChanging = false;
@@ -231,7 +263,6 @@ public class AddProfile extends Activity {
                             nameExists.show();
                         }
                     }
-                }
                 break;
         }
 
@@ -253,16 +284,20 @@ public class AddProfile extends Activity {
             if (data == null) {
                 return;
             }
+            localFiles = data.getStringArrayListExtra("files");
+            localSizes = data.getStringArrayListExtra("sizes");
             LocalPath = data.getStringExtra("path");
-            localpathtext.setText(new File(LocalPath).getName());
+            localpathtext.setText(LocalPath.substring(LocalPath.lastIndexOf("/") + 1));    //на этом этапе у нас есть путь к главной папке и список всех файлов
+
         }
         if (requestCode == 2) {
             if (data == null) {
                 return;
             }
-            RemotePath = data.getStringExtra("remotepathtext");
-            isFTPFile = data.getBooleanExtra("isFile", isFTPFile);
-            remotepathtext.setText((CharSequence) new File(RemotePath).getName());
+            remoteFiles = data.getStringArrayListExtra("files");
+            remoteSizes = data.getStringArrayListExtra("sizes");
+            RemotePath = data.getStringExtra("path");
+            remotepathtext.setText( new File(RemotePath).getName());
         }
     }
 

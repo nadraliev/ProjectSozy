@@ -84,7 +84,7 @@ public class MainActivity extends Activity {
                 Fragment fragment;
                 FragmentManager fragmentManager;
                 switch (position) {
-                    case 0 :
+                    case 0:
 
                         fragment = new ProfilesFragment();
 
@@ -97,7 +97,7 @@ public class MainActivity extends Activity {
                         navigationDrawer.closeDrawer(navigationDrawerList);
                         setTitle(getResources().getStringArray(R.array.navigationdrawer)[0]);
                         break;
-                    case 1 :
+                    case 1:
                         //вставка фрагмента процессов
                         fragment = new ProcessesFragment();
 
@@ -139,7 +139,25 @@ public class MainActivity extends Activity {
         return true;
     }
 
+    public void sendTextOnNotif(String input, int id) {
 
+        Notification.Builder builder = new Notification.Builder(context);
+
+
+        builder
+                .setSmallIcon(R.drawable.ic_notif)
+                .setTicker(input)
+                .setWhen(System.currentTimeMillis())
+                .setContentTitle(input)
+                .setContentText(input)
+                .setAutoCancel(true);
+
+
+        Notification notification = builder.build();
+
+        NotificationManager notificationManager = (NotificationManager)context.getSystemService(context.NOTIFICATION_SERVICE);
+        notificationManager.notify(id, notification);
+    }
 
     public void addprofilebutton(View view) {
         Intent newprofile = new Intent(this, AddProfile.class);

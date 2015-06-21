@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">SozySync</string>
-    <string name="addrhead">Адрес сервера FTP: </string>
-    <string name="userhead">Логин: </string>
-    <string name="passwdhead">Пароль:</string>
+    <string name="addrhead">Адрес сервера FTP </string>
+    <string name="userhead">Логин </string>
+    <string name="passwdhead">Пароль</string>
     <string name="uploadbutton">Выгрузить</string>
     <string name="download">Загрузить</string>
     <string name="settingsbutton">Параметры</string>
     <string name="savebutton">Сохранить</string>
     <string name="pathtohome">/storage/emulated/0/</string>
-    <string name="localpathhead">Локальный путь: </string>
-    <string name="remotepathhead">Удаленный путь: </string>
+    <string name="localpathhead">Локальный путь </string>
+    <string name="remotepathhead">Удаленный путь </string>
     <string name="unknownhostexception">Неизвестный сервер: </string>
     <string name="connectexception">Подключение не удалось</string>
     <string name="saved">Сохранено</string>
@@ -40,7 +40,7 @@
     <string name="empty">Пусто</string>
     <string name="start">Запустить</string>
     <string name="info">Инфо</string>
-    <string name="typehead">Тип: </string>
+    <string name="typehead">Тип </string>
     <string name="about">Информация</string>
     <string name="edit">Изменить профиль</string>
     <string name="synccomplete">Синхронизация завершена</string>
@@ -52,6 +52,8 @@
     <string name="time">Время</string>
     <string name="day_info">День: </string>
     <string name="time_info">Время:</string>
+    <string name="path">Путь</string>
+    <string name="destination">Пункт назначения</string>
     <string-array name="navigationdrawer">
         <item>Профили</item>
         <item>Процессы</item>

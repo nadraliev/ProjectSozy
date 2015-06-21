@@ -66,7 +66,7 @@ public class ProfilesFragment extends android.app.Fragment {
 
         names.clear();
 
-        Cursor profiles = db.query("profiles", new String[] {"name", "localpath", "address", "type"}, null, null, null, null, null);
+        Cursor profiles = db.query("profiles", new String[] {"name", "path", "address", "type"}, null, null, null, null, null);
         profiles.moveToFirst();
 
         ArrayList<Map<String, Object>> data = new ArrayList<Map<String, Object>>(profiles.getCount());

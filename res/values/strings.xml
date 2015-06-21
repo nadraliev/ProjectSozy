@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">SozySync</string>
-    <string name="addrhead">FTP Server Address: </string>
-    <string name="userhead">Login: </string>
-    <string name="passwdhead">Password:</string>
+    <string name="addrhead">FTP Server Address </string>
+    <string name="userhead">Login </string>
+    <string name="passwdhead">Password</string>
     <string name="uploadbutton">Upload</string>
     <string name="download">Download</string>
     <string name="settingsbutton">Settings</string>
@@ -40,7 +40,7 @@
     <string name="empty">Empty</string>
     <string name="start">Start</string>
     <string name="info">Info</string>
-    <string name="typehead">Type: </string>
+    <string name="typehead">Type </string>
     <string name="about">About</string>
     <string name="edit">Edit profile</string>
     <string name="synccomplete">Sync completed</string>
@@ -52,6 +52,8 @@
     <string name="time">Time</string>
     <string name="day_info">Day: </string>
     <string name="time_info">Time:</string>
+    <string name="path">Path</string>
+    <string name="destination">Destination</string>
     <string-array name="navigationdrawer">
         <item>Profiles</item>
         <item>Processes</item>
