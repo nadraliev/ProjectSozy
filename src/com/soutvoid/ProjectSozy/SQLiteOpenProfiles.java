@@ -22,8 +22,6 @@ public class SQLiteOpenProfiles extends SQLiteOpenHelper {
     private static final String COLUMN_PATH = "path";
     private static final String COLUMN_DESTINATION = "destination";
     private static final String COLUMN_TYPE = "type";
-    private static final String COLUMN_DAYNUMBER = "daynumber";
-    private static final String COLUMN_TIME = "time";
     private static final String COLUMN_SIZE_DIGEST = "sizedigest";
 
     //номера столбцов
@@ -46,7 +44,7 @@ public class SQLiteOpenProfiles extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         String query = "CREATE TABLE " + TABLE_NAME + "(" + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT," + COLUMN_NAME + " STRING," + COLUMN_ADDRESS + " STRING," + COLUMN_USER + " STRING," + COLUMN_PASSWORD + " STRING,"
-                + COLUMN_PATH + " STRING," + COLUMN_DESTINATION + " STRING," + COLUMN_TYPE + " String," + COLUMN_DAYNUMBER + " integer," + COLUMN_TIME + " integer" + ");";
+                + COLUMN_PATH + " STRING," + COLUMN_DESTINATION + " STRING," + COLUMN_TYPE + " String" + ");";
         db.execSQL(query);
     }
 

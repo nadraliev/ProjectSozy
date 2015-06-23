@@ -39,20 +39,9 @@ public class AddProfile extends Activity {
     String syncType;
 
     Integer currentId;
-    Integer day;
-    Integer time;
 
     SQLiteOpenProfiles dbOpen;
     SQLiteDatabase db;
-
-    Spinner daysSpinner;
-    Spinner hoursSpinner;
-    Spinner minutesSpinner;
-
-    private ArrayList<String> localFiles = new ArrayList<String>();
-    private ArrayList<String> remoteFiles = new ArrayList<String>();
-    private ArrayList<String> localSizes = new ArrayList<String>();
-    private ArrayList<String> remoteSizes = new ArrayList<String>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,53 +68,7 @@ public class AddProfile extends Activity {
         useredit = ((EditText)findViewById(R.id.useredit));
         passwordedit = ((EditText)findViewById(R.id.passwdedit));
         nameedit = ((EditText)findViewById(R.id.nameedit));
-        daysSpinner = (Spinner)findViewById(R.id.days);
-        hoursSpinner = (Spinner)findViewById(R.id.hours);
-        minutesSpinner = (Spinner)findViewById(R.id.minutes);
 
-        //Инициализация спиннера дней недели
-        ArrayAdapter<CharSequence> days = ArrayAdapter.createFromResource(this, R.array.daysofweek, R.layout.spinner_row);
-        days.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        daysSpinner.setAdapter(days);
-        day = 0;
-        daysSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            public void onItemSelected(AdapterView<?> parent, View itemSelected, int selectedItemPosition, long selectedId) {
-                day = selectedItemPosition;
-            }
-
-            public void onNothingSelected(AdapterView<?> parent) {
-                //ничего не делать
-            }
-        });
-
-        //инициализация спиннеров времени
-        ArrayAdapter<CharSequence> hours = ArrayAdapter.createFromResource(this, R.array.hours, R.layout.spinner_row);
-        ArrayAdapter<CharSequence> minutes = ArrayAdapter.createFromResource(this, R.array.minutes, R.layout.spinner_row);
-        hours.setDropDownViewResource(R.layout.dropdown_spinner_item);
-        minutes.setDropDownViewResource(R.layout.dropdown_spinner_item);
-        hoursSpinner.setAdapter(hours);
-        minutesSpinner.setAdapter(minutes);
-        hoursSpinner.setSelection(22);
-        minutesSpinner.setSelection(0);
-        time = timeToMinutes(22, 0);
-        hoursSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            public void onItemSelected(AdapterView<?> parent, View itemSelected, int selectedItemPosition, long selectedId) {
-                hoursSpinner.setSelection(selectedItemPosition);
-            }
-
-            public void onNothingSelected(AdapterView<?> parent) {
-                //ничего не делать
-            }
-        });
-        minutesSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            public void onItemSelected(AdapterView<?> parent, View itemSelected, int selectedItemPosition, long selectedId) {
-                minutesSpinner.setSelection(selectedItemPosition);
-            }
-
-            public void onNothingSelected(AdapterView<?> parent) {
-                //ничего не делать
-            }
-        });
 
 
         if(isChanging) {     //заполнить поля текущими данными, если профиль изменяется
@@ -138,9 +81,6 @@ public class AddProfile extends Activity {
             useredit.setText(data.getString(3));
             passwordedit.setText(data.getString(4));
             nameedit.setText(data.getString(1));
-            daysSpinner.setSelection(data.getInt(8));
-            hoursSpinner.setSelection(data.getInt(9)/60);
-            minutesSpinner.setSelection(data.getInt(9)%60/10);
 
             LocalPath = data.getString(5);
             RemotePath = data.getString(6);
@@ -176,7 +116,6 @@ public class AddProfile extends Activity {
                         emptyField.show();
                     } else {
                         if (db.query("profiles", new String[]{"name"}, "name = '" + nameedit.getText().toString() + "'", null, null, null, null).getCount() == 0 || (isChanging && MainActivity.currentName.equals(nameedit.getText().toString()))) {
-                            time = hoursSpinner.getSelectedItemPosition()*60 + minutesSpinner.getSelectedItemPosition()*10;
                             if(!isChanging) {
 
                                 ContentValues newValues = new ContentValues();
@@ -184,8 +123,6 @@ public class AddProfile extends Activity {
                                 newValues.put("address", addressedit.getText().toString());
                                 newValues.put("user", useredit.getText().toString());
                                 newValues.put("password", passwordedit.getText().toString());
-                                newValues.put("daynumber", day);
-                                newValues.put("time", time);
                                 if (isUploading) {
                                     syncType = "upload";
                                     if (new File(LocalPath).isDirectory())
@@ -220,8 +157,6 @@ public class AddProfile extends Activity {
                                 newValues.put("address", addressedit.getText().toString());
                                 newValues.put("user", useredit.getText().toString());
                                 newValues.put("password", passwordedit.getText().toString());
-                                newValues.put("daynumber", day);
-                                newValues.put("time", time);
                                 if (isUploading) {
                                     syncType = "upload";
                                     if (new File(LocalPath).isDirectory())

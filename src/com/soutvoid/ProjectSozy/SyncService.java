@@ -129,13 +129,17 @@ public class SyncService extends Service {
             e.printStackTrace();
             db = dbOpen.getReadableDatabase();
         }
-        Cursor cursor = db.query("profiles", new String[] {"_id"}, null, null, null, null, null);
-        cursor.moveToFirst();
-        Profile profile;
-        for (int i = 0; i < cursor.getCount(); i++) {
-            profile = new Profile(cursor.getInt(0));
-            profile.sync();
-            if (!cursor.isLast()) cursor.moveToNext();
+        try {
+            Cursor cursor = db.query("profiles", new String[]{"_id"}, null, null, null, null, null);
+            cursor.moveToFirst();
+            Profile profile;
+            for (int i = 0; i < cursor.getCount(); i++) {
+                profile = new Profile(cursor.getInt(0));
+                profile.sync();
+                if (!cursor.isLast()) cursor.moveToNext();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 

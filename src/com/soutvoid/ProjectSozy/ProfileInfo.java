@@ -69,7 +69,7 @@ public class ProfileInfo extends Activity {
     }
 
     public void UpdateInfo() {
-        Cursor data = db.query("profiles", new String[] {"address", "user", "password", "path", "destination", "type", "name", "daynumber", "time"}, "_id = " + id, null, null, null, null);
+        Cursor data = db.query("profiles", new String[] {"address", "user", "password", "path", "destination", "type", "name"}, "_id = " + id, null, null, null, null);
         data.moveToFirst();
 
         //заполняем поля информацией
