@@ -98,6 +98,8 @@ public class FTPPathsSelection extends ListActivity {
     private void sendResult() {
         final Intent i = new Intent();
         i.putExtra("isFile", isFile);
+        if (currentDirectory.equals(""))
+            currentDirectory.concat("/");
         i.putExtra("path", currentDirectory);
         setResult(RESULT_OK, i);
         finish();

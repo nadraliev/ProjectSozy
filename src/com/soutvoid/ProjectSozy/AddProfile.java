@@ -132,7 +132,7 @@ public class AddProfile extends Activity {
             Cursor data = db.query("profiles", new String[] {"_id", "name", "address", "user", "password", "path", "destination", "type", "daynumber", "time"}, "name = '" + MainActivity.currentName + "'", null, null, null, null);
             data.moveToFirst();
             currentId = data.getInt(0);
-            localpathtext.setText(data.getString(5).substring(data.getString(5).lastIndexOf("/") + 1));
+            localpathtext.setText(data.getString(5).substring(data.getString(5).lastIndexOf("/") + 1));    //TODO здесь надо исправить
             remotepathtext.setText(data.getString(6).substring(data.getString(6).lastIndexOf("/") + 1));
             addressedit.setText(data.getString(2));
             useredit.setText(data.getString(3));
@@ -215,8 +215,6 @@ public class AddProfile extends Activity {
                                 isChanging = false;
                                 finish();
                             } else {
-                                ArrayList<String> listFiles;
-                                ArrayList<String> sizesDigests;
                                 ContentValues newValues = new ContentValues();
                                 newValues.put("name", nameedit.getText().toString());
                                 newValues.put("address", addressedit.getText().toString());
@@ -226,29 +224,31 @@ public class AddProfile extends Activity {
                                 newValues.put("time", time);
                                 if (isUploading) {
                                     syncType = "upload";
-                                    newValues.put("path", LocalPath);
-                                    newValues.put("destination", RemotePath);
-                                    listFiles = localFiles;
-                                    sizesDigests = localSizes;
+                                    if (new File(LocalPath).isDirectory())
+                                        newValues.put("path", LocalPath);
+                                    else newValues.put("path", LocalPath.substring(0, LocalPath.lastIndexOf("/")));
+                                    if (!isFile)
+                                        newValues.put("destination", RemotePath);
+                                    else newValues.put("destination", RemotePath.substring(0, RemotePath.lastIndexOf("/")));
                                 } else {
                                     syncType = "download";
-                                    newValues.put("path", RemotePath);
-                                    newValues.put("destination", LocalPath);
-                                    listFiles = remoteFiles;
-                                    sizesDigests = remoteSizes;
+                                    if (!isFile)
+                                        newValues.put("path", RemotePath);
+                                    else newValues.put("path", RemotePath.substring(0, RemotePath.lastIndexOf("/")));
+                                    if (new File(LocalPath).isDirectory())
+                                        newValues.put("destination", LocalPath);
+                                    else newValues.put("destination", LocalPath.substring(0, LocalPath.lastIndexOf("/")));
                                 }
                                 newValues.put("type", syncType);
                                 db.update("profiles", newValues, "_id = " + currentId, null);
                                 Cursor cursor = db.query("profiles", new String[]{"_id"}, "name = '" + nameedit.getText().toString() + "'", null, null, null, null);
                                 cursor.moveToFirst();
-                                dbOpen.dropTable(db, "profile" + cursor.getInt(0));
-                                dbOpen.createTable(db, "profile" + cursor.getInt(0));
-                                for (int i = 0; i < listFiles.size(); i++) {
-                                    newValues = new ContentValues();
-                                    newValues.put("path", listFiles.get(i));
-                                    newValues.put("sizedigest", sizesDigests.get(i));
-                                    db.insert("profile" + cursor.getInt(0), null, newValues);
-                                }
+                                int id = cursor.getInt(0);
+                                cursor.close();
+                                dbOpen.dropTable(db, "profile" + currentId);
+                                Intent i = new Intent(AddProfile.this, SyncService.class);
+                                i.putExtra("id", currentId).putExtra("isUpload", isUploading).putExtra("isFile", isFile).putExtra("reason", "createProfile").putExtra("local", LocalPath).putExtra("remote", RemotePath);
+                                startService(i);
                                 cursor.close();
                                 MainActivity.currentName = nameedit.getText().toString();
 
@@ -294,7 +294,10 @@ public class AddProfile extends Activity {
             }
             RemotePath = data.getStringExtra("path");
             isFile = data.getBooleanExtra("isFile", isFile);
-            remotepathtext.setText( new File(RemotePath).getName());
+            if (RemotePath.equals("/"))
+                remotepathtext.setText("/");
+            else
+                remotepathtext.setText( new File(RemotePath).getName());
         }
     }
 

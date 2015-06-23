@@ -255,7 +255,7 @@ public class Profile {
             if (file.isDirectory()) {
                 rescanLocal(path + "/" + file.getName(), prefix + "/" + file.getName());
             } else {
-                if (db.query("profile" + id, null, "path = '" + prefix + "/" + file.getName() + "'", null, null, null, null).getCount() == 0) {
+                if (db.query("profile" + id, null, "path = \"" + prefix + "/" + file.getName() + "\"", null, null, null, null).getCount() == 0) {
                     ContentValues newValues = new ContentValues();
                     newValues.put("path", prefix + "/" + file.getName());
                     db.insert("profile" + id, null, newValues);
@@ -273,7 +273,7 @@ public class Profile {
                         rescanFTP(prefix + "/" + file.getName());
                         ftpClient.changeToParentDirectory();
                     } else {
-                        if (db.query("profile" + id, null, "path = '" + prefix + "/" + file.getName() + "'", null, null, null, null).getCount() == 0) {
+                        if (db.query("profile" + id, null, "path = \"" + prefix + "/" + file.getName() + "\"", null, null, null, null).getCount() == 0) {
                             ContentValues newValues = new ContentValues();
                             newValues.put("path", prefix + "/" + file.getName());
                             db.insert("profile" + id, null, newValues);
@@ -363,7 +363,7 @@ public class Profile {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            db.delete("profile" + id, "path = '" + file + "'", null);
+            db.delete("profile" + id, "path = \"" + file + "\"", null);
             synced++;
             sendNotifProcessing();
         }
@@ -417,7 +417,7 @@ public class Profile {
                         BufferedInputStream buffin = new BufferedInputStream((new FileInputStream(path + file)));
                         ContentValues newValues = new ContentValues();
                         newValues.put("sizedigest", md5(new File(path + file).length() + ""));
-                        db.update("profile" + id, newValues, "path = '" + file + "'", null);
+                        db.update("profile" + id, newValues, "path = \"" + file + "\"", null);
                         file = file.substring(1);
                         while (file.contains("/")) {
                             ftpClient.makeDirectory(file.substring(0, file.indexOf("/")));
@@ -458,7 +458,7 @@ public class Profile {
                 ftpClient.retrieveFile(ftpClient.printWorkingDirectory() + file, buffout);
                 ContentValues newValues = new ContentValues();
                 newValues.put("sizedigest", md5(ftpClient.mlistFile(path + file).getSize() + ""));
-                db.update("profile" + id, newValues, "path = '" + file + "'", null);
+                db.update("profile" + id, newValues, "path = \"" + file + "\"", null);
                 buffout.close();
                 synced++;
                 sendNotifProcessing();
@@ -481,13 +481,17 @@ public class Profile {
                 e.printStackTrace();
                 db = dbOpen.getReadableDatabase();
             }
-            Cursor cursor = db.query("profile" + id, null, null, null, null, null, null);
-            cursor.moveToFirst();
-            if (cursor.getCount() != 1)
-            rescanLocal(path, "");
-            cursor.close();
-            db.close();
-            upload(checkChangesLocal());
+            try {
+                Cursor cursor = db.query("profile" + id, null, null, null, null, null, null);
+                cursor.moveToFirst();
+                if (cursor.getCount() != 1)
+                    rescanLocal(path, "");
+                cursor.close();
+                db.close();
+                upload(checkChangesLocal());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         } else {
             deleteFTP(checkDeletedFTP());
             try {
