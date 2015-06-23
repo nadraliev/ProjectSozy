@@ -42,8 +42,8 @@ public class Profile {
 
     private Context context;
 
-    private Integer filesCount = 0;
-    private  Integer counter = 0;
+    private int toSync = 0;
+    private int synced = 0;
 
     public Profile(int id) {
         try {
@@ -99,179 +99,6 @@ public class Profile {
         db.close();
     }
 
-    //выгрузка и все, что с ней связано
-    private void filesCount(File[] files) {
-        for (File file : files) {
-            if (file.isDirectory())
-                filesCount(new File(file.getAbsolutePath()).listFiles());
-            else filesCount++;
-        }
-    }
-
-    private void uploadInnerMethod(File[] files, final String destination) throws IOException {
-        for (File file : files) {
-            if (file.isDirectory()) {
-                ftpClient.makeDirectory(destination + "/" + file.getName());
-                uploadInnerMethod(file.listFiles(), destination + "/" + file.getName());
-            } else {
-                BufferedInputStream buffin = new BufferedInputStream((new FileInputStream(file.getAbsolutePath())));
-                ftpClient.changeWorkingDirectory(destination);
-                ftpClient.storeFile(file.getName(), buffin);
-                buffin.close();
-                sendNotifProcessing();
-            }
-        }
-    }
-
-    private void upload(final String profileName) {
-        final Cursor data = db.query("profiles", new String[]{"address", "user", "password", "localpath", "remotepath"}, "name = '" + profileName + "'", null, null, null, null);
-        data.moveToFirst();
-
-        ftpClient = new FTPClient();
-        ftpClient.setAutodetectUTF8(true);
-
-        final String localpath = data.getString(3);
-        final String remotepath = data.getString(4);
-
-        sendNotifStart();
-
-        try {
-            ftpClient.connect(data.getString(0));
-            ftpClient.login(data.getString(1), data.getString(2));
-            data.close();
-            File localPathFile = new File(localpath);
-            filesCount = 0;
-            if (localPathFile.isDirectory()) {
-                filesCount(localPathFile.listFiles());
-                sendNotifProcessing();
-                String destination = remotepath + "/" + localPathFile.getName();
-                ftpClient.changeWorkingDirectory(remotepath);
-                ftpClient.makeDirectory(localPathFile.getName());
-                uploadInnerMethod(localPathFile.listFiles(), destination);
-            } else {
-                filesCount = 1;
-                sendNotifProcessing();
-                BufferedInputStream buffin = new BufferedInputStream(new FileInputStream(localpath));
-                ftpClient.changeWorkingDirectory(remotepath);
-                ftpClient.storeFile(localPathFile.getName(), buffin);
-                buffin.close();
-                sendNotifProcessing();
-            }
-            ftpClient.logout();
-            ftpClient.disconnect();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            sendNotifDone();
-        }
-    }
-
-    //загрузка и все, что с ней связано
-    private void FTPFilesCount(FTPFile[] files) throws IOException {
-        String currentDir = ftpClient.printWorkingDirectory();
-        for (FTPFile file : files) {
-            if (!file.getName().equals(".") && !file.getName().equals("..")) {
-                if (file.isDirectory()) {
-                    ftpClient.changeWorkingDirectory(ftpClient.printWorkingDirectory() + "/" + file.getName());
-                    FTPFilesCount(ftpClient.listFiles());
-                    ftpClient.changeWorkingDirectory(currentDir);
-                } else {
-                    filesCount++;
-                }
-            }
-        }
-    }
-
-    private void downloadInnerMethod(FTPFile[] files, final String destination) throws IOException {
-        String currentDir = ftpClient.printWorkingDirectory();
-        for (FTPFile file : files) {
-            if (!file.getName().equals(".") && !file.getName().equals("..")) {
-                if (file.isDirectory()) {
-                    new File(destination + "/" + file.getName()).mkdir();
-                    ftpClient.changeWorkingDirectory(ftpClient.printWorkingDirectory() + "/" + file.getName());
-                    downloadInnerMethod(ftpClient.listFiles(), destination + "/" + file.getName());
-                    ftpClient.changeWorkingDirectory(currentDir);
-                } else {
-                    BufferedOutputStream buffout = new BufferedOutputStream(new FileOutputStream(destination + "/" + file.getName()));
-                    ftpClient.retrieveFile(ftpClient.printWorkingDirectory() + "/" + file.getName(), buffout);
-                    buffout.close();
-                    sendNotifProcessing();
-                    //здесь увеличиваем счетчик
-                }
-            }
-        }
-    }
-
-    private void download(final String profileName) {
-        final Cursor data = db.query("profiles", new String[]{"address", "user", "password", "localpath", "remotepath"}, "name = '" + profileName + "'", null, null, null, null);
-        data.moveToFirst();
-
-        ftpClient = new FTPClient();
-        ftpClient.setAutodetectUTF8(true);
-
-        final String localpath = data.getString(3);
-        final String remotepath = data.getString(4);
-
-        sendNotifStart();
-
-        try {
-            ftpClient.connect(data.getString(0));
-            ftpClient.login(data.getString(1), data.getString(2));
-            data.close();
-            filesCount = 0;
-            if (ftpClient.changeWorkingDirectory(remotepath)) {
-                FTPFilesCount(ftpClient.listFiles());
-                sendNotifProcessing();
-                //здесь определяется кол-во файлов
-                String destination = localpath + remotepath.substring(remotepath.lastIndexOf("/"));
-                new File(destination).mkdirs();
-                downloadInnerMethod(ftpClient.listFiles(), destination);
-            } else {   //если таргет это файл
-                filesCount = 1;
-                sendNotifProcessing();
-                ftpClient.changeWorkingDirectory(remotepath.substring(0, remotepath.lastIndexOf("/")));
-                BufferedOutputStream buffout = new BufferedOutputStream(new FileOutputStream(localpath + remotepath.substring(remotepath.lastIndexOf("/"))));
-                ftpClient.retrieveFile(remotepath, buffout);
-                buffout.close();
-                sendNotifProcessing();
-            }
-            ftpClient.logout();
-            ftpClient.disconnect();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            sendNotifDone();
-        }
-    }
-
-
-    public void startProfile() {
-        dbOpen = new SQLiteOpenProfiles(context);
-        try {
-            db = dbOpen.getWritableDatabase();
-        } catch (SQLiteException e) {
-            e.printStackTrace();
-            db = dbOpen.getReadableDatabase();
-        }
-
-        counter = 0;
-
-
-        if (name == null) {
-            Cursor cursor = db.query("profiles", new String[] {"name"}, "_id = " + id, null, null, null, null);
-            cursor.moveToFirst();
-            name = cursor.getString(0);
-            cursor.close();
-        }
-
-        Cursor cursor = db.query("profiles", new String[]{"type"}, "name = '" + name + "'", null, null, null, null);
-        cursor.moveToFirst();
-        if (cursor.getString(0).equals("upload"))
-            upload(name);
-        else download(name);
-        cursor.close();
-    }
-
     private void sendTextOnNotif(String input, int id) {
 
         Notification.Builder builder = new Notification.Builder(context);
@@ -292,96 +119,47 @@ public class Profile {
         notificationManager.notify(id, notification);
     }
 
-    private void sendNotifStart() {
-
-        Resources resources = context.getResources();
-
-        Intent intent = new Intent(context, ProfileInfo.class).putExtra("name", name);
-        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
-
-
+    private void sendNotifProcessing() {
         Notification.Builder builder = new Notification.Builder(context);
 
 
-        builder.setContentIntent(pendingIntent)
+        builder
                 .setSmallIcon(R.drawable.ic_notif)
-                .setLargeIcon(BitmapFactory.decodeResource(resources, R.drawable.ic_notif))
-                .setTicker(resources.getString(R.string.syncstarted))
+                .setTicker(name)
                 .setWhen(System.currentTimeMillis())
-                .setContentTitle('"' + name + '"' + " " + resources.getString(R.string.is) + " " + resources.getString(R.string.syncstarted))
-                .setContentText(resources.getString(R.string.showprofile))
-                .setProgress(0, 0, true)
-                .setAutoCancel(false);
-
+                .setContentTitle(name)
+                .setContentText(context.getResources().getString(R.string.syncing))
+                .setAutoCancel(false)
+                .setOngoing(true)
+                .setProgress(toSync, synced, false)
+                .setContentIntent(PendingIntent.getActivity(context, 1, new Intent(context, ProfileInfo.class).putExtra("name", name), PendingIntent.FLAG_UPDATE_CURRENT));
 
         Notification notification = builder.build();
 
         notification.flags = notification.flags | Notification.FLAG_ONGOING_EVENT;
 
-        NotificationManager notificationManager = (NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.notify(1, notification);
-
+        NotificationManager notificationManager = (NotificationManager)context.getSystemService(context.NOTIFICATION_SERVICE);
+        notificationManager.notify(id, notification);
     }
 
     private void sendNotifDone() {
-
-        Resources resources = context.getResources();
-
-        Intent intent = new Intent(context, ProfileInfo.class).putExtra("name", name);
-        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
-
-
         Notification.Builder builder = new Notification.Builder(context);
 
 
-        builder.setContentIntent(pendingIntent)
+        builder
                 .setSmallIcon(R.drawable.ic_notif)
-                .setLargeIcon(BitmapFactory.decodeResource(resources, R.drawable.ic_notif))
-                .setTicker(resources.getString(R.string.synccomplete))
+                .setTicker(name)
                 .setWhen(System.currentTimeMillis())
-                .setContentTitle('"' + name + '"' + " " + resources.getString(R.string.synccomplete))
-                .setContentText(resources.getString(R.string.showprofile))
-                .setAutoCancel(true);
-
+                .setContentTitle(name)
+                .setContentText(context.getResources().getString(R.string.done))
+                .setAutoCancel(true)
+                .setOngoing(false)
+                .setContentIntent(PendingIntent.getActivity(context, 1, new Intent(context, ProfileInfo.class).putExtra("name", name), PendingIntent.FLAG_UPDATE_CURRENT));
 
         Notification notification = builder.build();
 
         NotificationManager notificationManager = (NotificationManager)context.getSystemService(context.NOTIFICATION_SERVICE);
-        notificationManager.notify(1, notification);
-    }
-
-    private void sendNotifProcessing() {
-
-        Resources resources = context.getResources();
-
-        Intent intent = new Intent(context, ProfileInfo.class).putExtra("name", name);
-        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
-
-        int maxCount = 0;
-        maxCount = filesCount;
-
-        Notification.Builder builder = new Notification.Builder(context);
-
-
-        builder.setContentIntent(pendingIntent)
-                .setSmallIcon(R.drawable.ic_notif)
-                .setLargeIcon(BitmapFactory.decodeResource(resources, R.drawable.ic_notif))
-                .setTicker(resources.getString(R.string.syncing))
-                .setWhen(System.currentTimeMillis())
-                .setContentTitle('"' + name + '"' + " " + resources.getString(R.string.is) + " " + resources.getString(R.string.syncing))
-                .setContentText(resources.getString(R.string.showprofile))
-                .setProgress(maxCount, counter, false)
-                .setAutoCancel(false);
-
-
-        Notification notification = builder.build();
-
-        notification.flags = notification.flags | Notification.FLAG_ONGOING_EVENT;
-
-        NotificationManager notificationManager = (NotificationManager) context.getSystemService(context.NOTIFICATION_SERVICE);
-        notificationManager.notify(1, notification);
-
-        counter++;
+        notificationManager.notify(id, notification);
     }
 
     public static String md5(String st) {
@@ -422,6 +200,7 @@ public class Profile {
         for (int i = 0; i < files.getCount(); i++) {
             if (!(new File(path + files.getString(0)).exists())) {
                 result.add(files.getString(0));
+                toSync++;
             }
             if (!(files.isLast())) files.moveToNext();
         }
@@ -453,6 +232,7 @@ public class Profile {
                 ftpClient.changeWorkingDirectory(path + files.getString(0).substring(0, files.getString(0).lastIndexOf("/")));
                 if (ftpClient.mlistFile(path + files.getString(0)) == null) {
                     result.add(files.getString(0));
+                    toSync++;
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -520,6 +300,7 @@ public class Profile {
         for (int i = 0; i < files.getCount(); i++) {
             if (!(md5(new File(path + files.getString(0)).length() + "").equals(files.getString(1)))) {
                 result.add(files.getString(0));
+                toSync++;
             }
             if (!files.isLast()) files.moveToNext();
         }
@@ -546,6 +327,7 @@ public class Profile {
             for (int i = 0; i < files.getCount(); i++) {
                 if (!(md5(ftpClient.mlistFile(path + files.getString(0)).getSize() + "").equals(files.getString(1)))) {
                     result.add(files.getString(0));
+                    toSync++;
                 }
                 if (!files.isLast()) files.moveToNext();
             }
@@ -582,6 +364,8 @@ public class Profile {
                 e.printStackTrace();
             }
             db.delete("profile" + id, "path = '" + file + "'", null);
+            synced++;
+            sendNotifProcessing();
         }
         db.close();
         try {
@@ -607,6 +391,8 @@ public class Profile {
                 e.printStackTrace();
             }
             db.delete("profile" + id, "path = '" + file + "'", null);
+            synced++;
+            sendNotifProcessing();
         }
         db.close();
     }
@@ -639,6 +425,8 @@ public class Profile {
                         }
                         ftpClient.storeFile(file, buffin);
                         buffin.close();
+                        synced++;
+                        sendNotifProcessing();
                     }
                     db.close();
                     ftpClient.logout();
@@ -671,6 +459,8 @@ public class Profile {
                 newValues.put("sizedigest", md5(ftpClient.mlistFile(path + file).getSize() + ""));
                 db.update("profile" + id, newValues, "path = '" + file + "'", null);
                 buffout.close();
+                synced++;
+                sendNotifProcessing();
             }
             db.close();
             ftpClient.logout();
@@ -690,8 +480,11 @@ public class Profile {
                 e.printStackTrace();
                 db = dbOpen.getReadableDatabase();
             }
-            if (db.query("profile" + id, null, null, null, null, null, null).getCount() != 0)
+            Cursor cursor = db.query("profile" + id, null, null, null, null, null, null);
+            cursor.moveToFirst();
+            if (cursor.getCount() != 1)
             rescanLocal(path, "");
+            cursor.close();
             db.close();
             upload(checkChangesLocal());
         } else {
@@ -719,6 +512,8 @@ public class Profile {
             download(checkChangesFTP());
         }
         db.close();
+        if (toSync != 0)
+            sendNotifDone();
     }
 
     public void openConnection() {

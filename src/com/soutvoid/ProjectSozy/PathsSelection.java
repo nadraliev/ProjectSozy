@@ -45,7 +45,10 @@ public class PathsSelection extends ListActivity {
 
     private void sendResult() {
         Intent i = new Intent();
+        if (currentFile.getName() == "")
         i.putExtra("path", currentDirectory.getAbsolutePath());
+        else
+        i.putExtra("path", currentFile.getAbsolutePath());
         setResult(RESULT_OK, i);
     }
 

@@ -188,12 +188,20 @@ public class AddProfile extends Activity {
                                 newValues.put("time", time);
                                 if (isUploading) {
                                     syncType = "upload";
+                                    if (new File(LocalPath).isDirectory())
                                     newValues.put("path", LocalPath);
-                                    newValues.put("destination", RemotePath);;
+                                    else newValues.put("path", LocalPath.substring(0, LocalPath.lastIndexOf("/")));
+                                    if (!isFile)
+                                    newValues.put("destination", RemotePath);
+                                    else newValues.put("destination", RemotePath.substring(0, RemotePath.lastIndexOf("/")));
                                 } else {
                                     syncType = "download";
+                                    if (!isFile)
                                     newValues.put("path", RemotePath);
+                                    else newValues.put("path", RemotePath.substring(0, RemotePath.lastIndexOf("/")));
+                                    if (new File(LocalPath).isDirectory())
                                     newValues.put("destination", LocalPath);
+                                    else newValues.put("destination", LocalPath.substring(0, LocalPath.lastIndexOf("/")));
                                 }
                                 newValues.put("type", syncType);
                                 db.insert("profiles", null, newValues);

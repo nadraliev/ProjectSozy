@@ -32,8 +32,6 @@ public class SyncService extends Service {
     String RemotePath;
     int id;
 
-    ExecutorService executorService;
-
     public void onCreate() {
         super.onCreate();
 
@@ -96,13 +94,13 @@ public class SyncService extends Service {
                 profile.rescanLocal(LocalPath, "");
             } else {
                 newValues = new ContentValues();
-                newValues.put("path", LocalPath);
+                newValues.put("path", LocalPath.substring(LocalPath.lastIndexOf("/")));
                 db.insert("profile" + id, null, newValues);
             }
         } else {
             if (isFile) {
                 newValues = new ContentValues();
-                newValues.put("path", RemotePath);
+                newValues.put("path", RemotePath.substring(RemotePath.lastIndexOf("/")));
                 db.insert("profile" + id, null, newValues);
             } else {
                     Thread thread = new Thread(new Runnable() {
