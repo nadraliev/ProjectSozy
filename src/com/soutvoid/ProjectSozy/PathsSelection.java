@@ -45,16 +45,6 @@ public class PathsSelection extends ListActivity {
 
     private void sendResult() {
         Intent i = new Intent();
-        allFiles.clear();
-        sizes.clear();
-        if (currentFile.getName() == "") {
-            findAllFiles(currentDirectory.getAbsolutePath(), "");
-        } else {
-            allFiles.add("/" + currentFile.getName());
-            sizes.add(Profile.md5(currentFile.length() + ""));
-        }
-        i.putExtra("files", allFiles);
-        i.putExtra("sizes", sizes);
         i.putExtra("path", currentDirectory.getAbsolutePath());
         setResult(RESULT_OK, i);
     }

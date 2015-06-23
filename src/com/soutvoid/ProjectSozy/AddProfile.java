@@ -33,6 +33,7 @@ public class AddProfile extends Activity {
     public static EditText useredit;
     public static EditText passwordedit;
     public static EditText nameedit;
+    boolean isFile = true;
     boolean isUploading = true;
     public static boolean isChanging = false;    //если true, то активность вызвана, чтобы изменить профиль
     String syncType;
@@ -178,8 +179,6 @@ public class AddProfile extends Activity {
                             time = hoursSpinner.getSelectedItemPosition()*60 + minutesSpinner.getSelectedItemPosition()*10;
                             if(!isChanging) {
 
-                                ArrayList<String> listFiles;
-                                ArrayList<String> sizesDigests;
                                 ContentValues newValues = new ContentValues();
                                 newValues.put("name", nameedit.getText().toString());
                                 newValues.put("address", addressedit.getText().toString());
@@ -190,28 +189,21 @@ public class AddProfile extends Activity {
                                 if (isUploading) {
                                     syncType = "upload";
                                     newValues.put("path", LocalPath);
-                                    newValues.put("destination", RemotePath);
-                                    listFiles = localFiles;
-                                    sizesDigests = localSizes;
+                                    newValues.put("destination", RemotePath);;
                                 } else {
                                     syncType = "download";
                                     newValues.put("path", RemotePath);
                                     newValues.put("destination", LocalPath);
-                                    listFiles = remoteFiles;
-                                    sizesDigests = remoteSizes;
                                 }
                                 newValues.put("type", syncType);
                                 db.insert("profiles", null, newValues);
                                 Cursor cursor = db.query("profiles", new String[]{"_id"}, "name = '" + nameedit.getText().toString() + "'", null, null, null, null);
                                 cursor.moveToFirst();
-                                dbOpen.createTable(db, "profile" + cursor.getInt(0));
-                                for (int i = 0; i < listFiles.size(); i++) {
-                                    newValues = new ContentValues();
-                                    newValues.put("path", listFiles.get(i));
-                                    newValues.put("sizedigest", sizesDigests.get(i));
-                                    db.insert("profile" + cursor.getInt(0), null, newValues);
-                                }
+                                int id = cursor.getInt(0);
                                 cursor.close();
+                                Intent i = new Intent(AddProfile.this, SyncService.class);
+                                i.putExtra("id", id).putExtra("isUpload", isUploading).putExtra("isFile", isFile).putExtra("reason", "createProfile").putExtra("local", LocalPath).putExtra("remote", RemotePath);
+                                startService(i);
                                 isChanging = false;
                                 finish();
                             } else {
@@ -284,8 +276,6 @@ public class AddProfile extends Activity {
             if (data == null) {
                 return;
             }
-            localFiles = data.getStringArrayListExtra("files");
-            localSizes = data.getStringArrayListExtra("sizes");
             LocalPath = data.getStringExtra("path");
             localpathtext.setText(LocalPath.substring(LocalPath.lastIndexOf("/") + 1));    //на этом этапе у нас есть путь к главной папке и список всех файлов
 
@@ -294,9 +284,8 @@ public class AddProfile extends Activity {
             if (data == null) {
                 return;
             }
-            remoteFiles = data.getStringArrayListExtra("files");
-            remoteSizes = data.getStringArrayListExtra("sizes");
             RemotePath = data.getStringExtra("path");
+            isFile = data.getBooleanExtra("isFile", isFile);
             remotepathtext.setText( new File(RemotePath).getName());
         }
     }

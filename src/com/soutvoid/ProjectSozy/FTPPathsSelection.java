@@ -97,51 +97,11 @@ public class FTPPathsSelection extends ListActivity {
 
     private void sendResult() {
         final Intent i = new Intent();
-        allFiles.clear();
-        sizes.clear();
-        if (isFile) {
-            allFiles.add(currentDirectory.substring(currentDirectory.lastIndexOf("/") + 1));
-            try {
-                sizes.add(Profile.md5(ftpClient.mlistFile(currentDirectory).getSize() + ""));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            currentDirectory = currentDirectory.substring(0, currentDirectory.lastIndexOf("/"));
-            i.putExtra("files", allFiles);
-            i.putExtra("sizes", sizes);
-            i.putExtra("path", currentDirectory);
-            setResult(RESULT_OK, i);
-            finish();
-        } else {
-            Thread thread = new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        ftpClient = new FTPClient();
-                        ftpClient.setAutodetectUTF8(true);
-                        ftpClient.connect(AddProfile.addressedit.getText().toString().trim());
-                        ftpClient.login(AddProfile.useredit.getText().toString().trim(), AddProfile.passwordedit.getText().toString().trim());
-                        ftpClient.changeWorkingDirectory(currentDirectory);
-                        findAllFiles("");
-                        ftpClient.logout();
-                        ftpClient.disconnect();
-                        i.putExtra("files", allFiles);
-                        i.putExtra("sizes", sizes);
-                        i.putExtra("path", currentDirectory);
-                        setResult(RESULT_OK, i);
-                        finish();
-                    } catch (ConnectException e) {
-                        e.printStackTrace();
-                        ConnectExceptionToast.show();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                        ConnectExceptionToast.show();
-                    }
-                }
-            });
-            thread.start();
+        i.putExtra("isFile", isFile);
+        i.putExtra("path", currentDirectory);
+        setResult(RESULT_OK, i);
+        finish();
 
-        }
     }
 
     @Override

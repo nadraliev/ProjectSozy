@@ -35,10 +35,10 @@ public class Profile {
     public String destination;
     public String type;
 
-    private SQLiteDatabase db;
-    private SQLiteOpenProfiles dbOpen;
+    public SQLiteDatabase db;
+    public SQLiteOpenProfiles dbOpen;
 
-    private FTPClient ftpClient;
+    public FTPClient ftpClient;
 
     private Context context;
 
@@ -690,6 +690,7 @@ public class Profile {
                 e.printStackTrace();
                 db = dbOpen.getReadableDatabase();
             }
+            if (db.query("profile" + id, null, null, null, null, null, null).getCount() != 0)
             rescanLocal(path, "");
             db.close();
             upload(checkChangesLocal());
@@ -702,6 +703,7 @@ public class Profile {
                 e.printStackTrace();
                 db = dbOpen.getReadableDatabase();
             }
+            if (db.query("profile" + id, null, null, null, null, null, null).getCount() != 0)
             try {
                 ftpClient = new FTPClient();
                 ftpClient.setAutodetectUTF8(true);
@@ -717,5 +719,25 @@ public class Profile {
             download(checkChangesFTP());
         }
         db.close();
+    }
+
+    public void openConnection() {
+        try {
+            ftpClient = new FTPClient();
+            ftpClient.setAutodetectUTF8(true);
+            ftpClient.connect(address);
+            ftpClient.login(user, password);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void closeConnection() {
+        try {
+            ftpClient.logout();
+            ftpClient.disconnect();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
