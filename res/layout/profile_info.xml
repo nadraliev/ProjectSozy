@@ -7,18 +7,18 @@
     <LinearLayout
             android:orientation="vertical"
             android:layout_width="fill_parent"
-            android:layout_height="fill_parent" android:background="@color/white"
+            android:layout_height="wrap_content" android:background="@color/purplelight"
             android:paddingLeft="10dp" android:paddingTop="5dp" android:paddingRight="10dp">
 
         <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="New Text"
-                android:id="@+id/info_name" android:background="@color/white"
+                android:id="@+id/info_name" android:background="@color/purplelight"
                 android:layout_gravity="center_horizontal"
                 android:textSize="25sp"
                 android:textStyle="bold"
-                android:textColor="@color/black"/>
+                android:textColor="@color/white"/>
         <TextView android:layout_width="match_parent" android:layout_height="2dp"
                   android:background="@color/purplelight"/>
         <TextView
@@ -28,21 +28,22 @@
         <LinearLayout
                 android:orientation="horizontal"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" android:layout_gravity="left">
+                android:layout_height="wrap_content" android:layout_gravity="left"
+                android:background="@color/purplelight">
             <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/addrhead"
-                    android:layout_gravity="left" android:background="@color/white"
-                    android:textStyle="bold" android:textColor="@color/black" android:textSize="15sp"
+                    android:layout_gravity="left" android:background="@color/purplelight"
+                    android:textStyle="bold" android:textColor="@color/white" android:textSize="15sp"
                     android:layout_weight="1"/>
             <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/addrhead"
                     android:id="@+id/info_address"
-                    android:layout_gravity="left" android:background="@color/white"
-                    android:textStyle="normal" android:textColor="@color/black" android:textSize="15sp"
+                    android:layout_gravity="left" android:background="@color/purplelight"
+                    android:textStyle="normal" android:textColor="@color/white" android:textSize="15sp"
                     android:paddingLeft="5dp"/>
         </LinearLayout>
         <LinearLayout
@@ -50,46 +51,56 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                      android:text="@string/userhead" android:layout_gravity="left" android:background="@color/white"
-                      android:textStyle="bold" android:textColor="@color/black" android:textSize="15sp"
+                      android:text="@string/userhead" android:layout_gravity="left" android:background="@color/purplelight"
+                      android:textStyle="bold" android:textColor="@color/white" android:textSize="15sp"
                       android:layout_weight="1"/>
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                       android:text="@string/userhead" android:id="@+id/info_user" android:layout_gravity="left"
-                      android:background="@color/white" android:textStyle="normal" android:textColor="@color/black"
+                      android:background="@color/purplelight" android:textStyle="normal" android:textColor="@color/white"
                       android:textSize="15sp" android:paddingLeft="5dp"/>
         </LinearLayout>
         <LinearLayout android:orientation="horizontal" android:layout_width="match_parent"
                       android:layout_height="wrap_content">
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                      android:text="@string/path" android:layout_gravity="left" android:background="@color/white"
-                      android:textStyle="bold" android:textColor="@color/black" android:textSize="15sp"
+                      android:text="@string/path" android:layout_gravity="left" android:background="@color/purplelight"
+                      android:textStyle="bold" android:textColor="@color/white" android:textSize="15sp"
                       android:layout_weight="1"/>
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                       android:text="@string/localpathhead" android:id="@+id/info_localpath" android:layout_gravity="left"
-                      android:background="@color/white" android:textStyle="normal" android:textColor="@color/black"
+                      android:background="@color/purplelight" android:textStyle="normal" android:textColor="@color/white"
                       android:textSize="15sp" android:paddingLeft="5dp"/>
         </LinearLayout>
         <LinearLayout android:orientation="horizontal" android:layout_width="match_parent"
                       android:layout_height="wrap_content">
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                      android:text="@string/destination" android:layout_gravity="left" android:background="@color/white"
-                      android:textStyle="bold" android:textColor="@color/black" android:textSize="15sp"
+                      android:text="@string/destination" android:layout_gravity="left" android:background="@color/purplelight"
+                      android:textStyle="bold" android:textColor="@color/white" android:textSize="15sp"
                       android:layout_weight="1"/>
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                       android:text="@string/remotepathhead" android:id="@+id/info_remotepath" android:layout_gravity="left"
-                      android:background="@color/white" android:textStyle="normal" android:textColor="@color/black"
+                      android:background="@color/purplelight" android:textStyle="normal" android:textColor="@color/white"
                       android:textSize="15sp" android:paddingLeft="5dp"/>
         </LinearLayout>
         <LinearLayout android:orientation="horizontal" android:layout_width="match_parent"
                       android:layout_height="wrap_content">
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                      android:text="@string/typehead" android:layout_gravity="left" android:background="@color/white"
-                      android:textStyle="bold" android:textColor="@color/black" android:textSize="15sp"
+                      android:text="@string/typehead" android:layout_gravity="left" android:background="@color/purplelight"
+                      android:textStyle="bold" android:textColor="@color/white" android:textSize="15sp"
                       android:layout_weight="1"/>
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                       android:text="@string/typehead" android:id="@+id/info_type" android:layout_gravity="left"
-                      android:background="@color/white" android:textStyle="normal" android:textColor="@color/black"
+                      android:background="@color/purplelight" android:textStyle="normal" android:textColor="@color/white"
                       android:textSize="15sp" android:paddingLeft="5dp"/>
         </LinearLayout>
     </LinearLayout>
+    <TextView
+            android:layout_width="fill_parent"
+            android:layout_height="10dp"
+            android:id="@+id/editText2" android:background="@color/purplelight"/>
+    <TextView
+            android:layout_width="fill_parent"
+            android:layout_height="3dp"
+            android:id="@+id/editText" android:background="@color/purple"/>
+    <ListView android:layout_width="fill_parent" android:layout_height="fill_parent" android:background="@color/white"
+              android:id="@+id/lvSimple"></ListView>
 </LinearLayout>

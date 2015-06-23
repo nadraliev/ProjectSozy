@@ -413,6 +413,7 @@ public class Profile {
                         db = dbOpen.getReadableDatabase();
                     }
                     for (String file : files) {
+                        ftpClient.changeWorkingDirectory(destination);
                         BufferedInputStream buffin = new BufferedInputStream((new FileInputStream(path + file)));
                         ContentValues newValues = new ContentValues();
                         newValues.put("sizedigest", md5(new File(path + file).length() + ""));

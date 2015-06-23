@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteException;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ListView;
 import android.widget.TextView;
 
 /**
@@ -28,6 +29,9 @@ public class ProfileInfo extends Activity {
     String name;
 
     Integer id;
+
+    ListView lvSimple;
+    FilesListAdapter filesListAdapter;
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -52,6 +56,10 @@ public class ProfileInfo extends Activity {
         id = ids.getInt(0);
 
         UpdateInfo();
+
+        filesListAdapter = new FilesListAdapter(getApplicationContext(), id);
+        lvSimple = (ListView)findViewById(R.id.lvSimple);
+        lvSimple.setAdapter(filesListAdapter);
 
     }
 
