@@ -3,6 +3,7 @@ package com.soutvoid.ProjectSozy;
 import android.app.*;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -30,6 +31,7 @@ public class MainActivity extends Activity {
     ListView navigationDrawerList;
     int[] navigationDrawerIcons;
 
+    public static SharedPreferences sharedPreferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,12 +40,11 @@ public class MainActivity extends Activity {
         getActionBar().setIcon(R.drawable.ic_title);
         getActionBar().setTitle("");
 
+        sharedPreferences = getPreferences(MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString("interval", "10");
+        editor.commit();
         context = getApplicationContext();
-
-        AlarmManager alarmManager = (AlarmManager)context.getSystemService(context.ALARM_SERVICE);
-        Intent intent = new Intent(MainActivity.this, SyncService.class);
-        PendingIntent pendingIntent = PendingIntent.getService(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        alarmManager.setInexactRepeating(AlarmManager.RTC, System.currentTimeMillis(), 1000*60*10, pendingIntent);
 
         //вставить фрагмент профилей
         FragmentManager fragmentManager = getFragmentManager();
@@ -56,7 +57,7 @@ public class MainActivity extends Activity {
         navigationDrawerItems = getResources().getStringArray(R.array.navigationdrawer);
         navigationDrawer = (DrawerLayout)findViewById(R.id.drawer_layout);
         navigationDrawerList = (ListView)findViewById(R.id.left_drawer);
-        navigationDrawerIcons = new int[] {R.drawable.ic_list, R.drawable.ic_processing};
+        navigationDrawerIcons = new int[] {R.drawable.ic_list, R.drawable.ic_processing, R.drawable.ic_settings};
 
         navigationDrawer.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
 
@@ -109,6 +110,19 @@ public class MainActivity extends Activity {
                         navigationDrawerList.setSelection(position);
                         navigationDrawer.closeDrawer(navigationDrawerList);
                         setTitle(getResources().getStringArray(R.array.navigationdrawer)[1]);
+                        break;
+                    case 2:
+                        //вставка фрагмента настроек
+                        fragment = new SettingsFragment();
+
+                        fragmentManager = getFragmentManager();
+                        fragmentManager.beginTransaction()
+                                .replace(R.id.main_container, fragment)
+                                .commit();
+
+                        navigationDrawerList.setSelection(position);
+                        navigationDrawer.closeDrawer(navigationDrawerList);
+                        setTitle(getResources().getStringArray(R.array.navigationdrawer)[2]);
                         break;
                 }
             }

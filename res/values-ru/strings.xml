@@ -54,17 +54,11 @@
     <string name="time_info">Время:</string>
     <string name="path">Путь</string>
     <string name="destination">Пункт назначения</string>
+    <string name="checkinterval">Период проверки</string>
+    <string name="inminutes">В минутах</string>
     <string-array name="navigationdrawer">
         <item>Профили</item>
         <item>Процессы</item>
-    </string-array>
-    <string-array name="daysofweek">
-        <item>Понедельник</item>
-        <item>Вторник</item>
-        <item>Среда</item>
-        <item>Четверг</item>
-        <item>Пятница</item>
-        <item>Суббота</item>
-        <item>Воскресенье</item>
+        <item>Настройки</item>
     </string-array>
 </resources>

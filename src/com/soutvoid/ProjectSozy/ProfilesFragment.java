@@ -1,6 +1,10 @@
 package com.soutvoid.ProjectSozy;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
@@ -10,6 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.ShareActionProvider;
 import android.widget.SimpleAdapter;
 
 import java.util.ArrayList;
@@ -34,10 +39,20 @@ public class ProfilesFragment extends android.app.Fragment {
 
     View rootView;
 
+    Context context = MainActivity.context;
+
+    SharedPreferences sharedPreferences = MainActivity.sharedPreferences;
+
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         rootView = inflater.inflate(R.layout.profiles_fragment, container, false);
         UpdateList();
+        int interval = Integer.parseInt(sharedPreferences.getString("interval", "10"));
+        AlarmManager alarmManager = (AlarmManager)context.getSystemService(context.ALARM_SERVICE);
+        Intent intent = new Intent(context, SyncService.class);
+        PendingIntent pendingIntent = PendingIntent.getService(context, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+        alarmManager.setInexactRepeating(AlarmManager.RTC, System.currentTimeMillis(), 1000 * 60 * interval, pendingIntent);
         profileslist.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
