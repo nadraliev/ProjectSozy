@@ -112,7 +112,7 @@ public class ProfileInfo extends Activity {
                 break;
             case R.id.editmenu :
                 AddProfile.isChanging = true;
-                Intent i = new Intent(ProfileInfo.this, AddProfile.class);
+                Intent i = new Intent(ProfileInfo.this, AddProfile.class).putExtra("id", id);
                 startActivity(i);
                 break;
             case R.id.startmenu :

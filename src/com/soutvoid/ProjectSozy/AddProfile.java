@@ -52,7 +52,10 @@ public class AddProfile extends Activity {
 
         currentId = 0;
 
-        if(isChanging) getActionBar().setTitle(R.string.edit);
+        if(isChanging) {
+            getActionBar().setTitle(R.string.edit);
+            currentId = getIntent().getIntExtra("id", 0);
+        }
 
         dbOpen = new SQLiteOpenProfiles(this);
         try {
@@ -72,11 +75,8 @@ public class AddProfile extends Activity {
 
 
         if(isChanging) {     //заполнить поля текущими данными, если профиль изменяется
-            Cursor data = db.query("profiles", new String[] {"_id", "name", "address", "user", "password", "path", "destination", "type", "daynumber", "time"}, "name = '" + MainActivity.currentName + "'", null, null, null, null);
+            Cursor data = db.query("profiles", new String[] {"_id", "name", "address", "user", "password", "path", "destination", "type"}, "_id = " + currentId, null, null, null, null);
             data.moveToFirst();
-            currentId = data.getInt(0);
-            localpathtext.setText(data.getString(5).substring(data.getString(5).lastIndexOf("/") + 1));    //TODO здесь надо исправить
-            remotepathtext.setText(data.getString(6).substring(data.getString(6).lastIndexOf("/") + 1));
             addressedit.setText(data.getString(2));
             useredit.setText(data.getString(3));
             passwordedit.setText(data.getString(4));
@@ -85,14 +85,50 @@ public class AddProfile extends Activity {
             LocalPath = data.getString(5);
             RemotePath = data.getString(6);
 
-            if (data.getString(7).equals("upload")) isUploading = true;
-            else {
+            Cursor cursor = db.query("profile" + currentId, new String[] {"path"}, null, null, null, null, null);
+            cursor.moveToFirst();
+
+            if (data.getString(7).equals("upload")) {
+                isUploading = true;
+                if (cursor.getCount() != 1) {
+                    localpathtext.setText(data.getString(5).substring(data.getString(5).lastIndexOf("/") + 1));
+                    LocalPath = data.getString(5);
+                } else {
+                    localpathtext.setText(cursor.getString(0).substring(1));
+                    LocalPath = data.getString(5) + cursor.getString(0);
+                }
+                if (data.getString(6).equals("/")) {
+                    isFile = false;
+                    remotepathtext.setText("/");
+                    RemotePath = "/";
+                } else {
+                    isFile = false;
+                    remotepathtext.setText(data.getString(6).substring(data.getString(6).lastIndexOf("/") + 1));
+                    RemotePath = data.getString(6);
+                }
+            } else {
                 isUploading = false;
+                localpathtext.setText(data.getString(5).substring(data.getString(6).lastIndexOf("/") + 1));
+                if (data.getString(6).equals("/")) {
+                    remotepathtext.setText("/");
+                    RemotePath = "/";
+                } else
+                    if (cursor.getCount() != 1) {
+                        isFile = false;
+                        remotepathtext.setText(data.getString(6).substring(data.getString(5).lastIndexOf("/") + 1));
+                        RemotePath = data.getString(6);
+                    } else {
+                        isFile = true;
+                        remotepathtext.setText(cursor.getString(0).substring(1));
+                        RemotePath = data.getString(6) + cursor.getString(0);
+                    }
                 ImageView arrow = (ImageView)findViewById(R.id.arrow);
                 arrow.setImageResource(R.drawable.ic_lefttarrow);
             }
             data.close();
+            cursor.close();
         }
+        db.close();
 
     }
 
@@ -110,6 +146,13 @@ public class AddProfile extends Activity {
                 onBackPressed();
                 break;
             case R.id.ok_action :
+                dbOpen = new SQLiteOpenProfiles(this);
+                try {
+                    db = dbOpen.getWritableDatabase();
+                } catch (SQLiteException e) {
+                    e.printStackTrace();
+                    db = dbOpen.getReadableDatabase();
+                }
                     if (nameedit.getText().toString().trim().equals("") || addressedit.getText().toString().trim().equals("") || useredit.getText().toString().trim().equals("") || passwordedit.getText().toString().trim().equals("") ||
                             LocalPath.equals("") || RemotePath.equals("")) {
                         Toast emptyField = Toast.makeText(getApplicationContext(), getString(R.string.emptyField), Toast.LENGTH_LONG);
@@ -146,9 +189,15 @@ public class AddProfile extends Activity {
                                 cursor.moveToFirst();
                                 int id = cursor.getInt(0);
                                 cursor.close();
-                                Intent i = new Intent(AddProfile.this, SyncService.class);
+                                final Intent i = new Intent(AddProfile.this, SyncService.class);
                                 i.putExtra("id", id).putExtra("isUpload", isUploading).putExtra("isFile", isFile).putExtra("reason", "createProfile").putExtra("local", LocalPath).putExtra("remote", RemotePath);
-                                startService(i);
+                                Thread thread = new Thread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        startService(i);
+                                    }
+                                });
+                                thread.start();
                                 isChanging = false;
                                 finish();
                             } else {
@@ -176,15 +225,10 @@ public class AddProfile extends Activity {
                                 }
                                 newValues.put("type", syncType);
                                 db.update("profiles", newValues, "_id = " + currentId, null);
-                                Cursor cursor = db.query("profiles", new String[]{"_id"}, "name = '" + nameedit.getText().toString() + "'", null, null, null, null);
-                                cursor.moveToFirst();
-                                int id = cursor.getInt(0);
-                                cursor.close();
                                 dbOpen.dropTable(db, "profile" + currentId);
                                 Intent i = new Intent(AddProfile.this, SyncService.class);
                                 i.putExtra("id", currentId).putExtra("isUpload", isUploading).putExtra("isFile", isFile).putExtra("reason", "createProfile").putExtra("local", LocalPath).putExtra("remote", RemotePath);
                                 startService(i);
-                                cursor.close();
                                 MainActivity.currentName = nameedit.getText().toString();
 
                                 isChanging = false;
@@ -198,6 +242,7 @@ public class AddProfile extends Activity {
                             nameExists.show();
                         }
                     }
+                db.close();
                 break;
         }
 

@@ -398,43 +398,51 @@ public class Profile {
     }
 
     private void upload(ArrayList<String> files) {
-                try {
-                    ftpClient = new FTPClient();
-                    ftpClient.setAutodetectUTF8(true);
-                    ftpClient.connect(address);
-                    ftpClient.login(user, password);
-                    ftpClient.changeWorkingDirectory(destination);
-
-                    try {
-                        dbOpen = new SQLiteOpenProfiles(context);
-                        db = dbOpen.getWritableDatabase();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        db = dbOpen.getReadableDatabase();
-                    }
-                    for (String file : files) {
-                        ftpClient.changeWorkingDirectory(destination);
-                        BufferedInputStream buffin = new BufferedInputStream((new FileInputStream(path + file)));
-                        ContentValues newValues = new ContentValues();
-                        newValues.put("sizedigest", md5(new File(path + file).length() + ""));
-                        db.update("profile" + id, newValues, "path = \"" + file + "\"", null);
-                        file = file.substring(1);
-                        while (file.contains("/")) {
-                            ftpClient.makeDirectory(file.substring(0, file.indexOf("/")));
-                            ftpClient.changeWorkingDirectory(file.substring(0, file.indexOf("/")));
-                            file = file.substring(file.indexOf("/") + 1);
-                        }
-                        ftpClient.storeFile(file, buffin);
-                        buffin.close();
-                        synced++;
-                        sendNotifProcessing();
-                    }
-                    db.close();
-                    ftpClient.logout();
-                    ftpClient.disconnect();
-                } catch (Exception e) {
-                    e.printStackTrace();
+        try {
+            ftpClient = new FTPClient();
+            ftpClient.setAutodetectUTF8(true);
+            ftpClient.connect(address);
+            ftpClient.login(user, password);
+            ftpClient.changeWorkingDirectory(destination);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            dbOpen = new SQLiteOpenProfiles(context);
+            db = dbOpen.getWritableDatabase();
+        } catch (Exception e) {
+            e.printStackTrace();
+            db = dbOpen.getReadableDatabase();
+        }
+        for (String file : files) {
+            try {
+                ftpClient.changeWorkingDirectory(destination);
+                BufferedInputStream buffin = new BufferedInputStream((new FileInputStream(path + file)));
+                String temp = file;
+                file = file.substring(1);
+                while (file.contains("/")) {
+                    ftpClient.makeDirectory(file.substring(0, file.indexOf("/")));
+                    ftpClient.changeWorkingDirectory(file.substring(0, file.indexOf("/")));
+                    file = file.substring(file.indexOf("/") + 1);
                 }
+                ftpClient.storeFile(file, buffin);
+                buffin.close();
+                ContentValues newValues = new ContentValues();
+                newValues.put("sizedigest", md5(new File(path + temp).length() + ""));
+                db.update("profile" + id, newValues, "path = \"" + temp + "\"", null);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            synced++;
+            sendNotifProcessing();
+        }
+        db.close();
+        try {
+            ftpClient.logout();
+            ftpClient.disconnect();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }       //выгрузка на сервер
 
     private void download(ArrayList<String> files) {
