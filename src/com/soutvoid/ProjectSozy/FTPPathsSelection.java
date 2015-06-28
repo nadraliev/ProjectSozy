@@ -31,9 +31,6 @@ public class FTPPathsSelection extends ListActivity {
     private Handler printList;
     private TextView abspath;
     boolean isFile = false;
-    private ArrayList<String> allFiles = new ArrayList<String>();
-    private ArrayList<String> sizes = new ArrayList<String>();
-
     ProgressBar spinner;
     Handler progress;
 
@@ -53,25 +50,6 @@ public class FTPPathsSelection extends ListActivity {
         progress.sendEmptyMessage(0);
     }
 
-    private void findAllFiles(String prefix) {
-        try {
-            for (FTPFile file : ftpClient.listFiles()) {
-                if (!(file.getName().equals(".") || file.getName().equals(".."))) {
-                    if (file.isDirectory()) {
-                        ftpClient.changeWorkingDirectory(file.getName());
-                        findAllFiles(prefix + "/" + file.getName());
-                        ftpClient.changeToParentDirectory();
-                    } else {
-                        sendTextOnNotif(prefix + "/" + file.getName(),3);
-                        allFiles.add(prefix + "/" + file.getName());
-                        sizes.add(Profile.md5(file.getSize() + ""));
-                    }
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
 
     public void sendTextOnNotif(String input, int id) {
 
@@ -102,7 +80,6 @@ public class FTPPathsSelection extends ListActivity {
             currentDirectory.concat("/");
         i.putExtra("path", currentDirectory);
         setResult(RESULT_OK, i);
-        finish();
 
     }
 
@@ -157,6 +134,12 @@ public class FTPPathsSelection extends ListActivity {
                         currentDirectory = currentDirectory.concat("/" + selectedItem);
                         isFile = true;
                         sendResult();
+                        try {
+                            ftpClient.logout();
+                            ftpClient.disconnect();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
                         finish();
                     }
                 } catch (IOException e) {

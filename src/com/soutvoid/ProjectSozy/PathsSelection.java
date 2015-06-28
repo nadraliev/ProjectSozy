@@ -27,25 +27,12 @@ public class PathsSelection extends ListActivity {
     private List<String> directoryEntries = new ArrayList<String>();
     private List<String> directoryEntriesShow = new ArrayList<String>();
     private File currentDirectory = new File("/");
-    private File currentFile = new File("");
-    private ArrayList<String> allFiles = new ArrayList<String>();
-    private ArrayList<String> sizes = new ArrayList<String>();
+    private File currentFile = new File("");;
 
-
-    private void findAllFiles(String path, String prefix) {
-        for (File file : new File(path).listFiles()) {
-            if (file.isDirectory()) {
-                findAllFiles(path + "/" + file.getName(), prefix + "/" + file.getName());
-            } else {
-                allFiles.add(prefix + "/" + file.getName());
-                sizes.add(Profile.md5(file.length() + ""));
-            }
-        }
-    }
 
     private void sendResult() {
         Intent i = new Intent();
-        if (currentFile.getName() == "")
+        if (currentFile.getName().equals(""))
         i.putExtra("path", currentDirectory.getAbsolutePath());
         else
         i.putExtra("path", currentFile.getAbsolutePath());

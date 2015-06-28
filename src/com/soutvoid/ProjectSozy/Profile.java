@@ -509,7 +509,7 @@ public class Profile {
                 e.printStackTrace();
                 db = dbOpen.getReadableDatabase();
             }
-            if (db.query("profile" + id, null, null, null, null, null, null).getCount() != 0)
+            if (db.query("profile" + id, null, null, null, null, null, null).getCount() > 1)
             try {
                 ftpClient = new FTPClient();
                 ftpClient.setAutodetectUTF8(true);

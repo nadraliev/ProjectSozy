@@ -108,19 +108,19 @@ public class AddProfile extends Activity {
                 }
             } else {
                 isUploading = false;
-                localpathtext.setText(data.getString(5).substring(data.getString(6).lastIndexOf("/") + 1));
-                if (data.getString(6).equals("/")) {
+                localpathtext.setText(data.getString(6).substring(data.getString(6).lastIndexOf("/") + 1));
+                if (data.getString(5).equals("/")) {
                     remotepathtext.setText("/");
                     RemotePath = "/";
                 } else
                     if (cursor.getCount() != 1) {
                         isFile = false;
-                        remotepathtext.setText(data.getString(6).substring(data.getString(5).lastIndexOf("/") + 1));
-                        RemotePath = data.getString(6);
+                        remotepathtext.setText(data.getString(5).substring(data.getString(5).lastIndexOf("/") + 1));
+                        RemotePath = data.getString(5);
                     } else {
                         isFile = true;
                         remotepathtext.setText(cursor.getString(0).substring(1));
-                        RemotePath = data.getString(6) + cursor.getString(0);
+                        RemotePath = data.getString(5) + cursor.getString(0);
                     }
                 ImageView arrow = (ImageView)findViewById(R.id.arrow);
                 arrow.setImageResource(R.drawable.ic_lefttarrow);
@@ -273,7 +273,7 @@ public class AddProfile extends Activity {
                 return;
             }
             RemotePath = data.getStringExtra("path");
-            isFile = data.getBooleanExtra("isFile", isFile);
+            isFile = data.getBooleanExtra("isFile", false);
             if (RemotePath.equals("/"))
                 remotepathtext.setText("/");
             else
