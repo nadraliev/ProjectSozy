@@ -52,7 +52,7 @@ public class SyncService extends Service {
         super.onStartCommand(intent, flags, startId);
 
         if (intent.hasExtra("reason"))
-        if (intent.getStringExtra("reason").equals("createProfile")) {
+        if (intent.getStringExtra("reason").equals("createProfile")) {   //создание таблицы с фалами профиля, если профиль создается или изменяется
             isUpload = intent.getBooleanExtra("isUpload", true);
             isFile = intent.getBooleanExtra("isFile", false);
             LocalPath = intent.getStringExtra("local");

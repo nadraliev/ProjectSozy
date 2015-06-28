@@ -106,7 +106,7 @@ public class AddProfile extends Activity {
                     remotepathtext.setText(data.getString(6).substring(data.getString(6).lastIndexOf("/") + 1));
                     RemotePath = data.getString(6);
                 }
-            } else {
+            } else {        //если тип профиля - "загрзука", то поля путей поменять местами
                 isUploading = false;
                 localpathtext.setText(data.getString(6).substring(data.getString(6).lastIndexOf("/") + 1));
                 if (data.getString(5).equals("/")) {
@@ -154,7 +154,7 @@ public class AddProfile extends Activity {
                     db = dbOpen.getReadableDatabase();
                 }
                     if (nameedit.getText().toString().trim().equals("") || addressedit.getText().toString().trim().equals("") || useredit.getText().toString().trim().equals("") || passwordedit.getText().toString().trim().equals("") ||
-                            LocalPath.equals("") || RemotePath.equals("")) {
+                            LocalPath.equals("") || RemotePath.equals("")) {    //проверка на предмет пустых полей
                         Toast emptyField = Toast.makeText(getApplicationContext(), getString(R.string.emptyField), Toast.LENGTH_LONG);
                         emptyField.show();
                     } else {
@@ -194,7 +194,7 @@ public class AddProfile extends Activity {
                                 Thread thread = new Thread(new Runnable() {
                                     @Override
                                     public void run() {
-                                        startService(i);
+                                        startService(i);   //запустить сервис, где будет сформирована таблица файлов данного профиля
                                     }
                                 });
                                 thread.start();
@@ -260,7 +260,7 @@ public class AddProfile extends Activity {
     }
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == 1) {
+        if (requestCode == 1) {     //результат с PathsSelection
             if (data == null) {
                 return;
             }
@@ -268,7 +268,7 @@ public class AddProfile extends Activity {
             localpathtext.setText(LocalPath.substring(LocalPath.lastIndexOf("/") + 1));    //на этом этапе у нас есть путь к главной папке и список всех файлов
 
         }
-        if (requestCode == 2) {
+        if (requestCode == 2) {     //результат с FTPPathsSelection
             if (data == null) {
                 return;
             }
@@ -326,12 +326,8 @@ public class AddProfile extends Activity {
             rotateListen.onAnimationEnd(rotateToLeft);
             isUploading = true;
         }
-    }
+    }   //смена типа синхронизации с анимацией
 
-    public int timeToMinutes(int hours, int minutes) {
-        int result = hours*60 + minutes;
-        return result;
-    }
 
 
 }

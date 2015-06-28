@@ -105,6 +105,7 @@ public class ProfilesFragment extends android.app.Fragment {
         String[] from = {ATTRIBUTE_NAME, ATTRIBUTE_LOCALPATH, ATTRIBUTE_SERVER, ATTRIBUTE_TYPE};
         int[] to = {R.id.profilenameitem, R.id.localpathitem, R.id.serveraddressitem, R.id.typeitem};
 
+        //список профилей
         SimpleAdapter ProfilesAdapter = new SimpleAdapter(MainActivity.context, data, R.layout.listitemprofiles, from, to);
 
         profileslist = (ListView)rootView.findViewById(R.id.profileslist);

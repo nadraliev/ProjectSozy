@@ -57,6 +57,7 @@ public class ProfileInfo extends Activity {
 
         UpdateInfo();
 
+        //инициализируем список файлов
         filesListAdapter = new FilesListAdapter(getApplicationContext(), id);
         lvSimple = (ListView)findViewById(R.id.lvSimple);
         lvSimple.setAdapter(filesListAdapter);

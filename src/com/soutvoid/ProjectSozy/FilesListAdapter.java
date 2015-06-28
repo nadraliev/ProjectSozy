@@ -68,8 +68,7 @@ public class FilesListAdapter extends BaseAdapter {
             view = lInflater.inflate(R.layout.listfilesitem, parent, false);
         }
 
-        // заполняем View в пункте списка данными из товаров: наименование, цена
-        // и картинка
+        // заполняем View в пункте списка данными из товаров: наименование, цена и картинка
         ((TextView) view.findViewById(R.id.filespath)).setText(files.get(position));
 
         Button button = (Button) view.findViewById(R.id.filesclear);
